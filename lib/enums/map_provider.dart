@@ -1,0 +1,4 @@
+enum MapProvider {
+  flutter,
+  neshan,
+}
