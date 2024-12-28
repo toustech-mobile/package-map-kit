@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:location/location.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
 import 'package:map_kit/models/circle_marker_model.dart';
 import 'package:map_kit/models/marker_model.dart';
+import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/widgets/flutter_map_widget.dart';
 
 class UiMap extends StatefulWidget {
@@ -18,11 +17,13 @@ class UiMap extends StatefulWidget {
   LatLng? initialCenter;
   bool? isDarkMode;
   double? zoom;
+  bool? isCurrentLocationEnable;
   List<MarkerModel>? markers;
   List<CircleMarkerModel>? circles;
-  List<Polyline>? polyLines;
+  List<PolyLineModel>? polyLines;
 
   UiMap({
+    super.key,
     required this.mapProvider,
     this.controller,
     this.onTap,
@@ -32,9 +33,10 @@ class UiMap extends StatefulWidget {
     this.initialCenter,
     this.isDarkMode,
     this.zoom,
+    this.isCurrentLocationEnable,
     List<MarkerModel>? markers,
     List<CircleMarkerModel>? circles,
-    List<Polyline>? polyLines,
+    List<PolyLineModel>? polyLines,
   }) {
     this.markers = markers ?? [];
     this.circles = circles ?? [];
@@ -46,18 +48,9 @@ class UiMap extends StatefulWidget {
 }
 
 class _UiMapState extends State<UiMap> {
-  LatLng? _currentLocation;
-
   @override
   void initState() {
     super.initState();
-    _getUserLocation();
-
-    // widget.controller!.initialize(
-    //   addMarkerCallback: addMarker,
-    //   addPolygonCallback: addPolygon,
-    //   addPolylineCallback: addPolyline,
-    // );
   }
 
   @override
@@ -67,12 +60,11 @@ class _UiMapState extends State<UiMap> {
           ? FlutterMapWidget(
               uiMapController: widget.controller,
               initialCenter: widget.initialCenter,
-              isDarkMode: widget.isDarkMode,
               zoom: widget.zoom,
-              markers: widget.markers!
-                  .map((markerModel) =>
-                      markerModel.toFlutterMarker(widget.onMarkerTap))
-                  .toList(),
+              isCurrentLocationEnable: widget.isCurrentLocationEnable,
+              isDarkMode: widget.isDarkMode,
+              markers: widget.markers,
+              polyLines: widget.polyLines,
               circles: widget.circles,
               onMarkerTap: widget.onMarkerTap,
               onCircleTap: widget.onCircleTap,
@@ -83,30 +75,6 @@ class _UiMapState extends State<UiMap> {
     );
   }
 
-  Future<void> _getUserLocation() async {
-    Location location = Location();
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-
-    serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) return;
-    }
-
-    permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) return;
-    }
-
-    final locData = await location.getLocation();
-    setState(() {
-      _currentLocation = LatLng(locData.latitude!, locData.longitude!);
-    });
-    // _mapController.move(_currentLocation!, 15);
-  }
-
   Widget _buildNeshanMap() {
     return Center(
       child: Text(
@@ -115,16 +83,4 @@ class _UiMapState extends State<UiMap> {
       ),
     );
   }
-
-//
-//
-// void addPolyline(List<LatLng> points) {
-//   setState(() {
-//     widget.polyLines!.add(Polyline(
-//       points: points,
-//       color: Colors.green,
-//       strokeWidth: 4,
-//     ));
-//   });
-// }
 }
