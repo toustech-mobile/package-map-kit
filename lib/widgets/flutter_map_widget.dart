@@ -144,7 +144,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
             _mapController.move(
                 LatLng(
                     widget.userMarker!.latitude, widget.userMarker!.longitude),
-                11);
+                widget.zoom ?? 11);
           },
           child: const Icon(
             Icons.my_location,
