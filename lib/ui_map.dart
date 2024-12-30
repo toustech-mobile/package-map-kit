@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
@@ -77,10 +78,20 @@ class _UiMapState extends State<UiMap> {
 
   Widget _buildNeshanMap() {
     return Center(
-      child: Text(
-        "Neshan Map is not implemented yet.",
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      child: ElevatedButton(
+        onPressed: () {
+          MyPlugin.openActivity();
+        },
+        child: Text('Open Native Activity'),
       ),
     );
+  }
+}
+
+class MyPlugin {
+  static const MethodChannel _channel = MethodChannel('com.golrang.map_kit/map_kit');
+
+  static Future<void> openActivity() async {
+    await _channel.invokeMethod('openActivity');
   }
 }

@@ -18,6 +18,8 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+//        maven { url "https://maven.neshan.org/artifactory/public-maven" }
+//        maven { url 'https://sdk.neshan.org/maven/' }
     }
 }
 
@@ -52,6 +54,16 @@ android {
     dependencies {
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
+
+        implementation 'androidx.appcompat:appcompat:1.6.1'
+//
+//        implementation 'neshan-android-sdk:mobile-sdk:1.0.3'
+//        implementation 'neshan-android-sdk:services-sdk:1.0.0'
+//        implementation 'neshan-android-sdk:common-sdk:0.0.3'
+//
+//        //Play Services
+//        implementation 'com.google.android.gms:play-services-gcm:16.1.0'
+//        implementation 'com.google.android.gms:play-services-location:17.0.0'
     }
 
     testOptions {
@@ -60,7 +72,7 @@ android {
 
             testLogging {
                 events "passed", "skipped", "failed", "standardOut", "standardError"
-                outputs.upToDateWhen {false}
+                outputs.upToDateWhen { false }
                 showStandardStreams = true
             }
         }

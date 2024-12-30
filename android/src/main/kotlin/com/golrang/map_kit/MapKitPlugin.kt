@@ -1,5 +1,8 @@
 package com.golrang.map_kit
 
+import android.content.Context
+import android.content.Intent
+import android.widget.Toast
 import androidx.annotation.NonNull
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -15,15 +18,21 @@ class MapKitPlugin: FlutterPlugin, MethodCallHandler {
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
+  private lateinit var context: Context
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "map_kit")
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "com.golrang.map_kit/map_kit")
     channel.setMethodCallHandler(this)
+    context = flutterPluginBinding.applicationContext
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
+    if (call.method == "openActivity") {
+      Toast.makeText(context, "Hello from Plugin!", Toast.LENGTH_SHORT).show()
+
+      val intent = Intent(context, MyActivity::class.java)
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      context.startActivity(intent)
     } else {
       result.notImplemented()
     }
