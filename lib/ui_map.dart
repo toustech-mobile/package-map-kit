@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
@@ -7,6 +6,7 @@ import 'package:map_kit/models/circle_marker_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/widgets/flutter_map_widget.dart';
+import 'package:map_kit/widgets/neshan/neshan_map_widget.dart';
 
 class UiMap extends StatefulWidget {
   final MapProvider mapProvider;
@@ -56,42 +56,34 @@ class _UiMapState extends State<UiMap> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: widget.mapProvider == MapProvider.flutter
-          ? FlutterMapWidget(
-              uiMapController: widget.controller,
-              initialCenter: widget.initialCenter,
-              zoom: widget.zoom,
-              isCurrentLocationEnable: widget.isCurrentLocationEnable,
-              isDarkMode: widget.isDarkMode,
-              markers: widget.markers,
-              polyLines: widget.polyLines,
-              circles: widget.circles,
-              onMarkerTap: widget.onMarkerTap,
-              onCircleTap: widget.onCircleTap,
-              onTap: widget.onTap,
-              onLongPress: widget.onLongPress,
-            )
-          : _buildNeshanMap(),
-    );
+    return Scaffold(body: _loadMap());
   }
 
-  Widget _buildNeshanMap() {
-    return Center(
-      child: ElevatedButton(
-        onPressed: () {
-          MyPlugin.openActivity();
-        },
-        child: Text('Open Native Activity'),
-      ),
-    );
-  }
-}
+  _loadMap() {
+    switch (widget.mapProvider) {
+      case MapProvider.flutter:
+        return FlutterMapWidget(
+          uiMapController: widget.controller,
+          initialCenter: widget.initialCenter,
+          zoom: widget.zoom,
+          isCurrentLocationEnable: widget.isCurrentLocationEnable,
+          isDarkMode: widget.isDarkMode,
+          markers: widget.markers,
+          polyLines: widget.polyLines,
+          circles: widget.circles,
+          onMarkerTap: widget.onMarkerTap,
+          onCircleTap: widget.onCircleTap,
+          onTap: widget.onTap,
+          onLongPress: widget.onLongPress,
+        );
 
-class MyPlugin {
-  static const MethodChannel _channel = MethodChannel('com.golrang.map_kit/map_kit');
-
-  static Future<void> openActivity() async {
-    await _channel.invokeMethod('openActivity');
+      case MapProvider.neshan:
+        return NeshanMapWidget(
+          uiMapController: widget.controller,
+          initialCenter: widget.initialCenter,
+          isDarkMode: widget.isDarkMode,
+          markers: widget.markers,
+        );
+    }
   }
 }

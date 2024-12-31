@@ -5,7 +5,6 @@ import 'package:map_kit/enums/map_provider.dart';
 import 'package:map_kit/models/circle_marker_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
-import 'package:map_kit/models/user_marker.dart';
 import 'package:map_kit/ui_map.dart';
 
 void main() {
@@ -29,21 +28,31 @@ class _MyAppState extends State<MyApp> {
     mapKitPlugin = UiMap(
       mapProvider: MapProvider.neshan,
       controller: mapController,
-      initialCenter: const LatLng(36.54665465, 59.564654),
-      isDarkMode: false,
+      initialCenter: const LatLng(36.3156692, 59.5405541),
+      isDarkMode: true,
       isCurrentLocationEnable: true,
       zoom: 12,
       markers: [
         MarkerModel(
-          latitude: 36.54665465,
-          longitude: 59.564654,
+          latitude: 36.3156692,
+          longitude: 59.5405541,
           data: "Test Click On Marker",
           child: const Icon(
             Icons.location_on,
             color: Colors.blue,
             size: 40,
           ),
-        )
+        ),
+        MarkerModel(
+          latitude: 36.315673,
+          longitude: 59.5403954,
+          data: "Test Click On Marker",
+          child: const Icon(
+            Icons.location_on,
+            color: Colors.blue,
+            size: 40,
+          ),
+        ),
       ],
       polyLines: [
         PolyLineModel(points: [
@@ -144,17 +153,17 @@ class _MyAppState extends State<MyApp> {
             Center(
               child: mapKitPlugin,
             ),
-            ElevatedButton(
-                onPressed: () {
-                  mapController.setUserLocation(
-                    UserMarkerModel(
-                      latitude: 36.3219341,
-                      longitude: 59.5214737,
-                      radius: 100,
-                    ),
-                  );
-                },
-                child: Text('click'))
+            // ElevatedButton(
+            //     onPressed: () {
+            //       mapController.setUserLocation(
+            //         UserMarkerModel(
+            //           latitude: 36.3219341,
+            //           longitude: 59.5214737,
+            //           radius: 100,
+            //         ),
+            //       );
+            //     },
+            //     child: Text('click'))
           ],
         ),
         // floatingActionButton: FloatingActionButton(

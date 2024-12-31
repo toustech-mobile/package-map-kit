@@ -22,4 +22,12 @@ class MarkerModel {
         point: LatLng(latitude, longitude),
         child: child,
       );
+
+  Map<String, dynamic> toNeshanMarker() {
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+      'data': data,
+    };
+  }
 }
