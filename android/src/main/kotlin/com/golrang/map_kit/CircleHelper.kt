@@ -19,8 +19,9 @@ class CircleHelper {
                     val borderStroke = circle["borderStroke"] as? Double
                     val color = circle["color"] as? String
                     val borderColor = circle["borderColor"] as? String
+                    val visibility = circle["visibility"] as Boolean
 
-                    if (latitude != null && longitude != null) {
+                    if (latitude != null && longitude != null && visibility) {
                         createMarker(
                             LatLng(latitude, longitude),
                             radius!!,
@@ -37,7 +38,7 @@ class CircleHelper {
             }
         }
 
-        fun createMarker(
+        private fun createMarker(
             point: LatLng,
             radius: Double,
             borderStroke: Double,

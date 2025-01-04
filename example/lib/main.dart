@@ -97,14 +97,16 @@ class _MyAppState extends State<MyApp> {
             radius: 1000,
             color: Colors.blue.withOpacity(0.5),
             borderColor: Colors.blue,
-            data: 'Circle data 22222'),
+            data: 'Circle data 22222',
+            visibility: true),
         CircleModel(
-            latitude: 36.335225692645906,
-            longitude: 59.50116236645647,
-            radius: 500,
-            color: Colors.deepOrange.withOpacity(0.5),
-            borderColor: Colors.deepOrange,
-            data: 'Circle data 22222'),
+          latitude: 36.335225692645906,
+          longitude: 59.50116236645647,
+          radius: 500,
+          color: Colors.deepOrange.withOpacity(0.5),
+          borderColor: Colors.deepOrange,
+          data: 'Circle data 22222',
+        ),
       ],
       onMarkerTap: (markerModel) {
         print(markerModel.data);
