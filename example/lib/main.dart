@@ -37,21 +37,13 @@ class _MyAppState extends State<MyApp> {
           latitude: 36.3156692,
           longitude: 59.5405541,
           data: "Test Click On Marker",
-          child: const Icon(
-            Icons.location_on,
-            color: Colors.blue,
-            size: 40,
-          ),
+          icon: 'pause.svg',
         ),
         MarkerModel(
-          latitude: 36.315673,
+          latitude: 36.315653,
           longitude: 59.5403954,
           data: "Test Click On Marker",
-          child: const Icon(
-            Icons.location_on,
-            color: Colors.blue,
-            size: 40,
-          ),
+          icon: 'end_point.svg',
         ),
       ],
       polyLines: [
@@ -98,15 +90,22 @@ class _MyAppState extends State<MyApp> {
           LatLng(36.3224315, 59.5237103),
         ], color: Colors.blue, strokeWidth: 5),
       ],
-      // circles: [
-      //   CircleMarkerModel(
-      //       latitude: 36.52265465,
-      //       longitude: 59.564654,
-      //       radius: 600,
-      //       color: Colors.deepOrange.withOpacity(0.5),
-      //       borderColor: Colors.deepOrange,
-      //       data: 'Circle data 22222'),
-      // ],
+      circles: [
+        CircleMarkerModel(
+            latitude: 36.32209806699167,
+            longitude: 59.52369428145562,
+            radius: 1000,
+            color: Colors.blue.withOpacity(0.5),
+            borderColor: Colors.blue,
+            data: 'Circle data 22222'),
+        CircleMarkerModel(
+            latitude: 36.335225692645906,
+            longitude: 59.50116236645647,
+            radius: 500,
+            color: Colors.deepOrange.withOpacity(0.5),
+            borderColor: Colors.deepOrange,
+            data: 'Circle data 22222'),
+      ],
       onMarkerTap: (markerModel) {
         print(markerModel.data);
       },

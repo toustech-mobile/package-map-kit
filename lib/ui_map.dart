@@ -5,7 +5,7 @@ import 'package:map_kit/enums/map_provider.dart';
 import 'package:map_kit/models/circle_marker_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
-import 'package:map_kit/widgets/flutter_map_widget.dart';
+import 'package:map_kit/widgets/flutter/flutter_map_widget.dart';
 import 'package:map_kit/widgets/neshan/neshan_map_widget.dart';
 
 class UiMap extends StatefulWidget {
@@ -81,8 +81,11 @@ class _UiMapState extends State<UiMap> {
         return NeshanMapWidget(
           uiMapController: widget.controller,
           initialCenter: widget.initialCenter,
+          zoom: widget.zoom,
           isDarkMode: widget.isDarkMode,
           markers: widget.markers,
+          polyLines: widget.polyLines,
+          circles: widget.circles,
         );
     }
   }

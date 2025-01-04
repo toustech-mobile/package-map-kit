@@ -4,22 +4,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
+import 'package:map_kit/models/circle_marker_model.dart';
 import 'package:map_kit/models/marker_model.dart';
+import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/widgets/neshan/neshan_callback.dart';
 import 'package:map_kit/widgets/neshan/neshan_methods.dart' as neshan;
 
 class NeshanMapWidget extends StatefulWidget {
+  GlobalKey globalKey = GlobalKey();
   UiMapController? uiMapController;
   LatLng? initialCenter;
   bool? isDarkMode;
+  double? zoom;
   List<MarkerModel>? markers;
+  List<PolyLineModel>? polyLines;
+  List<CircleMarkerModel>? circles;
 
   NeshanMapWidget({
     super.key,
     this.uiMapController,
     this.initialCenter,
     this.isDarkMode,
+    this.zoom,
     this.markers,
+    this.polyLines,
+    this.circles,
   });
 
   @override
@@ -38,7 +47,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
           latitude: marker.latitude,
           longitude: marker.longitude,
           data: 'marker Added Neshan Click',
-          child: Container(),
+          icon: '',
         ));
       };
     }
@@ -56,7 +65,10 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
             'longitude': widget.initialCenter!.longitude,
           },
           'isDarkMode': widget.isDarkMode,
+          'zoom': widget.zoom,
           'markers': widget.markers!.map((flutterModel) => flutterModel.toNeshanMarker()).toList(),
+          'polyLines': widget.polyLines!.map((flutterModel) => flutterModel.toNeshanPolyLines()).toList(),
+          'circles': widget.circles!.map((flutterModel) => flutterModel.toNeshanCircle()).toList(),
         },
         creationParamsCodec: const StandardMessageCodec(),
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
@@ -72,7 +84,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
       widget.uiMapController!.addMarker(MarkerModel(
         latitude: point.latitude,
         longitude: point.longitude,
-        child: Container(),
+        icon:'',
       ));
     }
   }

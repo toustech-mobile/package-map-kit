@@ -8,7 +8,7 @@ import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/move_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 
-import '../models/user_marker.dart';
+import '../../models/user_marker.dart';
 
 class FlutterMapWidget extends StatefulWidget {
   PopupController? popupController = PopupController();

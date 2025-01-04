@@ -40,8 +40,7 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         methodChannel.setMethodCallHandler(this)
 
         binding.platformViewRegistry.registerViewFactory(
-            "com.golrang.map_kit/map_kit_view",
-            MapKitViewFactory()
+            "com.golrang.map_kit/map_kit_view", MapKitViewFactory()
         )
     }
 
@@ -67,18 +66,17 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
         val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
         val data = arguments?.get("data") as? String ?: ""
+        val child = arguments?.get("child") as? String ?: ""
 
         mapKitView.addMarker(
-            LatLng(latitude, longitude),
-            data
+            LatLng(latitude, longitude), data, child
         )
 
         result.success("Marker added successfully")
     }
 }
 
-class MapKitViewFactory :
-    PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+class MapKitViewFactory : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
     override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
         val params = args as? Map<String, Any>
 
@@ -87,9 +85,9 @@ class MapKitViewFactory :
     }
 }
 
-class MapKitView(private val context: Context, params: Map<String, Any>?) :
-    PlatformView {
+class MapKitView(private val context: Context, params: Map<String, Any>?) : PlatformView {
     private lateinit var mapView: MapView
+    private var defaultZoom: Float = 12.0f
 
     private val layout: LinearLayout =
         LayoutInflater.from(context).inflate(R.layout.my_activity, null) as LinearLayout
@@ -98,8 +96,11 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) :
         initLayoutReferences()
 
         setInitialCenter(params)
+        setDefaultZoom(params)
         setMapStyle(params)
         addMarkers(context, params)
+        addPolyLines(params)
+        addCircles(params)
     }
 
     private fun setInitialCenter(params: Map<String, Any>?) {
@@ -108,12 +109,20 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) :
 
         mapView.moveCamera(
             LatLng(
-                initialCenter["latitude"] as Double,
-                initialCenter["longitude"] as Double
+                initialCenter["latitude"] as Double, initialCenter["longitude"] as Double
             ), 0f
         )
-        mapView.setZoom(14f, 0f)
+        mapView.setZoom(defaultZoom, 0f)
     }
+
+    private fun setDefaultZoom(params: Map<String, Any>?) {
+        val zoom = params?.get("zoom") as Double
+        Log.d("setDefaultZoom", zoom.toString())
+
+        defaultZoom = zoom.toFloat()
+        mapView.setZoom(defaultZoom, 0f)
+    }
+
 
     private fun setMapStyle(params: Map<String, Any>?) {
         val isDarkMode: Boolean = params?.get("isDarkMode") as Boolean
@@ -135,9 +144,29 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) :
         }
     }
 
-    fun addMarker(point: LatLng, data: Any) {
-        mapView.addMarker(createMarker(point, data, context))
+    fun addMarker(point: LatLng, data: Any, child: String) {
+        mapView.addMarker(createMarker(point, data, child, context))
     }
+
+    private fun addPolyLines(params: Map<String, Any>?) {
+        val polyLines = params?.get("polyLines")
+        Log.d("Native PolyLines", polyLines.toString())
+
+        PolyLineHelper.toNeshanModel(polyLines!!).forEach {
+            mapView.addPolyline(it)
+        }
+    }
+
+
+    private fun addCircles(params: Map<String, Any>?) {
+        val circles = params?.get("circles")
+        Log.d("Native Circles", circles.toString())
+
+        CircleHelper.toNeshanModel(circles!!).forEach {
+            mapView.addCircle(it)
+        }
+    }
+
 
     private fun initLayoutReferences() {
         initViews()
@@ -162,8 +191,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) :
 
     private fun sendOnMapClickCallbackToFlutter(point: LatLng) {
         val pointMap = mapOf(
-            "latitude" to point.latitude,
-            "longitude" to point.longitude
+            "latitude" to point.latitude, "longitude" to point.longitude
         )
 
         Handler(Looper.getMainLooper()).post {
