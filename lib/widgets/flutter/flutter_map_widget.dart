@@ -133,7 +133,11 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         visible: widget.isCurrentLocationEnable ?? false,
         child: FloatingActionButton(
           onPressed: () {
-            _mapController.move(LatLng(widget.userMarker!.latitude, widget.userMarker!.longitude), widget.zoom ?? 11);
+            if (widget.userMarker != null) {
+              _mapController.move(LatLng(widget.userMarker!.latitude, widget.userMarker!.longitude), widget.zoom ?? 11);
+            } else {
+              //fixme show error message
+            }
           },
           child: const Icon(
             Icons.my_location,
