@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
-import 'package:map_kit/models/circle_marker_model.dart';
+import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/widgets/neshan/neshan_callback.dart';
@@ -18,7 +18,7 @@ class NeshanMapWidget extends StatefulWidget {
   double? zoom;
   List<MarkerModel>? markers;
   List<PolyLineModel>? polyLines;
-  List<CircleMarkerModel>? circles;
+  List<CircleModel>? circles;
 
   NeshanMapWidget({
     super.key,

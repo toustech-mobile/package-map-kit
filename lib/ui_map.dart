@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
-import 'package:map_kit/models/circle_marker_model.dart';
+import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/widgets/flutter/flutter_map_widget.dart';
@@ -14,13 +14,13 @@ class UiMap extends StatefulWidget {
   final void Function(LatLng)? onTap;
   final void Function(LatLng)? onLongPress;
   final void Function(MarkerModel)? onMarkerTap;
-  final void Function(CircleMarkerModel)? onCircleTap;
+  final void Function(CircleModel)? onCircleTap;
   LatLng? initialCenter;
   bool? isDarkMode;
   double? zoom;
   bool? isCurrentLocationEnable;
   List<MarkerModel>? markers;
-  List<CircleMarkerModel>? circles;
+  List<CircleModel>? circles;
   List<PolyLineModel>? polyLines;
 
   UiMap({
@@ -36,7 +36,7 @@ class UiMap extends StatefulWidget {
     this.zoom,
     this.isCurrentLocationEnable,
     List<MarkerModel>? markers,
-    List<CircleMarkerModel>? circles,
+    List<CircleModel>? circles,
     List<PolyLineModel>? polyLines,
   }) {
     this.markers = markers ?? [];

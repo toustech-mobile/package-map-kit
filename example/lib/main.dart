@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
-import 'package:map_kit/models/circle_marker_model.dart';
+import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/ui_map.dart';
@@ -91,14 +91,14 @@ class _MyAppState extends State<MyApp> {
         ], color: Colors.blue, strokeWidth: 5),
       ],
       circles: [
-        CircleMarkerModel(
+        CircleModel(
             latitude: 36.32209806699167,
             longitude: 59.52369428145562,
             radius: 1000,
             color: Colors.blue.withOpacity(0.5),
             borderColor: Colors.blue,
             data: 'Circle data 22222'),
-        CircleMarkerModel(
+        CircleModel(
             latitude: 36.335225692645906,
             longitude: 59.50116236645647,
             radius: 500,
@@ -128,7 +128,7 @@ class _MyAppState extends State<MyApp> {
         // );
       },
       onLongPress: (LatLng point) {
-        mapController.addCircle(CircleMarkerModel(
+        mapController.addCircle(CircleModel(
             latitude: point.latitude,
             longitude: point.longitude,
             radius: 200,

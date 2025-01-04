@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
-import 'package:map_kit/models/circle_marker_model.dart';
+import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/move_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
@@ -15,7 +15,7 @@ class FlutterMapWidget extends StatefulWidget {
   UiMapController? uiMapController;
   List<MarkerModel>? markers;
   List<PolyLineModel>? polyLines;
-  List<CircleMarkerModel>? circles;
+  List<CircleModel>? circles;
   UserMarkerModel? userMarker;
   LatLng? initialCenter;
   bool? isDarkMode;
@@ -24,7 +24,7 @@ class FlutterMapWidget extends StatefulWidget {
   final void Function(LatLng)? onTap;
   final void Function(LatLng)? onLongPress;
   final void Function(MarkerModel)? onMarkerTap;
-  final void Function(CircleMarkerModel)? onCircleTap;
+  final void Function(CircleModel)? onCircleTap;
 
   FlutterMapWidget({
     this.uiMapController,
