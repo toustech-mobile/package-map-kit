@@ -5,16 +5,12 @@ import 'package:map_kit/models/marker_model.dart';
 abstract class NeshanMethods {
   static const MethodChannel _channel = MethodChannel('com.golrang.map_kit/method_channel');
 
-  static addMarker(MarkerModel model) async {
-    final String value = await _channel.invokeMethod(
-      'addMarker', model.toNeshanMarker()
-    );
+  static addMarkers(List<MarkerModel> markers) async {
+    await _channel.invokeMethod('addMarkers', markers.map((flutterModel) => flutterModel.toNeshanMarker()).toList());
   }
 
-  static removeMarker(MarkerModel model) async {
-    final String value = await _channel.invokeMethod(
-        'removeMarker', model.toNeshanMarker()
-    );
+  static removeMarkers(List<MarkerModel> markers) async {
+    await _channel.invokeMethod('removeMarkers', markers.map((flutterModel) => flutterModel.toNeshanMarker()).toList());
   }
 }
 

@@ -51,8 +51,8 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
   @override
   void initState() {
     if (widget.uiMapController != null) {
-      widget.uiMapController!.addMarker = (MarkerModel marker) {
-        widget.markers!.add(marker);
+      widget.uiMapController!.addMarkers = (List<MarkerModel> markers) {
+        widget.markers!.addAll(markers);
         setState(() {});
       };
 

@@ -42,19 +42,16 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
     NeshanCallback.setNeshanCallback(this);
 
     if (widget.uiMapController != null) {
-      widget.uiMapController!.addMarker = (MarkerModel marker) {
-        widget.markers!.add(marker);
-        neshan.NeshanMethods.addMarker(MarkerModel(
-          latitude: marker.latitude,
-          longitude: marker.longitude,
-          data: 'marker Added Neshan Click',
-          icon: marker.icon,
-        ));
+      widget.uiMapController!.addMarkers = (List<MarkerModel> markers) {
+        widget.markers!.addAll(markers);
+        neshan.NeshanMethods.addMarkers(markers);
       };
 
-      widget.uiMapController!.removeMarker = (MarkerModel marker) {
-        widget.markers!.remove(marker);
-        neshan.NeshanMethods.removeMarker(marker);
+      widget.uiMapController!.removeMarkers = (List<MarkerModel> markers) {
+        neshan.NeshanMethods.removeMarkers(markers);
+        for (var m in markers) {
+          widget.markers!.remove(m);
+        }
       };
     }
 
@@ -92,11 +89,15 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
   @override
   void onMapTap(LatLng point) {
     if (widget.uiMapController != null) {
-      widget.uiMapController!.addMarker(MarkerModel(
-        latitude: point.latitude,
-        longitude: point.longitude,
-        icon: '',
-      ));
+      // widget.uiMapController!.addMarkers([
+      //   MarkerModel(
+      //     latitude: point.latitude,
+      //     longitude: point.longitude,
+      //     icon: 'pause.svg',
+      //   )
+      // ]);
+
+      // widget.uiMapController!.removeMarkers([widget.markers![0]]);
     }
   }
 

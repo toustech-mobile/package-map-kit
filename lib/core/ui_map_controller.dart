@@ -5,8 +5,8 @@ import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/models/user_marker.dart';
 
 mixin class UiMapController {
-  late Function(MarkerModel) addMarker;
-  late Function(MarkerModel) removeMarker;
+  late Function(List<MarkerModel>) addMarkers;
+  late Function(List<MarkerModel>) removeMarkers;
   late Function(CircleModel) addCircle;
   late Function(List<PolyLineModel>) addPolyline;
   late Function(MoveModel) moveCamera;

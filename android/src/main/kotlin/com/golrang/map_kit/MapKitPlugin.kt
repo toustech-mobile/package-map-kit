@@ -55,12 +55,12 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            "addMarker" -> {
-                handleAddMarker(call, result)
+            "addMarkers" -> {
+                handleAddMarkers(call, result)
             }
 
-            "removeMarker" -> {
-                handleRemoveMarker(call, result)
+            "removeMarkers" -> {
+                handleRemoveMarkers(call, result)
             }
 
             else -> {
@@ -70,30 +70,16 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     }
 
 
-    private fun handleAddMarker(call: MethodCall, result: MethodChannel.Result) {
-        val arguments = call.arguments as? Map<String, Any>
-
-        val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
-        val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
-        val data = arguments?.get("data") as? String ?: ""
-        val icon = arguments?.get("icon") as? String ?: ""
-
-        mapKitView.addMarker(
-            LatLng(latitude, longitude), data, icon
-        )
+    private fun handleAddMarkers(call: MethodCall, result: MethodChannel.Result) {
+        Log.d("Native Add Markers", "")
+        mapKitView.addMarkers(call.arguments as List<*>)
 
         result.success("Marker added successfully")
     }
 
-    private fun handleRemoveMarker(call: MethodCall, result: MethodChannel.Result) {
-        Log.d("Native Remove Marker", "")
-        val arguments = call.arguments as? Map<String, Any>
-
-        val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
-        val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
-
-        mapKitView.removeMarker(point = LatLng(latitude, longitude))
-
+    private fun handleRemoveMarkers(call: MethodCall, result: MethodChannel.Result) {
+        Log.d("Native Remove Markers", "")
+        mapKitView.removeMarkers(call.arguments as List<*>)
 
         result.success("Marker removed successfully")
     }
@@ -172,23 +158,36 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         }
     }
 
-    fun addMarker(point: LatLng, data: Any, icon: String) {
-        val marker = createMarker(point, data, icon, context)
-        this.markers.add(marker)
+    fun addMarkers(rawMarkers: List<*>) {
+        val markers = rawMarkers.mapNotNull {
+            val arguments = it as? Map<*, *>
+            val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
+            val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
+            val data = arguments?.get("data") as? String ?: ""
+            val icon = arguments?.get("icon") as? String ?: ""
 
-        mapView.addMarker(marker)
+            createMarker(LatLng(latitude, longitude), data, icon, context)
+        }
+
+        this.markers.addAll(markers)
+        mapView.addMarkers(markers)
     }
 
-    fun removeMarker(point: LatLng) {
-        val marker = this.markers.find {
-            it.latLng.latitude == point.latitude && it.latLng.longitude == point.longitude
-        }
+    fun removeMarkers(rawMarkers: List<*>) {
+        rawMarkers.forEach {
+            val arguments = it as? Map<*, *>
+            val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
+            val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
 
-
-        if (marker != null) {
-            this.markers.remove(marker)
-            mapView.removeMarker(marker)
+            val marker = this.markers.find {
+                it.latLng.latitude == latitude && it.latLng.longitude == longitude
+            }
+            if (marker != null) {
+                this.markers.remove(marker)
+                mapView.removeMarker(marker)
+            }
         }
+        mapView.setZoom(mapView.zoom, 0f)
     }
 
 
