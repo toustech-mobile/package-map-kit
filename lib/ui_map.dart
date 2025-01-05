@@ -77,14 +77,17 @@ class _UiMapState extends State<UiMap> {
   }
 
   Widget _buildNeshanMap() {
-    return Center(
-      child: ElevatedButton(
-        onPressed: () {
-          MyPlugin.openActivity();
-        },
-        child: Text('Open Native Activity'),
-      ),
-    );
+
+
+    return AndroidView(viewType: '',);
+    // return Center(
+    //   child: ElevatedButton(
+    //     onPressed: () {
+    //       MyPlugin.openActivity();
+    //     },
+    //     child: Text('Open Native Activity'),
+    //   ),
+    // );
   }
 }
 
