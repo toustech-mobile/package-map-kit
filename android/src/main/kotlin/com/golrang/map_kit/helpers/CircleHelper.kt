@@ -1,9 +1,9 @@
-package com.golrang.map_kit
+package com.golrang.map_kit.helpers
 
 import com.carto.graphics.Color
 import com.carto.styles.LineStyle
 import com.carto.styles.LineStyleBuilder
-import com.golrang.map_kit.model.MyCircle
+import com.golrang.map_kit.models.MyCircle
 import org.neshan.common.model.LatLng
 import org.neshan.mapsdk.model.Circle
 

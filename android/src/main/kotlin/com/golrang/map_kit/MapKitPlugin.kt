@@ -10,8 +10,11 @@ import android.widget.LinearLayout
 import androidx.annotation.NonNull
 import com.golrang.map_kit.MapKitPlugin.Companion.callBackChannel
 import com.golrang.map_kit.MapKitPlugin.Companion.mapKitView
-import com.golrang.map_kit.MarkerHelper.Companion.createMarker
-import com.golrang.map_kit.model.MyCircle
+import com.golrang.map_kit.helpers.MarkerHelper.Companion.createMarker
+import com.golrang.map_kit.helpers.CircleHelper
+import com.golrang.map_kit.helpers.MarkerHelper
+import com.golrang.map_kit.helpers.PolyLineHelper
+import com.golrang.map_kit.models.MyCircle
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel

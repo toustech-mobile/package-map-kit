@@ -1,4 +1,4 @@
-package com.golrang.map_kit.model
+package com.golrang.map_kit.models
 
 import org.neshan.mapsdk.model.Circle
 

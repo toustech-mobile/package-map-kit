@@ -1,10 +1,11 @@
-package com.golrang.map_kit
+package com.golrang.map_kit.helpers
 
 import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.graphics.drawable.toBitmap
 import com.carto.styles.MarkerStyleBuilder
+import com.golrang.map_kit.R
 import org.neshan.common.model.LatLng
 import org.neshan.mapsdk.internal.utils.BitmapUtils
 import org.neshan.mapsdk.model.Marker

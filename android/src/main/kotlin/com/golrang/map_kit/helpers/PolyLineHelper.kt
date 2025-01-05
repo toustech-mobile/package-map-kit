@@ -1,4 +1,4 @@
-package com.golrang.map_kit
+package com.golrang.map_kit.helpers
 
 import com.carto.styles.LineStyle
 import com.carto.styles.LineStyleBuilder
