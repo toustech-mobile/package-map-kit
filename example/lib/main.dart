@@ -26,7 +26,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     mapKitPlugin = UiMap(
-      mapProvider: MapProvider.flutter,
+      mapProvider: MapProvider.neshan,
       controller: mapController,
       initialCenter: const LatLng(36.3156692, 59.5405541),
       isDarkMode: false,
@@ -92,13 +92,13 @@ class _MyAppState extends State<MyApp> {
       ],
       circles: [
         CircleModel(
-            latitude: 36.32209806699167,
-            longitude: 59.52369428145562,
-            radius: 1000,
-            color: Colors.blue.withOpacity(0.5),
-            borderColor: Colors.blue,
-            data: 'Circle data 22222',
-            visibility: true),
+          latitude: 36.32209806699167,
+          longitude: 59.52369428145562,
+          radius: 1000,
+          color: Colors.blue.withOpacity(0.5),
+          borderColor: Colors.blue,
+          data: 'Circle data 22222',
+        ),
         CircleModel(
           latitude: 36.335225692645906,
           longitude: 59.50116236645647,

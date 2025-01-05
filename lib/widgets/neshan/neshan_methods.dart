@@ -10,6 +10,12 @@ abstract class NeshanMethods {
       'addMarker', model.toNeshanMarker()
     );
   }
+
+  static removeMarker(MarkerModel model) async {
+    final String value = await _channel.invokeMethod(
+        'removeMarker', model.toNeshanMarker()
+    );
+  }
 }
 
 abstract class NeshanCallbackInterface {

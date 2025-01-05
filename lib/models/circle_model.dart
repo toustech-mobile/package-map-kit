@@ -11,7 +11,6 @@ class CircleModel {
   Color? color;
   Color? borderColor;
   dynamic data;
-  bool? visibility;
 
   CircleModel({
     required this.latitude,
@@ -21,7 +20,6 @@ class CircleModel {
     this.color,
     this.borderColor,
     this.data,
-    this.visibility,
   });
 
   CircleMarker toFlutterCircleMarker() => CircleMarker(
@@ -42,7 +40,6 @@ class CircleModel {
       'color': color!.toHex(),
       'borderColor': borderColor!.toHex(),
       'data': data,
-      'visibility': visibility ?? true,
     };
   }
 }

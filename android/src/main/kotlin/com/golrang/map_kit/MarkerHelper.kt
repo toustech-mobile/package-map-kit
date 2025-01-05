@@ -20,9 +20,8 @@ class MarkerHelper {
                     val longitude = marker["longitude"] as? Double
                     val data = marker["data"]
                     val icon = marker["icon"] as? String ?: ""
-                    val visibility = marker["visibility"] as Boolean
 
-                    if (latitude != null && longitude != null && visibility) {
+                    if (latitude != null && longitude != null) {
                         createMarker(LatLng(latitude, longitude), data, icon, context)
                     } else {
                         null

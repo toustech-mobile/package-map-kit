@@ -30,9 +30,14 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         lateinit var mapKitView: MapKitView
     }
 
+    lateinit var binding: FlutterPlugin.FlutterPluginBinding
+
     override fun onAttachedToEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
 
-        callBackChannel = MethodChannel(binding.binaryMessenger, "com.golrang.map_kit/callback_channel")
+        this.binding = binding
+
+        callBackChannel =
+            MethodChannel(binding.binaryMessenger, "com.golrang.map_kit/callback_channel")
         methodChannel = MethodChannel(binding.binaryMessenger, "com.golrang.map_kit/method_channel")
 
         callBackChannel.setMethodCallHandler(this)
@@ -45,6 +50,7 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         callBackChannel.setMethodCallHandler(null)
+        mapKitView.dispose()
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -53,11 +59,16 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 handleAddMarker(call, result)
             }
 
+            "removeMarker" -> {
+                handleRemoveMarker(call, result)
+            }
+
             else -> {
                 result.notImplemented()
             }
         }
     }
+
 
     private fun handleAddMarker(call: MethodCall, result: MethodChannel.Result) {
         val arguments = call.arguments as? Map<String, Any>
@@ -73,6 +84,19 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
         result.success("Marker added successfully")
     }
+
+    private fun handleRemoveMarker(call: MethodCall, result: MethodChannel.Result) {
+        Log.d("Native Remove Marker", "")
+        val arguments = call.arguments as? Map<String, Any>
+
+        val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
+        val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
+
+        mapKitView.removeMarker(point = LatLng(latitude, longitude))
+
+
+        result.success("Marker removed successfully")
+    }
 }
 
 class MapKitViewFactory : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
@@ -87,6 +111,7 @@ class MapKitViewFactory : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
 class MapKitView(private val context: Context, params: Map<String, Any>?) : PlatformView {
     private lateinit var mapView: MapView
     private var defaultZoom: Float = 12.0f
+    private var markers: MutableList<Marker> = mutableListOf()
 
     private val layout: LinearLayout =
         LayoutInflater.from(context).inflate(R.layout.my_activity, null) as LinearLayout
@@ -111,6 +136,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
                 initialCenter["latitude"] as Double, initialCenter["longitude"] as Double
             ), 0f
         )
+
         mapView.setZoom(defaultZoom, 0f)
     }
 
@@ -138,14 +164,33 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         val markers = params?.get("markers")
         Log.d("Native Markers", markers.toString())
 
+
+
         MarkerHelper.toNeshanModel(context, markers!!).forEach {
+            this.markers.add(it)
             mapView.addMarker(it)
         }
     }
 
     fun addMarker(point: LatLng, data: Any, child: String) {
-        mapView.addMarker(createMarker(point, data, child, context))
+        val marker = createMarker(point, data, child, context)
+        this.markers.add(marker)
+
+        mapView.addMarker(marker)
     }
+
+    fun removeMarker(point: LatLng) {
+        val marker = this.markers.find {
+            it.latLng.latitude == point.latitude && it.latLng.longitude == point.longitude
+        }
+
+
+        if (marker != null) {
+            this.markers.remove(marker)
+            mapView.removeMarker(marker)
+        }
+    }
+
 
     private fun addPolyLines(params: Map<String, Any>?) {
         val polyLines = params?.get("polyLines")

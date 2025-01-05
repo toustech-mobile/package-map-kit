@@ -11,7 +11,8 @@ import 'package:map_kit/widgets/neshan/neshan_callback.dart';
 import 'package:map_kit/widgets/neshan/neshan_methods.dart' as neshan;
 
 class NeshanMapWidget extends StatefulWidget {
-  GlobalKey globalKey = GlobalKey();
+  late Map<String, dynamic> creationParams;
+
   UiMapController? uiMapController;
   LatLng? initialCenter;
   bool? isDarkMode;
@@ -38,6 +39,8 @@ class NeshanMapWidget extends StatefulWidget {
 class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCallbackInterface {
   @override
   void initState() {
+    setCreationParams();
+
     NeshanCallback.setNeshanCallback(this);
 
     if (widget.uiMapController != null) {
@@ -50,26 +53,35 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
           icon: '',
         ));
       };
+
+      widget.uiMapController!.removeMarker = (MarkerModel marker) {
+        widget.markers!.remove(marker);
+        neshan.NeshanMethods.removeMarker(marker);
+      };
     }
 
     super.initState();
+  }
+
+  void setCreationParams() {
+    widget.creationParams = <String, dynamic>{
+      'initialCenter': {
+        'latitude': widget.initialCenter!.latitude,
+        'longitude': widget.initialCenter!.longitude,
+      },
+      'isDarkMode': widget.isDarkMode,
+      'zoom': widget.zoom,
+      'markers': widget.markers!.map((flutterModel) => flutterModel.toNeshanMarker()).toList(),
+      'polyLines': widget.polyLines!.map((flutterModel) => flutterModel.toNeshanPolyLines()).toList(),
+      'circles': widget.circles!.map((flutterModel) => flutterModel.toNeshanCircle()).toList(),
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     return AndroidView(
         viewType: 'com.golrang.map_kit/map_kit_view',
-        creationParams: <String, dynamic>{
-          'initialCenter': {
-            'latitude': widget.initialCenter!.latitude,
-            'longitude': widget.initialCenter!.longitude,
-          },
-          'isDarkMode': widget.isDarkMode,
-          'zoom': widget.zoom,
-          'markers': widget.markers!.map((flutterModel) => flutterModel.toNeshanMarker()).toList(),
-          'polyLines': widget.polyLines!.map((flutterModel) => flutterModel.toNeshanPolyLines()).toList(),
-          'circles': widget.circles!.map((flutterModel) => flutterModel.toNeshanCircle()).toList(),
-        },
+        creationParams: widget.creationParams,
         creationParamsCodec: const StandardMessageCodec(),
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
         layoutDirection: TextDirection.ltr,
@@ -84,7 +96,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
       widget.uiMapController!.addMarker(MarkerModel(
         latitude: point.latitude,
         longitude: point.longitude,
-        icon:'',
+        icon: '',
       ));
     }
   }
