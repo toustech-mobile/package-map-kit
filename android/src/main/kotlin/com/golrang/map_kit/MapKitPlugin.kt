@@ -11,6 +11,7 @@ import androidx.annotation.NonNull
 import com.golrang.map_kit.MapKitPlugin.Companion.callBackChannel
 import com.golrang.map_kit.MapKitPlugin.Companion.mapKitView
 import com.golrang.map_kit.MarkerHelper.Companion.createMarker
+import com.golrang.map_kit.model.MyCircle
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -63,6 +64,14 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 handleRemoveMarkers(call, result)
             }
 
+            "addCircles" -> {
+                handleAddCircles(call, result)
+            }
+
+            "removeCircles" -> {
+                handleRemoveCircles(call, result)
+            }
+
             else -> {
                 result.notImplemented()
             }
@@ -83,6 +92,21 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
         result.success("Marker removed successfully")
     }
+
+    private fun handleAddCircles(call: MethodCall, result: MethodChannel.Result) {
+        Log.d("Native Add Circles", "")
+        mapKitView.addCircles(call.arguments as List<*>)
+
+        result.success("Circles added successfully")
+    }
+
+    private fun handleRemoveCircles(call: MethodCall, result: MethodChannel.Result) {
+        Log.d("Native Remove Circles", "")
+        mapKitView.removeCircles(call.arguments as List<*>)
+
+        result.success("Circles removed successfully")
+    }
+
 }
 
 class MapKitViewFactory : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
@@ -98,6 +122,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     private lateinit var mapView: MapView
     private var defaultZoom: Float = 12.0f
     private var markers: MutableList<Marker> = mutableListOf()
+    private var circles: MutableList<MyCircle> = mutableListOf()
 
     private val layout: LinearLayout =
         LayoutInflater.from(context).inflate(R.layout.my_activity, null) as LinearLayout
@@ -150,8 +175,6 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         val markers = params?.get("markers")
         Log.d("Native Markers", markers.toString())
 
-
-
         MarkerHelper.toNeshanModel(context, markers!!).forEach {
             this.markers.add(it)
             mapView.addMarker(it)
@@ -168,7 +191,6 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
             createMarker(LatLng(latitude, longitude), data, icon, context)
         }
-
         this.markers.addAll(markers)
         mapView.addMarkers(markers)
     }
@@ -190,6 +212,59 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         mapView.setZoom(mapView.zoom, 0f)
     }
 
+    private fun addCircles(params: Map<String, Any>?) {
+        val circles = params?.get("circles")
+        Log.d("Native Circles", circles.toString())
+
+        CircleHelper.toNeshanModel(circles!!).forEach {
+            this.circles.add(it)
+            mapView.addCircle(it.circle)
+        }
+    }
+
+    fun addCircles(rawMarkers: List<*>) {
+        val circles = rawMarkers.mapNotNull {
+            val arguments = it as? Map<*, *>
+            val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
+            val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
+            val radius = arguments?.get("radius") as? Double ?: 0.0
+            val borderStroke = arguments?.get("borderStroke") as? Double ?: 0.0
+            val color = arguments?.get("color") as? String ?: ""
+            val borderColor = arguments?.get("borderColor") as? String ?: ""
+
+            CircleHelper.createCircle(
+                LatLng(latitude, longitude),
+                radius,
+                borderStroke,
+                color,
+                borderColor,
+            )
+        }
+        this.circles.addAll(circles)
+        circles.forEach {
+            mapView.addCircle(it.circle)
+        }
+    }
+
+    fun removeCircles(rawMarkers: List<*>) {
+        rawMarkers.forEach {
+            val arguments = it as? Map<*, *>
+            val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
+            val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
+
+            val circle = this.circles.find {
+                it.latitude == latitude && it.longitude == longitude
+            }
+
+            Log.d("MY CIRCLEEEEEE", "removeCircles: $circle")
+
+            if (circle != null) {
+                this.circles.remove(circle)
+                mapView.removeCircle(circle.circle)
+            }
+        }
+        mapView.setZoom(mapView.zoom, 0f)
+    }
 
     private fun addPolyLines(params: Map<String, Any>?) {
         val polyLines = params?.get("polyLines")
@@ -200,21 +275,9 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         }
     }
 
-
-    private fun addCircles(params: Map<String, Any>?) {
-        val circles = params?.get("circles")
-        Log.d("Native Circles", circles.toString())
-
-        CircleHelper.toNeshanModel(circles!!).forEach {
-            mapView.addCircle(it)
-        }
-    }
-
-
     private fun initLayoutReferences() {
         initViews()
 
-//        // when long clicked on map, a marker is added in clicked location
 //        mapView.setOnMapLongClickListener {
 //            mapView.addMarker(createMarker(it, context))
 //        }

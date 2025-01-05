@@ -56,8 +56,8 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         setState(() {});
       };
 
-      widget.uiMapController!.addCircle = (circleMarkerModel) {
-        widget.circles!.add(circleMarkerModel);
+      widget.uiMapController!.addCircles = (circleMarkerModel) {
+        widget.circles!.addAll(circleMarkerModel);
         setState(() {});
       };
 

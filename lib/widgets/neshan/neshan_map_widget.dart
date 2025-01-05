@@ -53,6 +53,18 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
           widget.markers!.remove(m);
         }
       };
+
+      widget.uiMapController!.addCircles = (List<CircleModel> circles) {
+        widget.circles!.addAll(circles);
+        neshan.NeshanMethods.addCircles(circles);
+      };
+
+      widget.uiMapController!.removeCircles = (List<CircleModel> circles) {
+        neshan.NeshanMethods.removeCircles(circles);
+        for (var c in circles) {
+          widget.circles!.remove(c);
+        }
+      };
     }
 
     super.initState();
@@ -89,15 +101,18 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
   @override
   void onMapTap(LatLng point) {
     if (widget.uiMapController != null) {
-      // widget.uiMapController!.addMarkers([
-      //   MarkerModel(
-      //     latitude: point.latitude,
-      //     longitude: point.longitude,
-      //     icon: 'pause.svg',
+      // widget.uiMapController!.addCircles([
+      //   CircleModel(
+      //     latitude: 36.32209806699167,
+      //     longitude: 59.52369428145562,
+      //     radius: 1000,
+      //     color: Colors.blue.withOpacity(0.5),
+      //     borderColor: Colors.blue,
+      //     data: 'Circle data 22222',
       //   )
       // ]);
 
-      // widget.uiMapController!.removeMarkers([widget.markers![0]]);
+      // widget.uiMapController!.removeCircles([widget.circles![0]]);
     }
   }
 

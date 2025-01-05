@@ -100,8 +100,8 @@ class _MyAppState extends State<MyApp> {
           data: 'Circle data 22222',
         ),
         CircleModel(
-          latitude: 36.335225692645906,
-          longitude: 59.50116236645647,
+          latitude: 36.33377358253895,
+          longitude: 59.54590011713316,
           radius: 500,
           color: Colors.deepOrange.withOpacity(0.5),
           borderColor: Colors.deepOrange,
@@ -130,14 +130,16 @@ class _MyAppState extends State<MyApp> {
         // );
       },
       onLongPress: (LatLng point) {
-        mapController.addCircle(CircleModel(
-            latitude: point.latitude,
-            longitude: point.longitude,
-            radius: 200,
-            borderColor: Colors.purple,
-            color: Colors.purple.withOpacity(.5),
-            borderStroke: 2,
-            data: "UserCircleData"));
+        mapController.addCircles([
+          CircleModel(
+              latitude: point.latitude,
+              longitude: point.longitude,
+              radius: 200,
+              borderColor: Colors.purple,
+              color: Colors.purple.withOpacity(.5),
+              borderStroke: 2,
+              data: "UserCircleData")
+        ]);
       },
     );
   }

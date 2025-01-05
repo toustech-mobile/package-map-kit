@@ -3,6 +3,7 @@ package com.golrang.map_kit
 import com.carto.graphics.Color
 import com.carto.styles.LineStyle
 import com.carto.styles.LineStyleBuilder
+import com.golrang.map_kit.model.MyCircle
 import org.neshan.common.model.LatLng
 import org.neshan.mapsdk.model.Circle
 
@@ -10,7 +11,7 @@ import org.neshan.mapsdk.model.Circle
 class CircleHelper {
 
     companion object {
-        fun toNeshanModel(circles: Any): List<Circle> {
+        fun toNeshanModel(circles: Any): List<MyCircle> {
             return (circles as List<*>).mapNotNull { circle ->
                 if (circle is Map<*, *>) {
                     val latitude = circle["latitude"] as? Double
@@ -21,7 +22,7 @@ class CircleHelper {
                     val borderColor = circle["borderColor"] as? String
 
                     if (latitude != null && longitude != null) {
-                        createMarker(
+                        createCircle(
                             LatLng(latitude, longitude),
                             radius!!,
                             borderStroke!!,
@@ -37,18 +38,20 @@ class CircleHelper {
             }
         }
 
-        private fun createMarker(
+        fun createCircle(
             point: LatLng,
             radius: Double,
             borderStroke: Double,
             color: String,
             borderColor: String,
-        ): Circle {
-            return Circle(
-                point,
-                radius,
-                convertToCartoColor(android.graphics.Color.parseColor(color)),
-                getLineStyle(borderColor, borderStroke)
+        ): MyCircle {
+            return MyCircle(
+                point.latitude, point.longitude, Circle(
+                    point,
+                    radius,
+                    convertToCartoColor(android.graphics.Color.parseColor(color)),
+                    getLineStyle(borderColor, borderStroke)
+                )
             )
         }
 
