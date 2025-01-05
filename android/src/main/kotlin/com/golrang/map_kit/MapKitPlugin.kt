@@ -76,10 +76,10 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
         val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
         val data = arguments?.get("data") as? String ?: ""
-        val child = arguments?.get("child") as? String ?: ""
+        val icon = arguments?.get("icon") as? String ?: ""
 
         mapKitView.addMarker(
-            LatLng(latitude, longitude), data, child
+            LatLng(latitude, longitude), data, icon
         )
 
         result.success("Marker added successfully")
@@ -172,8 +172,8 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         }
     }
 
-    fun addMarker(point: LatLng, data: Any, child: String) {
-        val marker = createMarker(point, data, child, context)
+    fun addMarker(point: LatLng, data: Any, icon: String) {
+        val marker = createMarker(point, data, icon, context)
         this.markers.add(marker)
 
         mapView.addMarker(marker)

@@ -39,8 +39,6 @@ class NeshanMapWidget extends StatefulWidget {
 class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCallbackInterface {
   @override
   void initState() {
-    setCreationParams();
-
     NeshanCallback.setNeshanCallback(this);
 
     if (widget.uiMapController != null) {
@@ -50,7 +48,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
           latitude: marker.latitude,
           longitude: marker.longitude,
           data: 'marker Added Neshan Click',
-          icon: '',
+          icon: marker.icon,
         ));
       };
 
@@ -79,6 +77,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
 
   @override
   Widget build(BuildContext context) {
+    setCreationParams();
     return AndroidView(
         viewType: 'com.golrang.map_kit/map_kit_view',
         creationParams: widget.creationParams,
