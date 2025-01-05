@@ -26,10 +26,10 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     mapKitPlugin = UiMap(
-      mapProvider: MapProvider.neshan,
+      mapProvider: MapProvider.flutter,
       controller: mapController,
       initialCenter: const LatLng(36.3156692, 59.5405541),
-      isDarkMode: true,
+      isDarkMode: false,
       isCurrentLocationEnable: true,
       zoom: 12,
       markers: [

@@ -10,14 +10,15 @@ class MarkerModel {
   dynamic data;
   String icon;
   Widget? snippetWidget;
+  bool? visibility;
 
-  MarkerModel({
-    required this.latitude,
-    required this.longitude,
-    this.data,
-    required this.icon,
-    this.snippetWidget,
-  });
+  MarkerModel(
+      {required this.latitude,
+      required this.longitude,
+      this.data,
+      required this.icon,
+      this.snippetWidget,
+      this.visibility});
 
   Marker toFlutterMarker() => Marker(
         point: LatLng(latitude, longitude),
@@ -30,6 +31,7 @@ class MarkerModel {
       'longitude': longitude,
       'data': data,
       'icon': icon,
+      'visibility': visibility ?? true,
     };
   }
 }

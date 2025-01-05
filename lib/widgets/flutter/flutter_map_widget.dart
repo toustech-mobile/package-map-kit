@@ -122,7 +122,11 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
                 : "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
             subdomains: const ['a', 'b', 'c'],
           ),
-          CircleLayer(circles: widget.circles!.map((markerModel) => markerModel.toFlutterCircleMarker()).toList()),
+          CircleLayer(
+              circles: widget.circles!
+                  .where((circle) => circle.visibility ?? true)
+                  .map((circleModel) => circleModel.toFlutterCircleMarker())
+                  .toList()),
           _markers(),
           PolylineLayer(
               polylines: widget.polyLines!.map((polyLineModel) => polyLineModel.toFlutterPolyLine()).toList()),
@@ -151,7 +155,10 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
     return PopupMarkerLayer(
       options: PopupMarkerLayerOptions(
         popupController: widget.popupController,
-        markers: widget.markers!.map((marker) => marker.toFlutterMarker()).toList(),
+        markers: widget.markers!
+            .where((marker) => marker.visibility ?? true)
+            .map((markerModel) => markerModel.toFlutterMarker())
+            .toList(),
         popupDisplayOptions: PopupDisplayOptions(
           builder: (BuildContext context, Marker marker) {
             MarkerModel? tappedMarker;

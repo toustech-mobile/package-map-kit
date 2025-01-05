@@ -11,7 +11,6 @@ import com.carto.graphics.Color as CartoColor
 class PolyLineHelper {
     companion object {
         fun toNeshanModel(polyLines: Any): List<Polyline> {
-
             return (polyLines as List<*>).mapNotNull { polyLine ->
                 if (polyLine is Map<*, *>) {
                     val points = polyLine["points"] as? List<Map<*, *>>
