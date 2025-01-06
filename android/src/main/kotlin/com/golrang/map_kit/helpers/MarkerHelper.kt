@@ -62,7 +62,9 @@ class MarkerHelper {
             markStCr.anchorPointY = 0f
 
             val marker = Marker(loc, markSt)
-            marker.putMetadata("data", data.toString())
+            if (data != null) {
+                marker.putMetadata("data", data.toString())
+            }
             marker.title = snippetTitle
             marker.description = snippetDescription
 

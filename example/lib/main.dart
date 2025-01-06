@@ -111,6 +111,7 @@ class _MyAppState extends State<MyApp> {
           // snippetTitle: 'asdsadsadasdsadsadaa',
           // snippetDescription: 'asfagasgasgasgasgasasgasg'
         ),
+
       ],
       onMarkerTap: (markerModel) {
         print(markerModel.data);

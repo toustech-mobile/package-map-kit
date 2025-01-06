@@ -21,7 +21,7 @@ class CircleHelper {
                     val borderStroke = circle["borderStroke"] as? Double
                     val color = circle["color"] as? String
                     val borderColor = circle["borderColor"] as? String
-                    val data = circle["data"] as? String
+                    val data = circle["data"]
                     val snippetTitle = circle["snippetTitle"] as? String
                     val snippetDescription = circle["snippetDescription"] as? String
 
@@ -34,7 +34,7 @@ class CircleHelper {
                             borderColor!!,
                             snippetTitle!!,
                             snippetDescription!!,
-                            data!!,
+                            data,
                             context
                         )
                     } else {
@@ -54,7 +54,7 @@ class CircleHelper {
             borderColor: String,
             snippetTitle: String,
             snippetDescription: String,
-            data: String,
+            data: Any?,
             context: Context,
         ): MyCircle {
             return MyCircle(
