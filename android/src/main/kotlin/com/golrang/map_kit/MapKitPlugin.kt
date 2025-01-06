@@ -253,6 +253,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
                 marker.showInfoWindow()
             }
             sendOnMarkerClickCallbackToFlutter(marker.getMetadata("data"))
+            mapView.setZoom(defaultZoom, 0f)
         }
     }
 
