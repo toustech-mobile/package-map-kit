@@ -9,7 +9,9 @@ class MarkerModel {
   double longitude;
   dynamic data;
   String icon;
-  Widget? snippetWidget;
+  Widget? snippetWidget; //todo must be removed
+  String? snippetTitle;
+  String? snippetDescription;
 
   MarkerModel({
     required this.latitude,
@@ -17,6 +19,8 @@ class MarkerModel {
     this.data,
     required this.icon,
     this.snippetWidget,
+    this.snippetTitle,
+    this.snippetDescription,
   });
 
   Marker toFlutterMarker() => Marker(
@@ -30,6 +34,8 @@ class MarkerModel {
       'longitude': longitude,
       'data': data,
       'icon': icon,
+      'snippetTitle': snippetTitle,
+      'snippetDescription': snippetDescription,
     };
   }
 }

@@ -29,7 +29,7 @@ class _MyAppState extends State<MyApp> {
       mapProvider: MapProvider.neshan,
       controller: mapController,
       initialCenter: const LatLng(36.3156692, 59.5405541),
-      isDarkMode: false,
+      isDarkMode: true,
       isCurrentLocationEnable: true,
       zoom: 12,
       markers: [

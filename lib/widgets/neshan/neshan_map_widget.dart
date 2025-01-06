@@ -98,19 +98,19 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
         });
   }
 
+
   @override
   void onMapTap(LatLng point) {
     if (widget.uiMapController != null) {
-      // widget.uiMapController!.addCircles([
-      //   CircleModel(
-      //     latitude: 36.32209806699167,
-      //     longitude: 59.52369428145562,
-      //     radius: 1000,
-      //     color: Colors.blue.withOpacity(0.5),
-      //     borderColor: Colors.blue,
-      //     data: 'Circle data 22222',
-      //   )
-      // ]);
+      widget.uiMapController!.addMarkers([
+        MarkerModel(
+            latitude: 36.33531803315229,
+            longitude: 59.509480081578886,
+            data: 'Test Click On Marker',
+            icon: 'end_point.svg',
+            snippetTitle: 'Title',
+            snippetDescription: 'Description'),
+      ]);
 
       // widget.uiMapController!.removeCircles([widget.circles![0]]);
     }

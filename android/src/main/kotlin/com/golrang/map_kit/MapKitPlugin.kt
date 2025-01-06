@@ -10,7 +10,6 @@ import android.widget.LinearLayout
 import androidx.annotation.NonNull
 import com.golrang.map_kit.MapKitPlugin.Companion.callBackChannel
 import com.golrang.map_kit.MapKitPlugin.Companion.mapKitView
-import com.golrang.map_kit.helpers.MarkerHelper.Companion.createMarker
 import com.golrang.map_kit.helpers.CircleHelper
 import com.golrang.map_kit.helpers.MarkerHelper
 import com.golrang.map_kit.helpers.PolyLineHelper
@@ -136,9 +135,9 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         setInitialCenter(params)
         setDefaultZoom(params)
         setMapStyle(params)
-        addMarkers(context, params)
+        addMarkers(params!!["markers"] as List<*>)
         addPolyLines(params)
-        addCircles(params)
+        addCircles(params["circles"] as List<*>)
     }
 
     private fun setInitialCenter(params: Map<String, Any>?) {
@@ -174,28 +173,14 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         }
     }
 
-    private fun addMarkers(context: Context, params: Map<String, Any>?) {
-        val markers = params?.get("markers")
-        Log.d("Native Markers", markers.toString())
-
-        MarkerHelper.toNeshanModel(context, markers!!).forEach {
-            this.markers.add(it)
-            mapView.addMarker(it)
-        }
-    }
 
     fun addMarkers(rawMarkers: List<*>) {
-        val markers = rawMarkers.mapNotNull {
-            val arguments = it as? Map<*, *>
-            val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
-            val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
-            val data = arguments?.get("data") as? String ?: ""
-            val icon = arguments?.get("icon") as? String ?: ""
+        val markers = MarkerHelper.toNeshanModel(context, rawMarkers)
+        Log.d("Native Markers", markers.toString())
 
-            createMarker(LatLng(latitude, longitude), data, icon, context)
-        }
         this.markers.addAll(markers)
         mapView.addMarkers(markers)
+
     }
 
     fun removeMarkers(rawMarkers: List<*>) {
@@ -215,34 +200,10 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         mapView.setZoom(mapView.zoom, 0f)
     }
 
-    private fun addCircles(params: Map<String, Any>?) {
-        val circles = params?.get("circles")
-        Log.d("Native Circles", circles.toString())
+    fun addCircles(rawCircles: List<*>) {
+        val circles = CircleHelper.toNeshanModel(rawCircles)
+        Log.d("Native Circles", rawCircles.toString())
 
-        CircleHelper.toNeshanModel(circles!!).forEach {
-            this.circles.add(it)
-            mapView.addCircle(it.circle)
-        }
-    }
-
-    fun addCircles(rawMarkers: List<*>) {
-        val circles = rawMarkers.mapNotNull {
-            val arguments = it as? Map<*, *>
-            val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
-            val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
-            val radius = arguments?.get("radius") as? Double ?: 0.0
-            val borderStroke = arguments?.get("borderStroke") as? Double ?: 0.0
-            val color = arguments?.get("color") as? String ?: ""
-            val borderColor = arguments?.get("borderColor") as? String ?: ""
-
-            CircleHelper.createCircle(
-                LatLng(latitude, longitude),
-                radius,
-                borderStroke,
-                color,
-                borderColor,
-            )
-        }
         this.circles.addAll(circles)
         circles.forEach {
             mapView.addCircle(it.circle)
@@ -258,8 +219,6 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
             val circle = this.circles.find {
                 it.latitude == latitude && it.longitude == longitude
             }
-
-            Log.d("MY CIRCLEEEEEE", "removeCircles: $circle")
 
             if (circle != null) {
                 this.circles.remove(circle)
@@ -290,6 +249,9 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         }
 
         mapView.setOnMarkerClickListener { marker: Marker ->
+            if (marker.title != null || marker.description != null) {
+                marker.showInfoWindow()
+            }
             sendOnMarkerClickCallbackToFlutter(marker.getMetadata("data"))
         }
     }

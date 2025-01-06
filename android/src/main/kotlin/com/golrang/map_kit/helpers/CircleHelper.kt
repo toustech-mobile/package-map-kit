@@ -11,8 +11,8 @@ import org.neshan.mapsdk.model.Circle
 class CircleHelper {
 
     companion object {
-        fun toNeshanModel(circles: Any): List<MyCircle> {
-            return (circles as List<*>).mapNotNull { circle ->
+        fun toNeshanModel(circles: List<*>): List<MyCircle> {
+            return circles.mapNotNull { circle ->
                 if (circle is Map<*, *>) {
                     val latitude = circle["latitude"] as? Double
                     val longitude = circle["longitude"] as? Double

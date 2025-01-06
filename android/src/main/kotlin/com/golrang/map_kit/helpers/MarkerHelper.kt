@@ -14,19 +14,25 @@ import org.neshan.mapsdk.model.Marker
 class MarkerHelper {
 
     companion object {
-        fun toNeshanModel(context: Context, markers: Any): List<Marker> {
-            return (markers as List<*>).mapNotNull { marker ->
+        fun toNeshanModel(context: Context, markers: List<*>): List<Marker> {
+            return markers.mapNotNull { marker ->
                 if (marker is Map<*, *>) {
-                    val latitude = marker["latitude"] as? Double
-                    val longitude = marker["longitude"] as? Double
+                    val latitude = marker["latitude"] as Double
+                    val longitude = marker["longitude"] as Double
                     val data = marker["data"]
                     val icon = marker["icon"] as? String ?: ""
+                    val snippetTitle = marker["snippetTitle"] as? String
+                    val snippetDescription = marker["snippetDescription"] as? String
 
-                    if (latitude != null && longitude != null) {
-                        createMarker(LatLng(latitude, longitude), data, icon, context)
-                    } else {
-                        null
-                    }
+                    createMarker(
+                        LatLng(latitude, longitude),
+                        data,
+                        icon,
+                        snippetTitle,
+                        snippetDescription,
+                        context
+                    )
+
                 } else {
                     null
                 }
@@ -34,7 +40,12 @@ class MarkerHelper {
         }
 
         fun createMarker(
-            loc: LatLng, data: Any?, icon: String, context: Context
+            loc: LatLng,
+            data: Any?,
+            icon: String,
+            snippetTitle: String?,
+            snippetDescription: String?,
+            context: Context
         ): Marker {
             val markStCr = MarkerStyleBuilder()
 
@@ -48,6 +59,9 @@ class MarkerHelper {
 
             val marker = Marker(loc, markSt)
             marker.putMetadata("data", data.toString())
+            marker.title = snippetTitle
+            marker.description = snippetDescription
+
             return marker
         }
 
