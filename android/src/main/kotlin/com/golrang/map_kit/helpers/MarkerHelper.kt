@@ -21,6 +21,7 @@ class MarkerHelper {
                     val longitude = marker["longitude"] as Double
                     val data = marker["data"]
                     val icon = marker["icon"] as? String ?: ""
+                    val iconSize = marker["iconSize"] as? Int ?: 32
                     val snippetTitle = marker["snippetTitle"] as? String
                     val snippetDescription = marker["snippetDescription"] as? String
 
@@ -28,6 +29,7 @@ class MarkerHelper {
                         LatLng(latitude, longitude),
                         data,
                         icon,
+                        iconSize,
                         snippetTitle,
                         snippetDescription,
                         context
@@ -43,13 +45,14 @@ class MarkerHelper {
             loc: LatLng,
             data: Any?,
             icon: String,
+            iconSize: Int,
             snippetTitle: String?,
             snippetDescription: String?,
             context: Context
         ): Marker {
             val markStCr = MarkerStyleBuilder()
 
-            markStCr.size = 50f
+            markStCr.size = iconSize.toFloat()
 
             markStCr.bitmap = BitmapUtils.createBitmapFromAndroidBitmap(
                 getIconDrawableByReflection(context, icon)!!.toBitmap()

@@ -38,6 +38,7 @@ class _MyAppState extends State<MyApp> {
           longitude: 59.5405541,
           data: "Test Click On Marker",
           icon: 'pause.svg',
+          iconSize: 100,
         ),
         MarkerModel(
           latitude: 36.315653,

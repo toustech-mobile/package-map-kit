@@ -38,7 +38,7 @@ class CircleHelper {
             }
         }
 
-        fun createCircle(
+        private fun createCircle(
             point: LatLng,
             radius: Double,
             borderStroke: Double,
@@ -46,7 +46,7 @@ class CircleHelper {
             borderColor: String,
         ): MyCircle {
             return MyCircle(
-                point.latitude, point.longitude, Circle(
+                point.latitude, point.longitude, radius, Circle(
                     point,
                     radius,
                     convertToCartoColor(android.graphics.Color.parseColor(color)),

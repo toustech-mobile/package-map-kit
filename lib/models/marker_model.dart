@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -9,6 +11,7 @@ class MarkerModel {
   double longitude;
   dynamic data;
   String icon;
+  int? iconSize;
   Widget? snippetWidget; //todo must be removed
   String? snippetTitle;
   String? snippetDescription;
@@ -18,6 +21,7 @@ class MarkerModel {
     required this.longitude,
     this.data,
     required this.icon,
+    this.iconSize,
     this.snippetWidget,
     this.snippetTitle,
     this.snippetDescription,
@@ -34,6 +38,7 @@ class MarkerModel {
       'longitude': longitude,
       'data': data,
       'icon': icon,
+      'iconSize': iconSize,
       'snippetTitle': snippetTitle,
       'snippetDescription': snippetDescription,
     };
