@@ -281,7 +281,6 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         val longitude = rawPolyLines["longitude"] as Double
         val accuracy = rawPolyLines["accuracy"] as Double
 
-
         val location = Location("my_native_provider")
         location.latitude = latitude
         location.longitude = longitude
@@ -351,7 +350,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         )
 
         Handler(Looper.getMainLooper()).post {
-            callBackChannel?.invokeMethod("onMapLongClick", pointMap)
+            callBackChannel?.invokeMethod("onMapLongPress", pointMap)
         }
     }
 

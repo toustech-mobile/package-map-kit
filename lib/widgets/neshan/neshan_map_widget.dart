@@ -21,6 +21,10 @@ class NeshanMapWidget extends StatefulWidget {
   List<MarkerModel>? markers;
   List<PolyLineModel>? polyLines;
   List<CircleModel>? circles;
+  final void Function(LatLng)? onTap;
+  final void Function(LatLng)? onLongPress;
+  final void Function(MarkerModel)? onMarkerTap;
+  final void Function(CircleModel)? onCircleTap;
 
   NeshanMapWidget({
     super.key,
@@ -31,6 +35,10 @@ class NeshanMapWidget extends StatefulWidget {
     this.markers,
     this.polyLines,
     this.circles,
+    this.onTap,
+    this.onLongPress,
+    this.onMarkerTap,
+    this.onCircleTap,
   });
 
   @override
@@ -111,6 +119,11 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
   @override
   void onMapTap(LatLng point) {
     print('onMapTap :$point');
+
+    if (widget.onTap != null) {
+      widget.onTap!(point);
+    }
+
     if (widget.uiMapController != null) {
       widget.uiMapController!.addPolyline([
         PolyLineModel(points: [
@@ -133,33 +146,29 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
         longitude: 59.590460127376986,
         accuracy: 2500,
       ));
+    }
+  }
 
-      // widget.uiMapController!.addMarkers([
-      //   MarkerModel(
-      //       latitude: 36.33531803315229,
-      //       longitude: 59.509480081578886,
-      //       data: 'Test Click On Marker',
-      //       icon: 'end_point.svg',
-      //       snippetTitle: 'Title',
-      //       snippetDescription: 'Description'),
-      // ]);
-
-      // widget.uiMapController!.removeCircles([widget.circles![0]]);
+  @override
+  void onMapLongPress(LatLng point) {
+    if (widget.onLongPress != null) {
+      widget.onLongPress!(point);
     }
   }
 
   @override
   void onMarkerTap(data) {
     print('onMarkerTap :$data');
+    if (widget.onMarkerTap != null) {
+      widget.onMarkerTap!(data);
+    }
   }
 
   @override
   void onCircleTap(data) {
     print('onCircleTap :$data');
-  }
-
-  @override
-  void onMapLongClick(LatLng point) {
-    print('onMapLongClick :$point');
+    if (widget.onCircleTap != null) {
+      widget.onCircleTap!(data);
+    }
   }
 }

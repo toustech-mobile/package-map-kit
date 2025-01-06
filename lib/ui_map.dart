@@ -86,6 +86,10 @@ class _UiMapState extends State<UiMap> {
           markers: widget.markers,
           polyLines: widget.polyLines,
           circles: widget.circles,
+          onMarkerTap: widget.onMarkerTap,
+          onCircleTap: widget.onCircleTap,
+          onTap: widget.onTap,
+          onLongPress: widget.onLongPress,
         );
     }
   }
