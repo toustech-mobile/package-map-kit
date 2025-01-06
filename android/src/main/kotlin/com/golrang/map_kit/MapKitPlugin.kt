@@ -201,12 +201,13 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     }
 
     fun addCircles(rawCircles: List<*>) {
-        val circles = CircleHelper.toNeshanModel(rawCircles)
+        val circles = CircleHelper.toNeshanModel(rawCircles, context)
         Log.d("Native Circles", rawCircles.toString())
 
         this.circles.addAll(circles)
         circles.forEach {
             mapView.addCircle(it.circle)
+            mapView.addMarker(it.centerMarker)
         }
     }
 
@@ -249,10 +250,19 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         }
 
         mapView.setOnMarkerClickListener { marker: Marker ->
-            if (marker.title != null || marker.description != null) {
+            if (!marker.title.isNullOrEmpty() || !marker.description.isNullOrEmpty()) {
                 marker.showInfoWindow()
             }
-            sendOnMarkerClickCallbackToFlutter(marker.getMetadata("data"))
+
+            val circleMarker = circles.find { myCircle ->
+                myCircle.centerMarker == marker
+            }
+
+            if (circleMarker != null) {
+                sendOnCircleClickCallbackToFlutter(marker.getMetadata("data"))
+            } else {
+                sendOnMarkerClickCallbackToFlutter(marker.getMetadata("data"))
+            }
             mapView.setZoom(mapView.zoom, 0f)
         }
     }
@@ -274,6 +284,12 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     private fun sendOnMarkerClickCallbackToFlutter(data: String) {
         Handler(Looper.getMainLooper()).post {
             callBackChannel?.invokeMethod("onMarkerTap", data)
+        }
+    }
+
+    private fun sendOnCircleClickCallbackToFlutter(data: String) {
+        Handler(Looper.getMainLooper()).post {
+            callBackChannel?.invokeMethod("onCircleTap", data)
         }
     }
 

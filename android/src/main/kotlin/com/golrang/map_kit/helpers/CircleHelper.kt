@@ -1,5 +1,6 @@
 package com.golrang.map_kit.helpers
 
+import android.content.Context
 import com.carto.graphics.Color
 import com.carto.styles.LineStyle
 import com.carto.styles.LineStyleBuilder
@@ -11,7 +12,7 @@ import org.neshan.mapsdk.model.Circle
 class CircleHelper {
 
     companion object {
-        fun toNeshanModel(circles: List<*>): List<MyCircle> {
+        fun toNeshanModel(circles: List<*>, context: Context): List<MyCircle> {
             return circles.mapNotNull { circle ->
                 if (circle is Map<*, *>) {
                     val latitude = circle["latitude"] as? Double
@@ -20,6 +21,9 @@ class CircleHelper {
                     val borderStroke = circle["borderStroke"] as? Double
                     val color = circle["color"] as? String
                     val borderColor = circle["borderColor"] as? String
+                    val data = circle["data"] as? String
+                    val snippetTitle = circle["snippetTitle"] as? String
+                    val snippetDescription = circle["snippetDescription"] as? String
 
                     if (latitude != null && longitude != null) {
                         createCircle(
@@ -28,6 +32,10 @@ class CircleHelper {
                             borderStroke!!,
                             color!!,
                             borderColor!!,
+                            snippetTitle!!,
+                            snippetDescription!!,
+                            data!!,
+                            context
                         )
                     } else {
                         null
@@ -44,13 +52,25 @@ class CircleHelper {
             borderStroke: Double,
             color: String,
             borderColor: String,
+            snippetTitle: String,
+            snippetDescription: String,
+            data: String,
+            context: Context,
         ): MyCircle {
             return MyCircle(
-                point.latitude, point.longitude, radius, Circle(
+                point.latitude, point.longitude, radius, "", "", Circle(
                     point,
                     radius,
                     convertToCartoColor(android.graphics.Color.parseColor(color)),
                     getLineStyle(borderColor, borderStroke)
+                ), MarkerHelper.createMarker(
+                    LatLng(point.latitude, point.longitude),
+                    data,
+                    "circle.svg",
+                    20,
+                    snippetTitle,
+                    snippetDescription,
+                    context
                 )
             )
         }

@@ -12,7 +12,6 @@ import org.neshan.mapsdk.model.Marker
 
 
 class MarkerHelper {
-
     companion object {
         fun toNeshanModel(context: Context, markers: List<*>): List<Marker> {
             return markers.mapNotNull { marker ->
@@ -59,11 +58,16 @@ class MarkerHelper {
             )
 
             val markSt = markStCr.buildStyle()
+            markStCr.anchorPointX = 0f
+            markStCr.anchorPointY = 0f
 
             val marker = Marker(loc, markSt)
             marker.putMetadata("data", data.toString())
             marker.title = snippetTitle
             marker.description = snippetDescription
+
+
+            marker.setStyle(markStCr.buildStyle())
 
             return marker
         }
