@@ -1,6 +1,7 @@
 package com.golrang.map_kit
 
 import android.content.Context
+import android.location.Location
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -82,6 +83,10 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 //            "removePolyLines" -> {
 //                handleRemovePolyLines(call, result)
 //            }
+            "setUserMarker" -> {
+                handleSetUserMarker(call, result)
+            }
+
 
             else -> {
                 result.notImplemented()
@@ -123,6 +128,13 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         mapKitView.addPolyLines(call.arguments as List<*>)
 
         result.success("PolyLines added successfully")
+    }
+
+    private fun handleSetUserMarker(call: MethodCall, result: MethodChannel.Result) {
+        Log.d("Native SetUserMarker", "")
+
+        mapKitView.setUserMarker(call.arguments as Map<String, *>)
+        result.success("SetUserMarker set successfully")
     }
 //
 //    private fun handleRemovePolyLines(call: MethodCall, result: MethodChannel.Result) {
@@ -262,6 +274,31 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         polyLines.forEach {
             mapView.addPolyline(it)
         }
+    }
+
+    fun setUserMarker(rawPolyLines: Map<String, *>) {
+        val latitude = rawPolyLines["latitude"] as Double
+        val longitude = rawPolyLines["longitude"] as Double
+        val accuracy = rawPolyLines["accuracy"] as Double
+
+
+        val location = Location("my_native_provider")
+        location.latitude = latitude
+        location.longitude = longitude
+        location.altitude = 1200.0
+        location.accuracy = accuracy.toFloat()
+        location.time = System.currentTimeMillis()
+        location.speed = 0.0f
+
+        mapView.showAccuracyCircle(location)
+
+        val marker = MarkerHelper.createMarker(
+            LatLng(latitude, longitude), "", "current_location.svg", 24, "", "", context,
+        )
+
+        mapView.addMarker(
+            marker
+        )
     }
 
 

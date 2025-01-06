@@ -7,6 +7,7 @@ import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
+import 'package:map_kit/models/user_marker.dart';
 import 'package:map_kit/widgets/neshan/neshan_callback.dart';
 import 'package:map_kit/widgets/neshan/neshan_methods.dart' as neshan;
 
@@ -70,6 +71,10 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
         widget.polyLines!.addAll(polyLines);
         neshan.NeshanMethods.addPolylines(polyLines);
       };
+
+      widget.uiMapController!.setUserLocation = (UserMarkerModel userMarkerModel) {
+        neshan.NeshanMethods.setUserMarker(userMarkerModel);
+      };
     }
 
     super.initState();
@@ -122,6 +127,12 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
           LatLng(36.3191815, 59.5289642),
         ], color: Colors.green, strokeWidth: 5),
       ]);
+
+      widget.uiMapController!.setUserLocation(UserMarkerModel(
+        latitude: 36.3212712247589,
+        longitude: 59.590460127376986,
+        accuracy: 2500,
+      ));
 
       // widget.uiMapController!.addMarkers([
       //   MarkerModel(

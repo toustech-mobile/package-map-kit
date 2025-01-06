@@ -3,6 +3,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
+import 'package:map_kit/models/user_marker.dart';
 
 abstract class NeshanMethods {
   static const MethodChannel _channel = MethodChannel('com.golrang.map_kit/method_channel');
@@ -24,7 +25,12 @@ abstract class NeshanMethods {
   }
 
   static addPolylines(List<PolyLineModel> polyLines) async {
-    await _channel.invokeMethod('addPolyLines', polyLines.map((flutterModel) => flutterModel.toNeshanPolyLines()).toList());
+    await _channel.invokeMethod(
+        'addPolyLines', polyLines.map((flutterModel) => flutterModel.toNeshanPolyLines()).toList());
+  }
+
+  static setUserMarker(UserMarkerModel userMarker) async {
+    await _channel.invokeMethod('setUserMarker', userMarker.toNeshanUserMarker());
   }
 }
 
