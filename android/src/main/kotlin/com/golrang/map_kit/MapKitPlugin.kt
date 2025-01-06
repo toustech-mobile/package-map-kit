@@ -41,8 +41,7 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
         this.binding = binding
 
-        callBackChannel =
-            MethodChannel(binding.binaryMessenger, "com.golrang.map_kit/callback_channel")
+        callBackChannel = MethodChannel(binding.binaryMessenger, "com.golrang.map_kit/callback_channel")
         methodChannel = MethodChannel(binding.binaryMessenger, "com.golrang.map_kit/method_channel")
 
         callBackChannel.setMethodCallHandler(this)
