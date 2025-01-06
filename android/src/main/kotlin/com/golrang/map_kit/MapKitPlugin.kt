@@ -23,6 +23,7 @@ import io.flutter.plugin.platform.PlatformViewFactory
 import org.neshan.common.model.LatLng
 import org.neshan.mapsdk.MapView
 import org.neshan.mapsdk.model.Marker
+import org.neshan.mapsdk.model.Polyline
 import org.neshan.mapsdk.style.NeshanMapStyle
 
 class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
@@ -74,6 +75,14 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
                 handleRemoveCircles(call, result)
             }
 
+            "addPolyLines" -> {
+                handleAddPolyLines(call, result)
+            }
+
+//            "removePolyLines" -> {
+//                handleRemovePolyLines(call, result)
+//            }
+
             else -> {
                 result.notImplemented()
             }
@@ -109,6 +118,20 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         result.success("Circles removed successfully")
     }
 
+    private fun handleAddPolyLines(call: MethodCall, result: MethodChannel.Result) {
+        Log.d("Native Add PolyLines", "")
+        mapKitView.addPolyLines(call.arguments as List<*>)
+
+        result.success("PolyLines added successfully")
+    }
+//
+//    private fun handleRemovePolyLines(call: MethodCall, result: MethodChannel.Result) {
+//        Log.d("Native Remove PolyLines", "")
+//        mapKitView.removeCircles(call.arguments as List<*>)
+//
+//        result.success("PolyLines removed successfully")
+//    }
+
 }
 
 class MapKitViewFactory : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
@@ -125,6 +148,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     private var defaultZoom: Float = 12.0f
     private var markers: MutableList<Marker> = mutableListOf()
     private var circles: MutableList<MyCircle> = mutableListOf()
+    private var polyLines: MutableList<Polyline> = mutableListOf()
 
     private val layout: LinearLayout =
         LayoutInflater.from(context).inflate(R.layout.my_activity, null) as LinearLayout
@@ -136,8 +160,9 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         setDefaultZoom(params)
         setMapStyle(params)
         addMarkers(params!!["markers"] as List<*>)
-        addPolyLines(params)
         addCircles(params["circles"] as List<*>)
+        addPolyLines(params["polyLines"] as List<*>)
+
     }
 
     private fun setInitialCenter(params: Map<String, Any>?) {
@@ -174,8 +199,8 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     }
 
 
-    fun addMarkers(rawMarkers: List<*>) {
-        val markers = MarkerHelper.toNeshanModel(context, rawMarkers)
+    fun addMarkers(rawData: List<*>) {
+        val markers = MarkerHelper.toNeshanModel(context, rawData)
         Log.d("Native Markers", markers.toString())
 
         this.markers.addAll(markers)
@@ -183,8 +208,8 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
     }
 
-    fun removeMarkers(rawMarkers: List<*>) {
-        rawMarkers.forEach {
+    fun removeMarkers(rawData: List<*>) {
+        rawData.forEach {
             val arguments = it as? Map<*, *>
             val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
             val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
@@ -211,8 +236,8 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         }
     }
 
-    fun removeCircles(rawMarkers: List<*>) {
-        rawMarkers.forEach {
+    fun removeCircles(rawData: List<*>) {
+        rawData.forEach {
             val arguments = it as? Map<*, *>
             val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
             val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
@@ -229,14 +254,16 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         mapView.setZoom(mapView.zoom, 0f)
     }
 
-    private fun addPolyLines(params: Map<String, Any>?) {
-        val polyLines = params?.get("polyLines")
-        Log.d("Native PolyLines", polyLines.toString())
+    fun addPolyLines(rawPolyLines: List<*>) {
+        val polyLines = PolyLineHelper.toNeshanModel(rawPolyLines)
+        Log.d("Native PolyLines", rawPolyLines.toString())
 
-        PolyLineHelper.toNeshanModel(polyLines!!).forEach {
+        this.polyLines.addAll(polyLines)
+        polyLines.forEach {
             mapView.addPolyline(it)
         }
     }
+
 
     private fun initLayoutReferences() {
         initViews()

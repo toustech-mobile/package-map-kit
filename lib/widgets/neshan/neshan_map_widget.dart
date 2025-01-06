@@ -65,6 +65,11 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
           widget.circles!.remove(c);
         }
       };
+
+      widget.uiMapController!.addPolyline = (List<PolyLineModel> polyLines) {
+        widget.polyLines!.addAll(polyLines);
+        neshan.NeshanMethods.addPolylines(polyLines);
+      };
     }
 
     super.initState();
@@ -102,6 +107,22 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
   void onMapTap(LatLng point) {
     print('onMapTap :$point');
     if (widget.uiMapController != null) {
+      widget.uiMapController!.addPolyline([
+        PolyLineModel(points: [
+          LatLng(36.3167264, 59.5365894),
+          LatLng(36.3169662, 59.5359136),
+          LatLng(36.3172246, 59.5352273),
+          LatLng(36.3174794, 59.5343151),
+          LatLng(36.3177497, 59.5334306),
+          LatLng(36.3179679, 59.5325732),
+          LatLng(36.3182209, 59.5317401),
+          LatLng(36.3184893, 59.5309729),
+          LatLng(36.318721, 59.5302708),
+          LatLng(36.3189011, 59.5296759),
+          LatLng(36.3191815, 59.5289642),
+        ], color: Colors.green, strokeWidth: 5),
+      ]);
+
       // widget.uiMapController!.addMarkers([
       //   MarkerModel(
       //       latitude: 36.33531803315229,

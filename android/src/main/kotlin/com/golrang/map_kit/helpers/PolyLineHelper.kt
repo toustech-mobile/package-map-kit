@@ -10,8 +10,8 @@ import com.carto.graphics.Color as CartoColor
 
 class PolyLineHelper {
     companion object {
-        fun toNeshanModel(polyLines: Any): List<Polyline> {
-            return (polyLines as List<*>).mapNotNull { polyLine ->
+        fun toNeshanModel(polyLines: List<*>): List<Polyline> {
+            return polyLines.mapNotNull { polyLine ->
                 if (polyLine is Map<*, *>) {
                     val points = polyLine["points"] as? List<Map<*, *>>
                     val color = polyLine["color"] as? String
