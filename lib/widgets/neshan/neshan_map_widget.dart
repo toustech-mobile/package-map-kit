@@ -157,4 +157,9 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
   void onCircleTap(data) {
     print('onCircleTap :$data');
   }
+
+  @override
+  void onMapLongClick(LatLng point) {
+    print('onMapLongClick :$point');
+  }
 }

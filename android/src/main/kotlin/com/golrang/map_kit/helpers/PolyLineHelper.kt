@@ -30,8 +30,8 @@ class PolyLineHelper {
                         result.add(
                             createPolyLine(
                                 ArrayList(polyLinePoints),
-                                "#ffffff",
-                                strokeWidth + 5
+                                "#62EFFF",
+                                strokeWidth + 4
                             )
                         )
                         result.add(createPolyLine(ArrayList(polyLinePoints), color, strokeWidth))

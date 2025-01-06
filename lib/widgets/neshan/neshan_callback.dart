@@ -14,6 +14,10 @@ abstract class NeshanCallback {
           callbacks.onMapTap(LatLng((call.arguments as Map)['latitude'], (call.arguments as Map)['longitude']));
           break;
 
+        case 'onMapLongClick':
+          callbacks.onMapLongClick(LatLng((call.arguments as Map)['latitude'], (call.arguments as Map)['longitude']));
+          break;
+
         case 'onMarkerTap':
           callbacks.onMarkerTap(call.arguments as String);
           break;
@@ -28,6 +32,8 @@ abstract class NeshanCallback {
 
 abstract class NeshanCallbackInterface {
   void onMapTap(LatLng point);
+
+  void onMapLongClick(LatLng point);
 
   void onMarkerTap(dynamic data);
 

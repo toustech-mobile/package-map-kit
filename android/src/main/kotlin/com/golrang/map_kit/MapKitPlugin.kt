@@ -305,9 +305,9 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     private fun initLayoutReferences() {
         initViews()
 
-//        mapView.setOnMapLongClickListener {
-//            mapView.addMarker(createMarker(it, context))
-//        }
+        mapView.setOnMapLongClickListener { latLng ->
+            sendOnMapLongClickCallbackToFlutter(latLng)
+        }
 
         mapView.setOnMapClickListener { latLng ->
             sendOnMapClickCallbackToFlutter(latLng)
@@ -342,6 +342,16 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
         Handler(Looper.getMainLooper()).post {
             callBackChannel?.invokeMethod("onMapTap", pointMap)
+        }
+    }
+
+    private fun sendOnMapLongClickCallbackToFlutter(point: LatLng) {
+        val pointMap = mapOf(
+            "latitude" to point.latitude, "longitude" to point.longitude
+        )
+
+        Handler(Looper.getMainLooper()).post {
+            callBackChannel?.invokeMethod("onMapLongClick", pointMap)
         }
     }
 
