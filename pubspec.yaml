@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_map:
+  flutter_map: ^7.0.2
   latlong2:
   flutter_map_marker_popup:
   flutter_svg:

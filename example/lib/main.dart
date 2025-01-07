@@ -26,10 +26,10 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     mapKitPlugin = UiMap(
-      mapProvider: MapProvider.neshan,
+      mapProvider: MapProvider.flutter,
       controller: mapController,
       initialCenter: const LatLng(36.3156692, 59.5405541),
-      isDarkMode: true,
+      isDarkMode: false,
       isCurrentLocationEnable: true,
       zoom: 12,
       markers: [
@@ -39,7 +39,8 @@ class _MyAppState extends State<MyApp> {
             data: "Test Click On Marker",
             icon: 'pause.svg',
             snippetTitle: 'Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
-            snippetDescription: 'HellHelloHelloHelloHelloHelloHelloHelloHelloHelloHello'),
+            snippetDescription:
+                'HellHelloHelloHelloHelloHelloHelloHelloHelloHelloHello'),
         MarkerModel(
           latitude: 36.324915772569966,
           longitude: 59.54904346842852,
@@ -100,7 +101,8 @@ class _MyAppState extends State<MyApp> {
             borderColor: Colors.blue,
             data: 'Man Circle Blue hastam',
             snippetTitle: 'Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
-            snippetDescription: 'HellHelloHelloHelloHelloHelloHelloHelloHelloHelloHello'),
+            snippetDescription:
+                'HellHelloHelloHelloHelloHelloHelloHelloHelloHelloHello'),
         CircleModel(
           latitude: 36.33377358253895,
           longitude: 59.54590011713316,
@@ -111,7 +113,6 @@ class _MyAppState extends State<MyApp> {
           // snippetTitle: 'asdsadsadasdsadsadaa',
           // snippetDescription: 'asfagasgasgasgasgasasgasg'
         ),
-
       ],
       onMarkerTap: (markerModel) {
         print(markerModel.data);

@@ -75,6 +75,7 @@ class _UiMapState extends State<UiMap> {
           onCircleTap: widget.onCircleTap,
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
+          mapProvider: MapProvider.flutter,
         );
 
       case MapProvider.neshan:
@@ -90,6 +91,22 @@ class _UiMapState extends State<UiMap> {
           onCircleTap: widget.onCircleTap,
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
+        );
+      case MapProvider.mapIr:
+        return FlutterMapWidget(
+          uiMapController: widget.controller,
+          initialCenter: widget.initialCenter,
+          zoom: widget.zoom,
+          isCurrentLocationEnable: widget.isCurrentLocationEnable,
+          isDarkMode: widget.isDarkMode,
+          markers: widget.markers,
+          polyLines: widget.polyLines,
+          circles: widget.circles,
+          onMarkerTap: widget.onMarkerTap,
+          onCircleTap: widget.onCircleTap,
+          onTap: widget.onTap,
+          onLongPress: widget.onLongPress,
+          mapProvider: MapProvider.mapIr,
         );
     }
   }

@@ -50,10 +50,12 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
   @override
   void initState() {
     NeshanCallback.setNeshanCallback(this);
-
+    print('NeshanCallback setNeshanCallback set');
     if (widget.uiMapController != null) {
       widget.uiMapController!.refresh = () {
         NeshanCallback.setNeshanCallback(this);
+        print('refresh setNeshanCallback');
+        print('refresh setNeshanCallback  ');
       };
 
       widget.uiMapController!.addMarkers = (List<MarkerModel> markers) {
