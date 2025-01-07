@@ -3,19 +3,19 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
-import 'package:map_kit/models/circle_marker_model.dart';
+import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/move_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 
-import '../models/user_marker.dart';
+import '../../models/user_marker.dart';
 
 class FlutterMapWidget extends StatefulWidget {
   PopupController? popupController = PopupController();
   UiMapController? uiMapController;
   List<MarkerModel>? markers;
   List<PolyLineModel>? polyLines;
-  List<CircleMarkerModel>? circles;
+  List<CircleModel>? circles;
   UserMarkerModel? userMarker;
   LatLng? initialCenter;
   bool? isDarkMode;
@@ -24,7 +24,7 @@ class FlutterMapWidget extends StatefulWidget {
   final void Function(LatLng)? onTap;
   final void Function(LatLng)? onLongPress;
   final void Function(MarkerModel)? onMarkerTap;
-  final void Function(CircleMarkerModel)? onCircleTap;
+  final void Function(CircleModel)? onCircleTap;
 
   FlutterMapWidget({
     this.uiMapController,
@@ -51,13 +51,13 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
   @override
   void initState() {
     if (widget.uiMapController != null) {
-      widget.uiMapController!.addMarker = (MarkerModel marker) {
-        widget.markers!.add(marker);
+      widget.uiMapController!.addMarkers = (List<MarkerModel> markers) {
+        widget.markers!.addAll(markers);
         setState(() {});
       };
 
-      widget.uiMapController!.addCircle = (circleMarkerModel) {
-        widget.circles!.add(circleMarkerModel);
+      widget.uiMapController!.addCircles = (circleMarkerModel) {
+        widget.circles!.addAll(circleMarkerModel);
         setState(() {});
       };
 
@@ -97,8 +97,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
 
             bool isCircleClicked = false;
             for (var circle in widget.circles!) {
-              final distance = const Distance().as(LengthUnit.Meter,
-                  LatLng(circle.latitude, circle.longitude), point);
+              final distance = const Distance().as(LengthUnit.Meter, LatLng(circle.latitude, circle.longitude), point);
               if (distance <= circle.radius) {
                 if (widget.onCircleTap != null) {
                   widget.onCircleTap!.call(circle);
@@ -123,28 +122,22 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
                 : "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
             subdomains: const ['a', 'b', 'c'],
           ),
-          CircleLayer(
-              circles: widget.circles!
-                  .map((markerModel) => markerModel.toFlutterCircleMarker())
-                  .toList()),
+          CircleLayer(circles: widget.circles!.map((circleModel) => circleModel.toFlutterCircleMarker()).toList()),
           _markers(),
           PolylineLayer(
-              polylines: widget.polyLines!
-                  .map((polyLineModel) => polyLineModel.toFlutterPolyLine())
-                  .toList()),
-          widget.userMarker != null
-              ? widget.userMarker!.toUserMarker()
-              : Container()
+              polylines: widget.polyLines!.map((polyLineModel) => polyLineModel.toFlutterPolyLine()).toList()),
+          widget.userMarker != null ? widget.userMarker!.toUserMarker() : Container()
         ],
       ),
       floatingActionButton: Visibility(
-        visible: widget.isCurrentLocationEnable!,
+        visible: widget.isCurrentLocationEnable ?? false,
         child: FloatingActionButton(
           onPressed: () {
-            _mapController.move(
-                LatLng(
-                    widget.userMarker!.latitude, widget.userMarker!.longitude),
-                widget.zoom ?? 11);
+            if (widget.userMarker != null) {
+              _mapController.move(LatLng(widget.userMarker!.latitude, widget.userMarker!.longitude), widget.zoom ?? 11);
+            } else {
+              //fixme show error message
+            }
           },
           child: const Icon(
             Icons.my_location,
@@ -158,14 +151,12 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
     return PopupMarkerLayer(
       options: PopupMarkerLayerOptions(
         popupController: widget.popupController,
-        markers:
-            widget.markers!.map((marker) => marker.toFlutterMarker()).toList(),
+        markers: widget.markers!.map((markerModel) => markerModel.toFlutterMarker()).toList(),
         popupDisplayOptions: PopupDisplayOptions(
           builder: (BuildContext context, Marker marker) {
             MarkerModel? tappedMarker;
             for (var m in widget.markers!) {
-              if (m.latitude == marker.point.latitude &&
-                  m.longitude == marker.point.longitude) {
+              if (m.latitude == marker.point.latitude && m.longitude == marker.point.longitude) {
                 tappedMarker = m;
                 widget.onMarkerTap!(tappedMarker);
                 break;

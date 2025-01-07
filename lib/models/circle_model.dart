@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:map_kit/extensions/hex_color.dart';
 
-class CircleMarkerModel {
+class CircleModel {
   double latitude;
   double longitude;
   double radius;
@@ -10,8 +11,10 @@ class CircleMarkerModel {
   Color? color;
   Color? borderColor;
   dynamic data;
+  String? snippetTitle;
+  String? snippetDescription;
 
-  CircleMarkerModel({
+  CircleModel({
     required this.latitude,
     required this.longitude,
     required this.radius,
@@ -19,6 +22,8 @@ class CircleMarkerModel {
     this.color,
     this.borderColor,
     this.data,
+    this.snippetTitle,
+    this.snippetDescription,
   });
 
   CircleMarker toFlutterCircleMarker() => CircleMarker(
@@ -29,4 +34,18 @@ class CircleMarkerModel {
         useRadiusInMeter: true,
         radius: radius,
       );
+
+  Map<String, dynamic> toNeshanCircle() {
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+      'radius': radius,
+      'borderStroke': borderStroke ?? 2,
+      'color': color!.toHex(),
+      'borderColor': borderColor!.toHex(),
+      'data': data,
+      'snippetTitle': snippetTitle ?? '',
+      'snippetDescription': snippetDescription ?? '',
+    };
+  }
 }

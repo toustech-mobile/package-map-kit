@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
-import 'package:map_kit/models/circle_marker_model.dart';
+import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
-import 'package:map_kit/models/user_marker.dart';
 import 'package:map_kit/ui_map.dart';
 
 void main() {
@@ -29,21 +28,24 @@ class _MyAppState extends State<MyApp> {
     mapKitPlugin = UiMap(
       mapProvider: MapProvider.neshan,
       controller: mapController,
-      initialCenter: const LatLng(36.54665465, 59.564654),
-      isDarkMode: false,
+      initialCenter: const LatLng(36.3156692, 59.5405541),
+      isDarkMode: true,
       isCurrentLocationEnable: true,
       zoom: 12,
       markers: [
         MarkerModel(
-          latitude: 36.54665465,
-          longitude: 59.564654,
+            latitude: 36.3156692,
+            longitude: 59.5405541,
+            data: "Test Click On Marker",
+            icon: 'pause.svg',
+            snippetTitle: 'Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
+            snippetDescription: 'HellHelloHelloHelloHelloHelloHelloHelloHelloHelloHello'),
+        MarkerModel(
+          latitude: 36.324915772569966,
+          longitude: 59.54904346842852,
           data: "Test Click On Marker",
-          child: const Icon(
-            Icons.location_on,
-            color: Colors.blue,
-            size: 40,
-          ),
-        )
+          icon: 'end_point.svg',
+        ),
       ],
       polyLines: [
         PolyLineModel(points: [
@@ -89,15 +91,28 @@ class _MyAppState extends State<MyApp> {
           LatLng(36.3224315, 59.5237103),
         ], color: Colors.blue, strokeWidth: 5),
       ],
-      // circles: [
-      //   CircleMarkerModel(
-      //       latitude: 36.52265465,
-      //       longitude: 59.564654,
-      //       radius: 600,
-      //       color: Colors.deepOrange.withOpacity(0.5),
-      //       borderColor: Colors.deepOrange,
-      //       data: 'Circle data 22222'),
-      // ],
+      circles: [
+        CircleModel(
+            latitude: 36.32209806699167,
+            longitude: 59.52369428145562,
+            radius: 1000,
+            color: Colors.blue.withOpacity(0.5),
+            borderColor: Colors.blue,
+            data: 'Man Circle Blue hastam',
+            snippetTitle: 'Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
+            snippetDescription: 'HellHelloHelloHelloHelloHelloHelloHelloHelloHelloHello'),
+        CircleModel(
+          latitude: 36.33377358253895,
+          longitude: 59.54590011713316,
+          radius: 500,
+          color: Colors.deepOrange.withOpacity(0.5),
+          borderColor: Colors.deepOrange,
+          data: 'Man Circle Orange Hastam',
+          // snippetTitle: 'asdsadsadasdsadsadaa',
+          // snippetDescription: 'asfagasgasgasgasgasasgasg'
+        ),
+
+      ],
       onMarkerTap: (markerModel) {
         print(markerModel.data);
       },
@@ -120,14 +135,16 @@ class _MyAppState extends State<MyApp> {
         // );
       },
       onLongPress: (LatLng point) {
-        mapController.addCircle(CircleMarkerModel(
-            latitude: point.latitude,
-            longitude: point.longitude,
-            radius: 200,
-            borderColor: Colors.purple,
-            color: Colors.purple.withOpacity(.5),
-            borderStroke: 2,
-            data: "UserCircleData"));
+        mapController.addCircles([
+          CircleModel(
+              latitude: point.latitude,
+              longitude: point.longitude,
+              radius: 200,
+              borderColor: Colors.purple,
+              color: Colors.purple.withOpacity(.5),
+              borderStroke: 2,
+              data: "UserCircleData")
+        ]);
       },
     );
   }
@@ -144,17 +161,17 @@ class _MyAppState extends State<MyApp> {
             Center(
               child: mapKitPlugin,
             ),
-            ElevatedButton(
-                onPressed: () {
-                  mapController.setUserLocation(
-                    UserMarkerModel(
-                      latitude: 36.3219341,
-                      longitude: 59.5214737,
-                      radius: 100,
-                    ),
-                  );
-                },
-                child: Text('click'))
+            // ElevatedButton(
+            //     onPressed: () {
+            //       mapController.setUserLocation(
+            //         UserMarkerModel(
+            //           latitude: 36.3219341,
+            //           longitude: 59.5214737,
+            //           radius: 100,
+            //         ),
+            //       );
+            //     },
+            //     child: Text('click'))
           ],
         ),
         // floatingActionButton: FloatingActionButton(
