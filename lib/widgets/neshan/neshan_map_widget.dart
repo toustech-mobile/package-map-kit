@@ -118,7 +118,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
   Widget build(BuildContext context) {
     setCreationParams();
     return AndroidView(
-        viewType: 'com.golrang.map_kit/map_kit_view',
+        viewType: 'com.example.example/map_kit_view',
         creationParams: widget.creationParams,
         creationParamsCodec: const StandardMessageCodec(),
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
