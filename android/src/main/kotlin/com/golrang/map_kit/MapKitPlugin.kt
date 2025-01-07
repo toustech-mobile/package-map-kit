@@ -42,14 +42,14 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
         this.binding = binding
 
         callBackChannel =
-            MethodChannel(binding.binaryMessenger, "com.golrang.map_kit/callback_channel")
-        methodChannel = MethodChannel(binding.binaryMessenger, "com.golrang.map_kit/method_channel")
+            MethodChannel(binding.binaryMessenger, "com.example.example/callback_channel")
+        methodChannel = MethodChannel(binding.binaryMessenger, "com.example.example/method_channel")
 
         callBackChannel.setMethodCallHandler(this)
         methodChannel.setMethodCallHandler(this)
 
         binding.platformViewRegistry.registerViewFactory(
-            "com.golrang.map_kit/map_kit_view", MapKitViewFactory()
+            "com.example.example/map_kit_view", MapKitViewFactory()
         )
     }
 
