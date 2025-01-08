@@ -161,6 +161,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     private var markers: MutableList<Marker> = mutableListOf()
     private var circles: MutableList<MyCircle> = mutableListOf()
     private var polyLines: MutableList<Polyline> = mutableListOf()
+    private var userMarker: Marker? = null
 
     private val layout: LinearLayout =
         LayoutInflater.from(context).inflate(R.layout.my_activity, null) as LinearLayout
@@ -291,12 +292,16 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
         mapView.showAccuracyCircle(location)
 
-        val marker = MarkerHelper.createMarker(
+
+        if (userMarker != null) {
+            mapView.removeMarker(userMarker)
+        }
+
+        userMarker = MarkerHelper.createMarker(
             LatLng(latitude, longitude), "", "current_location.svg", 24, "", "", context,
         )
-
         mapView.addMarker(
-            marker
+            userMarker
         )
     }
 
