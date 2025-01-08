@@ -59,7 +59,7 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         mapKitView.dispose()
-        eventSink = null
+        com.golrang.map_kit.MapKitPlugin.Companion.eventChannel = null
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
