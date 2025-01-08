@@ -115,10 +115,10 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
       onMarkerTap: (markerModel) {
-        print(markerModel.data);
+        print(markerModel);
       },
       onCircleTap: (circleMarkerModel) {
-        print("onCircleTap: ${circleMarkerModel.data}");
+        print("onCircleTap: ${circleMarkerModel}");
       },
       onTap: (LatLng point) {
         print('User tapped on: $point');

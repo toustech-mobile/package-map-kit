@@ -17,11 +17,11 @@ abstract class NeshanCallback {
           break;
 
         case 'onMarkerTap':
-          callbacks.onMarkerTap((streamData['data'] as String));
+          callbacks.onMarkerTap((streamData['data']['data'] as String));
           break;
 
         case 'onCircleTap':
-          callbacks.onCircleTap((streamData['data'] as String));
+          callbacks.onCircleTap((streamData['data']['data'] as String));
           break;
       }
     }, onError: (error) {
