@@ -28,7 +28,7 @@ class CircleModel {
 
   CircleMarker toFlutterCircleMarker() => CircleMarker(
         point: LatLng(latitude, longitude),
-        color: color ?? Colors.blue.withOpacity(0.5),
+        color: color,
         borderColor: borderColor ?? Colors.blue,
         borderStrokeWidth: borderStroke ?? 2,
         useRadiusInMeter: true,
