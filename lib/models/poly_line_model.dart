@@ -28,4 +28,16 @@ class PolyLineModel {
       'strokeWidth': strokeWidth,
     };
   }
+
+  PolyLineModel copyWith({
+    List<LatLng>? points,
+    Color? color,
+    double? strokeWidth,
+  }) {
+    return PolyLineModel(
+      points: points ?? this.points,
+      color: color ?? this.color,
+      strokeWidth: strokeWidth ?? this.strokeWidth,
+    );
+  }
 }

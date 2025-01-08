@@ -4,6 +4,7 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
+import 'package:map_kit/extensions/hex_color.dart';
 import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/move_model.dart';
@@ -86,8 +87,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
   @override
   Widget build(BuildContext context) {
     if (widget.mapProvider == MapProvider.mapIr) {
-      tileUrl =
-          "https://map.ir/shiveh/xyz/1.0.0/Shiveh:Shiveh@EPSG:3857@png/{z}/{x}/{y}.png"
+      tileUrl = "https://map.ir/shiveh/xyz/1.0.0/Shiveh:Shiveh@EPSG:3857@png/{z}/{x}/{y}.png"
           "?x-api-key=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjAwN2VjZjAzNGM3MTVkYmRjMTI1ZWIxNzA4YWNiMzY4MGRkMzk5NzQ3Y2Q4ZjhhMTYwZWNiYTZmNDYzNTRlNmI0ZDFjNzE0M2RkOWRjYzM1In0.eyJhdWQiOiIzMDM4MCIsImp0aSI6IjAwN2VjZjAzNGM3MTVkYmRjMTI1ZWIxNzA4YWNiMzY4MGRkMzk5NzQ3Y2Q4ZjhhMTYwZWNiYTZmNDYzNTRlNmI0ZDFjNzE0M2RkOWRjYzM1IiwiaWF0IjoxNzM2MjQ1MjYzLCJuYmYiOjE3MzYyNDUyNjMsImV4cCI6MTczODc1MDg2Mywic3ViIjoiIiwic2NvcGVzIjpbImJhc2ljIl19.JjWf4g8nNKq4NzgIcrps-K8TAQoS6P9_dA9SNL-b9H2Z4XFiAZQUT5V8tifr-utfsMUhZ0VAMfL1yKUJwDgYnanpKqWSRkolbpGYG3rE4vdatSY6gmt5s7YLPrhgaQY3r5S28cTjOxCH68SSmclekQDXhnUmnMBnP2708WCV2QsR3_-kqC6ElrYoZvRIU1RbFaeeP8PKhwcKGzxuwYm6Er_aJPI7lu040z4AtSY7m1ALPnm7TtZ00hbAA76srmqVROHQ4Tmh1fxGRfPOnRStXDxWzwMQ24mAeKAsjvaB9W7SAfbhfXCpF51NgMRJy695kA5JFsdoatVK7zxG9MT-rw";
     } else {
       tileUrl = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -108,8 +108,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
 
             bool isCircleClicked = false;
             for (var circle in widget.circles!) {
-              final distance = const Distance().as(LengthUnit.Meter,
-                  LatLng(circle.latitude, circle.longitude), point);
+              final distance = const Distance().as(LengthUnit.Meter, LatLng(circle.latitude, circle.longitude), point);
               if (distance <= circle.radius) {
                 if (widget.onCircleTap != null) {
                   widget.onCircleTap!.call(circle);
@@ -129,23 +128,33 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         ),
         children: [
           TileLayer(
-            urlTemplate: widget.isDarkMode ?? false
-                ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                : tileUrl,
+            urlTemplate:
+                widget.isDarkMode ?? false ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : tileUrl,
             subdomains: const ['a', 'b', 'c'],
           ),
-          CircleLayer(
-              circles: widget.circles!
-                  .map((circleModel) => circleModel.toFlutterCircleMarker())
-                  .toList()),
+          CircleLayer(circles: widget.circles!.map((circleModel) => circleModel.toFlutterCircleMarker()).toList()),
           _markers(),
+          // PolylineLayer(
+          //     polylines: widget.polyLines!.map((polyLineModel) {
+          //       polyLineModel.color = const Color(0xff622FFF);
+          //       polyLineModel.strokeWidth = (polyLineModel.strokeWidth! + 5);
+          //       return polyLineModel.toFlutterPolyLine();
+          //     }).toList()),
+
           PolylineLayer(
-              polylines: widget.polyLines!
-                  .map((polyLineModel) => polyLineModel.toFlutterPolyLine())
-                  .toList()),
-          widget.userMarker != null
-              ? widget.userMarker!.toUserMarker()
-              : Container()
+            polylines: [
+              ...widget.polyLines!.map((polyLineModel) {
+                final modifiedModel = polyLineModel.copyWith(
+                  color: HexColor.fromHex('#ffffff'),
+                  strokeWidth: polyLineModel.strokeWidth! + 5,
+                );
+                return modifiedModel.toFlutterPolyLine();
+              }),
+              ...widget.polyLines!.map((polyLineModel) => polyLineModel.toFlutterPolyLine()),
+            ],
+          ),
+
+          widget.userMarker != null ? widget.userMarker!.toUserMarker() : Container()
         ],
       ),
       floatingActionButton: Visibility(
@@ -153,10 +162,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         child: FloatingActionButton(
           onPressed: () {
             if (widget.userMarker != null) {
-              _mapController.move(
-                  LatLng(widget.userMarker!.latitude,
-                      widget.userMarker!.longitude),
-                  widget.zoom ?? 11);
+              _mapController.move(LatLng(widget.userMarker!.latitude, widget.userMarker!.longitude), widget.zoom ?? 11);
             } else {
               //fixme show error message
             }
@@ -173,15 +179,12 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
     return PopupMarkerLayer(
       options: PopupMarkerLayerOptions(
         popupController: widget.popupController,
-        markers: widget.markers!
-            .map((markerModel) => markerModel.toFlutterMarker())
-            .toList(),
+        markers: widget.markers!.map((markerModel) => markerModel.toFlutterMarker()).toList(),
         popupDisplayOptions: PopupDisplayOptions(
           builder: (BuildContext context, Marker marker) {
             MarkerModel? tappedMarker;
             for (var m in widget.markers!) {
-              if (m.latitude == marker.point.latitude &&
-                  m.longitude == marker.point.longitude) {
+              if (m.latitude == marker.point.latitude && m.longitude == marker.point.longitude) {
                 tappedMarker = m;
                 widget.onMarkerTap!(tappedMarker);
                 break;
