@@ -14,8 +14,8 @@ class UiMap extends StatefulWidget {
   final UiMapController? controller;
   final void Function(LatLng)? onTap;
   final void Function(LatLng)? onLongPress;
-  final void Function(MarkerModel)? onMarkerTap;
-  final void Function(CircleModel)? onCircleTap;
+  final void Function(dynamic)? onMarkerTap;
+  final void Function(dynamic)? onCircleTap;
   LatLng? initialCenter;
   bool? isDarkMode;
   double? zoom;

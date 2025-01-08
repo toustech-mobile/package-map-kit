@@ -362,7 +362,6 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         val pointMap = mapOf(
             "latitude" to point.latitude, "longitude" to point.longitude
         )
-
         sendEventToFlutter("onMapTap", pointMap)
     }
 

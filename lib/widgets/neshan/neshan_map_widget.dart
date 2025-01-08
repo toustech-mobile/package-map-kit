@@ -22,8 +22,8 @@ class NeshanMapWidget extends StatefulWidget {
   List<CircleModel>? circles;
   final void Function(LatLng)? onTap;
   final void Function(LatLng)? onLongPress;
-  final void Function(MarkerModel)? onMarkerTap;
-  final void Function(CircleModel)? onCircleTap;
+  final void Function(dynamic)? onMarkerTap;
+  final void Function(dynamic)? onCircleTap;
 
   NeshanMapWidget({
     super.key,
@@ -117,8 +117,6 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
 
   @override
   void onMapTap(LatLng point) {
-    print('onMapTap :$point');
-
     if (widget.onTap != null) {
       widget.onTap!(point);
     }
@@ -157,7 +155,6 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
 
   @override
   void onMarkerTap(data) {
-    print('onMarkerTap :$data');
     if (widget.onMarkerTap != null) {
       widget.onMarkerTap!(data);
     }
@@ -165,7 +162,6 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
 
   @override
   void onCircleTap(data) {
-    print('onCircleTap :$data');
     if (widget.onCircleTap != null) {
       widget.onCircleTap!(data);
     }
