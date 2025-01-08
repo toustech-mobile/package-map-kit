@@ -8,8 +8,8 @@ class CircleModel {
   double longitude;
   double radius;
   double? borderStroke;
-  Color? color;
-  Color? borderColor;
+  Color color;
+  Color borderColor;
   dynamic data;
   String? snippetTitle;
   String? snippetDescription;
@@ -19,8 +19,8 @@ class CircleModel {
     required this.longitude,
     required this.radius,
     this.borderStroke,
-    this.color,
-    this.borderColor,
+    required this.color,
+    required this.borderColor,
     this.data,
     this.snippetTitle,
     this.snippetDescription,
@@ -41,8 +41,8 @@ class CircleModel {
       'longitude': longitude,
       'radius': radius,
       'borderStroke': borderStroke ?? 2,
-      'color': color!.toHex(),
-      'borderColor': borderColor!.toHex(),
+      'color': color.toHex(),
+      'borderColor': borderColor.toHex(),
       'data': data,
       'snippetTitle': snippetTitle ?? '',
       'snippetDescription': snippetDescription ?? '',
