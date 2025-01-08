@@ -9,13 +9,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import androidx.annotation.NonNull
-import com.golrang.map_kit.MapKitPlugin.Companion.callBackChannel
+import com.golrang.map_kit.MapKitPlugin.Companion.eventChannel
 import com.golrang.map_kit.MapKitPlugin.Companion.mapKitView
 import com.golrang.map_kit.helpers.CircleHelper
 import com.golrang.map_kit.helpers.MarkerHelper
 import com.golrang.map_kit.helpers.PolyLineHelper
 import com.golrang.map_kit.models.MyCircle
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.StandardMessageCodec
@@ -27,11 +28,12 @@ import org.neshan.mapsdk.model.Marker
 import org.neshan.mapsdk.model.Polyline
 import org.neshan.mapsdk.style.NeshanMapStyle
 
-class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
+class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
+
 
     companion object {
-        lateinit var callBackChannel: MethodChannel
         lateinit var methodChannel: MethodChannel
+        var eventChannel: EventChannel.EventSink? = null
         lateinit var mapKitView: MapKitView
     }
 
@@ -41,12 +43,14 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
 
         this.binding = binding
 
-        callBackChannel =
-            MethodChannel(binding.binaryMessenger, "com.example.example/callback_channel")
+
         methodChannel = MethodChannel(binding.binaryMessenger, "com.example.example/method_channel")
 
-        callBackChannel.setMethodCallHandler(this)
+
         methodChannel.setMethodCallHandler(this)
+
+        val eventChannel = EventChannel(binding.binaryMessenger, "com.yourapp/event_channel")
+        eventChannel.setStreamHandler(this)
 
         binding.platformViewRegistry.registerViewFactory(
             "com.example.example/map_kit_view", MapKitViewFactory()
@@ -54,8 +58,23 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        callBackChannel.setMethodCallHandler(null)
         mapKitView.dispose()
+//        eventSink = null
+    }
+
+    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+        eventChannel = events
+//        sendNativeEvent("Hello from Native!")
+    }
+
+    override fun onCancel(arguments: Any?) {
+        eventChannel = null
+    }
+
+    fun sendNativeEvent(message: String) {
+        Handler(Looper.getMainLooper()).post {
+            eventChannel?.success(message)
+        }
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -344,30 +363,33 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
             "latitude" to point.latitude, "longitude" to point.longitude
         )
 
-        Handler(Looper.getMainLooper()).post {
-            callBackChannel?.invokeMethod("onMapTap", pointMap)
-        }
+        sendEventToFlutter("onMapTap", pointMap)
     }
+
 
     private fun sendOnMapLongClickCallbackToFlutter(point: LatLng) {
         val pointMap = mapOf(
             "latitude" to point.latitude, "longitude" to point.longitude
         )
-
-        Handler(Looper.getMainLooper()).post {
-            callBackChannel?.invokeMethod("onMapLongPress", pointMap)
-        }
+        sendEventToFlutter("onMapLongPress", pointMap)
     }
 
     private fun sendOnMarkerClickCallbackToFlutter(data: String) {
-        Handler(Looper.getMainLooper()).post {
-            callBackChannel?.invokeMethod("onMarkerTap", data)
-        }
+        sendEventToFlutter("onMarkerTap", mapOf("data" to data))
     }
 
     private fun sendOnCircleClickCallbackToFlutter(data: String) {
+        sendEventToFlutter("onCircleTap", mapOf("data" to data))
+
+    }
+
+    private fun sendEventToFlutter(event: String, data: Map<String, *>) {
         Handler(Looper.getMainLooper()).post {
-            callBackChannel?.invokeMethod("onCircleTap", data)
+            eventChannel?.success(
+                mapOf(
+                    "event" to event, "data" to data
+                )
+            )
         }
     }
 

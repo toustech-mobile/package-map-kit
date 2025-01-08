@@ -2,31 +2,32 @@ import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 
 abstract class NeshanCallback {
-  static const MethodChannel _channel = MethodChannel('com.example.example/callback_channel');
+  static const EventChannel _eventChannel = EventChannel('com.yourapp/event_channel');
 
   static Future<void> setNeshanCallback(NeshanCallbackInterface callbacks) async {
-    // final String value = await _channel.invokeMethod('getNativeValue');
-    // print(value);   // این مقادیر برای کال کردن متد از فلاتر به اندروید و گرفتن مقدار از اندروید می باشد
-
-    _channel.setMethodCallHandler((call) async {
-      switch (call.method) {
+    _eventChannel.receiveBroadcastStream().listen((streamData) {
+      switch (streamData["event"]) {
         case 'onMapTap':
-          callbacks.onMapTap(LatLng((call.arguments as Map)['latitude'], (call.arguments as Map)['longitude']));
+          callbacks.onMapTap(LatLng((streamData['data'] as Map)['latitude'], (streamData['data'] as Map)['longitude']));
           break;
 
         case 'onMapLongPress':
-          callbacks.onMapLongPress(LatLng((call.arguments as Map)['latitude'], (call.arguments as Map)['longitude']));
+          callbacks.onMapLongPress(
+              LatLng((streamData['data'] as Map)['latitude'], (streamData['data'] as Map)['longitude']));
           break;
 
         case 'onMarkerTap':
-          callbacks.onMarkerTap(call.arguments as String);
+          callbacks.onMarkerTap((streamData['data'] as String));
           break;
 
         case 'onCircleTap':
-          callbacks.onCircleTap(call.arguments as String);
+          callbacks.onCircleTap((streamData['data'] as String));
           break;
       }
+    }, onError: (error) {
+      print('Error: $error');
     });
+    //
   }
 }
 

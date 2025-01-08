@@ -13,7 +13,6 @@ import 'package:map_kit/widgets/neshan/neshan_methods.dart' as neshan;
 
 class NeshanMapWidget extends StatefulWidget {
   late Map<String, dynamic> creationParams;
-
   UiMapController? uiMapController;
   LatLng? initialCenter;
   bool? isDarkMode;
@@ -45,19 +44,12 @@ class NeshanMapWidget extends StatefulWidget {
   State<NeshanMapWidget> createState() => _NeshanMapWidgetState();
 }
 
-class _NeshanMapWidgetState extends State<NeshanMapWidget>
-    implements NeshanCallbackInterface {
+class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCallbackInterface {
   @override
   void initState() {
     NeshanCallback.setNeshanCallback(this);
     print('NeshanCallback setNeshanCallback set');
     if (widget.uiMapController != null) {
-      widget.uiMapController!.refresh = () {
-        NeshanCallback.setNeshanCallback(this);
-        print('refresh setNeshanCallback');
-        print('refresh setNeshanCallback  ');
-      };
-
       widget.uiMapController!.addMarkers = (List<MarkerModel> markers) {
         widget.markers!.addAll(markers);
         neshan.NeshanMethods.addMarkers(markers);
@@ -87,8 +79,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
         neshan.NeshanMethods.addPolylines(polyLines);
       };
 
-      widget.uiMapController!.setUserLocation =
-          (UserMarkerModel userMarkerModel) {
+      widget.uiMapController!.setUserLocation = (UserMarkerModel userMarkerModel) {
         neshan.NeshanMethods.setUserMarker(userMarkerModel);
       };
     }
@@ -104,15 +95,9 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
       },
       'isDarkMode': widget.isDarkMode ?? false,
       'zoom': widget.zoom,
-      'markers': widget.markers!
-          .map((flutterModel) => flutterModel.toNeshanMarker())
-          .toList(),
-      'polyLines': widget.polyLines!
-          .map((flutterModel) => flutterModel.toNeshanPolyLines())
-          .toList(),
-      'circles': widget.circles!
-          .map((flutterModel) => flutterModel.toNeshanCircle())
-          .toList(),
+      'markers': widget.markers!.map((flutterModel) => flutterModel.toNeshanMarker()).toList(),
+      'polyLines': widget.polyLines!.map((flutterModel) => flutterModel.toNeshanPolyLines()).toList(),
+      'circles': widget.circles!.map((flutterModel) => flutterModel.toNeshanCircle()).toList(),
     };
   }
 
