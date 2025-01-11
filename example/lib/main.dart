@@ -5,6 +5,7 @@ import 'package:map_kit/enums/map_provider.dart';
 import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
+import 'package:map_kit/models/user_marker.dart';
 import 'package:map_kit/ui_map.dart';
 
 void main() {
@@ -38,9 +39,8 @@ class _MyAppState extends State<MyApp> {
             longitude: 59.5405541,
             data: "Test Click On Marker",
             icon: 'pause.svg',
-            snippetTitle: 'Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
-            snippetDescription:
-                'HellHelloHelloHelloHelloHelloHelloHelloHelloHelloHello'),
+            snippetTitle: 'marker title',
+            snippetDescription: 'marker description'),
         MarkerModel(
           latitude: 36.324915772569966,
           longitude: 59.54904346842852,
@@ -96,13 +96,12 @@ class _MyAppState extends State<MyApp> {
         CircleModel(
             latitude: 36.32209806699167,
             longitude: 59.52369428145562,
-            radius: 1000,
+            radius: 700,
             color: Colors.blue.withOpacity(0.5),
             borderColor: Colors.blue,
             data: 'Man Circle Blue hastam',
-            snippetTitle: 'Hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',
-            snippetDescription:
-                'HellHelloHelloHelloHelloHelloHelloHelloHelloHelloHello'),
+            snippetTitle: 'circle Abi hastam',
+            snippetDescription: 'man tozihat circle abi hastam'),
         CircleModel(
           latitude: 36.33377358253895,
           longitude: 59.54590011713316,
@@ -115,10 +114,10 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
       onMarkerTap: (markerModel) {
-        print(markerModel);
+        print("onMarkerTap: ${(markerModel as MarkerModel).data}");
       },
       onCircleTap: (circleMarkerModel) {
-        print("onCircleTap: ${circleMarkerModel}");
+        print("onCircleTap: ${(circleMarkerModel as CircleModel).data}");
       },
       onTap: (LatLng point) {
         print('User tapped on: $point');
@@ -162,17 +161,17 @@ class _MyAppState extends State<MyApp> {
             Center(
               child: mapKitPlugin,
             ),
-            // ElevatedButton(
-            //     onPressed: () {
-            //       mapController.setUserLocation(
-            //         UserMarkerModel(
-            //           latitude: 36.3219341,
-            //           longitude: 59.5214737,
-            //           radius: 100,
-            //         ),
-            //       );
-            //     },
-            //     child: Text('click'))
+            ElevatedButton(
+                onPressed: () {
+                  mapController.setUserLocation(
+                    UserMarkerModel(
+                      latitude: 36.3219341,
+                      longitude: 59.5214737,
+                      accuracy: 100,
+                    ),
+                  );
+                },
+                child: Text('click'))
           ],
         ),
         // floatingActionButton: FloatingActionButton(

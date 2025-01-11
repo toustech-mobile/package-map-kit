@@ -4,7 +4,6 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
-import 'package:map_kit/extensions/hex_color.dart';
 import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/move_model.dart';
@@ -13,7 +12,8 @@ import 'package:map_kit/models/poly_line_model.dart';
 import '../../models/user_marker.dart';
 
 class FlutterMapWidget extends StatefulWidget {
-  PopupController? popupController = PopupController();
+  final PopupController popupController = PopupController();
+
   UiMapController? uiMapController;
   List<MarkerModel>? markers;
   List<PolyLineModel>? polyLines;
@@ -52,17 +52,20 @@ class FlutterMapWidget extends StatefulWidget {
 class _FlutterMapWidgetState extends State<FlutterMapWidget> {
   final MapController _mapController = MapController();
   String tileUrl = '';
+  final Set<MarkerModel> _circleMarkers = {};
 
   @override
   void initState() {
+    super.initState();
+
     if (widget.uiMapController != null) {
       widget.uiMapController!.addMarkers = (List<MarkerModel> markers) {
         widget.markers!.addAll(markers);
         setState(() {});
       };
 
-      widget.uiMapController!.addCircles = (circleMarkerModel) {
-        widget.circles!.addAll(circleMarkerModel);
+      widget.uiMapController!.addCircles = (circles) {
+        widget.circles!.addAll(circles);
         setState(() {});
       };
 
@@ -81,7 +84,8 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         setState(() {});
       };
     }
-    super.initState();
+
+    _initializeHiddenMarkers();
   }
 
   @override
@@ -92,125 +96,164 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
     } else {
       tileUrl = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
     }
-    return _buildFlutterMap();
+
+    return Scaffold(
+      body: _buildFlutterMap(),
+      floatingActionButton: widget.isCurrentLocationEnable ?? false
+          ? FloatingActionButton(
+              onPressed: _moveToUserLocation,
+              child: const Icon(Icons.my_location),
+            )
+          : null,
+    );
   }
 
   Widget _buildFlutterMap() {
-    return Scaffold(
-      body: FlutterMap(
-        mapController: _mapController,
-        options: MapOptions(
+    return FlutterMap(
+      mapController: _mapController,
+      options: MapOptions(
           initialCenter: widget.initialCenter!,
           initialZoom: widget.zoom ?? 13,
-          onPositionChanged: (MapCamera position, bool hasGesture) {},
-          onTap: (tapPosition, point) {
-            widget.popupController!.hideAllPopups();
-
-            bool isCircleClicked = false;
-            for (var circle in widget.circles!) {
-              final distance = const Distance().as(LengthUnit.Meter, LatLng(circle.latitude, circle.longitude), point);
-              if (distance <= circle.radius) {
-                if (widget.onCircleTap != null) {
-                  widget.onCircleTap!.call(circle);
-                }
-                isCircleClicked = true;
-                break;
-              }
+          onTap: _handleMapTap,
+          onLongPress: _handleMapLongPress,
+          onMapEvent: (MapEvent event) {
+            if (event is MapEventMoveStart) {
+              widget.popupController.hideAllPopups();
             }
-            if (!isCircleClicked) {
-              widget.onTap?.call(point); // Call onTap if no circle was clicked
+            if (event is MapEventDoubleTapZoom) {
+              widget.popupController.hideAllPopups();
             }
-          },
-          onLongPress: (tapPosition, point) {
-            widget.popupController!.hideAllPopups();
-            if (widget.onLongPress != null) widget.onLongPress!(point);
-          },
+          }),
+      children: [
+        TileLayer(
+          urlTemplate:
+              widget.isDarkMode ?? false ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : tileUrl,
+          subdomains: const ['a', 'b', 'c'],
         ),
-        children: [
-          TileLayer(
-            urlTemplate:
-                widget.isDarkMode ?? false ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : tileUrl,
-            subdomains: const ['a', 'b', 'c'],
-          ),
-          CircleLayer(circles: widget.circles!.map((circleModel) => circleModel.toFlutterCircleMarker()).toList()),
-          _markers(),
-          // PolylineLayer(
-          //     polylines: widget.polyLines!.map((polyLineModel) {
-          //       polyLineModel.color = const Color(0xff622FFF);
-          //       polyLineModel.strokeWidth = (polyLineModel.strokeWidth! + 5);
-          //       return polyLineModel.toFlutterPolyLine();
-          //     }).toList()),
+        PolylineLayer(
+          polylines: widget.polyLines!.map((polyLineModel) => polyLineModel.toFlutterPolyLine()).toList(),
+        ),
+        CircleLayer(
+          circles: widget.circles!.map((circleModel) => circleModel.toFlutterCircleMarker()).toList(),
+        ),
+        _buildPopupMarkerLayer(),
+        if (widget.userMarker != null) widget.userMarker!.toUserMarker(),
+      ],
+    );
+  }
 
-          PolylineLayer(
-            polylines: [
-              ...widget.polyLines!.map((polyLineModel) {
-                final modifiedModel = polyLineModel.copyWith(
-                  color: HexColor.fromHex('#ffffff'),
-                  strokeWidth: polyLineModel.strokeWidth! + 5,
-                );
-                return modifiedModel.toFlutterPolyLine();
-              }),
-              ...widget.polyLines!.map((polyLineModel) => polyLineModel.toFlutterPolyLine()),
-            ],
-          ),
-
-          widget.userMarker != null ? widget.userMarker!.toUserMarker() : Container()
-        ],
-      ),
-      floatingActionButton: Visibility(
-        visible: widget.isCurrentLocationEnable ?? false,
-        child: FloatingActionButton(
-          onPressed: () {
-            if (widget.userMarker != null) {
-              _mapController.move(LatLng(widget.userMarker!.latitude, widget.userMarker!.longitude), widget.zoom ?? 11);
-            } else {
-              //fixme show error message
-            }
-          },
-          child: const Icon(
-            Icons.my_location,
-          ),
+  void _initializeHiddenMarkers() {
+    _circleMarkers.addAll(
+      widget.circles!.map(
+        (circle) => MarkerModel(
+          latitude: circle.latitude,
+          longitude: circle.longitude,
+          data: '',
+          icon: '',
+          snippetTitle: circle.snippetTitle,
+          snippetDescription: circle.snippetDescription,
         ),
       ),
     );
   }
 
-  PopupMarkerLayer _markers() {
+  PopupMarkerLayer _buildPopupMarkerLayer() {
+    final combinedMarkers = [
+      ...?widget.markers,
+      ..._circleMarkers,
+    ];
     return PopupMarkerLayer(
       options: PopupMarkerLayerOptions(
         popupController: widget.popupController,
-        markers: widget.markers!.map((markerModel) => markerModel.toFlutterMarker()).toList(),
+        markers: [
+          ...widget.markers!.map((markerModel) => markerModel.toFlutterMarker()),
+          ..._circleMarkers.map((markerModel) => markerModel.toFlutterMarker()),
+        ],
         popupDisplayOptions: PopupDisplayOptions(
           builder: (BuildContext context, Marker marker) {
-            MarkerModel? tappedMarker;
-            for (var m in widget.markers!) {
-              if (m.latitude == marker.point.latitude && m.longitude == marker.point.longitude) {
-                tappedMarker = m;
-                widget.onMarkerTap!(tappedMarker);
-                break;
-              }
-            }
-            return Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Text(
-                'Click On Marker ${tappedMarker!.data}',
-                textAlign: TextAlign.center,
-              ),
+            final tappedMarker = combinedMarkers.firstWhere(
+              (m) => m.latitude == marker.point.latitude && m.longitude == marker.point.longitude && m.icon.isNotEmpty,
+              orElse: () {
+                //fill hidden marker data
+                final tappedMarker = combinedMarkers.firstWhere((m) =>
+                    m.latitude == marker.point.latitude && m.longitude == marker.point.longitude && m.icon.isEmpty);
+                return MarkerModel(
+                    latitude: marker.point.latitude,
+                    longitude: marker.point.longitude,
+                    icon: '',
+                    snippetTitle: tappedMarker.snippetTitle,
+                    snippetDescription: tappedMarker.snippetDescription);
+              },
             );
+
+            if (tappedMarker.icon.isNotEmpty) {
+              widget.onMarkerTap?.call(tappedMarker);
+              return _buildPopupContent(tappedMarker);
+            } else {
+              final tappedCircle = widget.circles!.firstWhere(
+                (c) => c.latitude == marker.point.latitude && c.longitude == marker.point.longitude,
+              );
+              widget.onCircleTap?.call(tappedCircle);
+              return _buildPopupContent(tappedMarker);
+            }
           },
         ),
       ),
     );
+  }
+
+  Widget _buildPopupContent(MarkerModel marker) {
+    return Visibility(
+      visible: marker.snippetTitle != null || marker.snippetDescription != null,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Wrap(
+          children: [
+            Column(
+              children: [
+                if (marker.snippetTitle != null) Text(marker.snippetTitle!, textAlign: TextAlign.left),
+                if (marker.snippetDescription != null) Text(marker.snippetDescription!, textAlign: TextAlign.left),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleMapTap(TapPosition tapPosition, LatLng point) {
+    widget.popupController.hideAllPopups();
+    final circle = widget.circles?.firstWhere(
+      (circle) =>
+          const Distance().as(LengthUnit.Meter, LatLng(circle.latitude, circle.longitude), point) <= circle.radius,
+      orElse: () => CircleModel(latitude: 0, longitude: 0, radius: 0, color: Colors.red, borderColor: Colors.red),
+    );
+    if (circle!.longitude != 0) {
+      widget.onCircleTap?.call(circle);
+    } else {
+      widget.onTap?.call(point);
+    }
+  }
+
+  void _handleMapLongPress(TapPosition tapPosition, LatLng point) {
+    widget.popupController.hideAllPopups();
+    widget.onLongPress?.call(point);
+  }
+
+  void _moveToUserLocation() {
+    if (widget.userMarker != null) {
+      _mapController.move(LatLng(widget.userMarker!.latitude, widget.userMarker!.longitude), widget.zoom ?? 11);
+    }
   }
 }

@@ -1,6 +1,3 @@
-import 'dart:ffi';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -27,10 +24,19 @@ class MarkerModel {
     this.snippetDescription,
   });
 
-  Marker toFlutterMarker() => Marker(
+  Marker toFlutterMarker() {
+    if (icon.isNotEmpty) {
+      return Marker(
         point: LatLng(latitude, longitude),
         child: SvgPicture.asset(icon.isEmpty ? 'assets/icons/icon.svg' : "assets/icons/$icon"),
       );
+    } else {
+      return Marker(
+        point: LatLng(latitude, longitude),
+        child: const Icon(Icons.circle, color: Colors.transparent),
+      );
+    }
+  }
 
   Map<String, dynamic> toNeshanMarker() {
     return {

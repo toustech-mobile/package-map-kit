@@ -17,6 +17,7 @@ class PolyLineHelper {
                     val points = polyLine["points"] as? List<Map<*, *>>
                     val color = polyLine["color"] as? String
                     val strokeWidth = polyLine["strokeWidth"] as? Double
+                    val strokeColor = polyLine["strokeColor"] as? String
 
                     if (points != null && color != null && strokeWidth != null) {
                         val polyLinePoints = points.mapNotNull { point ->
@@ -30,7 +31,7 @@ class PolyLineHelper {
                         result.add(
                             createPolyLine(
                                 ArrayList(polyLinePoints),
-                                "#62EFFF",
+                                strokeColor!!,
                                 strokeWidth + 4
                             )
                         )

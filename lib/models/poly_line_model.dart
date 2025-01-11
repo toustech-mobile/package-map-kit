@@ -5,14 +5,15 @@ import 'package:map_kit/extensions/hex_color.dart';
 
 class PolyLineModel {
   List<LatLng>? points;
-  Color? color;
+  Color color;
   double? strokeWidth;
+  Color? strokeColor;
 
-  PolyLineModel({this.points, this.color, this.strokeWidth});
+  PolyLineModel({this.points, required this.color, this.strokeWidth, this.strokeColor});
 
   Polyline toFlutterPolyLine() => Polyline(
         points: points!,
-        color: color!,
+        color: color,
         strokeWidth: strokeWidth!,
       );
 
@@ -24,8 +25,9 @@ class PolyLineModel {
           "longitude": latLng.longitude,
         };
       }).toList(),
-      'color': color!.toHex(),
+      'color': color.toHex(),
       'strokeWidth': strokeWidth,
+      'strokeColor': strokeColor != null ? strokeColor!.toHex() : color.withAlpha(55).toHex(),
     };
   }
 
