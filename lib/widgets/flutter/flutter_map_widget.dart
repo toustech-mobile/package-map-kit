@@ -221,9 +221,10 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         child: Wrap(
           children: [
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (marker.snippetTitle != null) Text(marker.snippetTitle!, textAlign: TextAlign.left),
-                if (marker.snippetDescription != null) Text(marker.snippetDescription!, textAlign: TextAlign.left),
+                if (marker.snippetTitle != null) Text(marker.snippetTitle!),
+                if (marker.snippetDescription != null) Text(marker.snippetDescription!),
               ],
             )
           ],
