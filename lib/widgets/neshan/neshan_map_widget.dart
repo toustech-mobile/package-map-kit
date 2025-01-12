@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
+import 'package:map_kit/models/move_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/models/user_marker.dart';
 import 'package:map_kit/widgets/neshan/neshan_callback.dart';
@@ -16,10 +17,12 @@ class NeshanMapWidget extends StatefulWidget {
   UiMapController? uiMapController;
   LatLng? initialCenter;
   bool? isDarkMode;
+  bool? isCurrentLocationEnable;
   double? zoom;
   List<MarkerModel>? markers;
   List<PolyLineModel>? polyLines;
   List<CircleModel>? circles;
+  UserMarkerModel? userMarker;
   final void Function(LatLng)? onTap;
   final void Function(LatLng)? onLongPress;
   final void Function(dynamic)? onMarkerTap;
@@ -30,6 +33,7 @@ class NeshanMapWidget extends StatefulWidget {
     this.uiMapController,
     this.initialCenter,
     this.isDarkMode,
+    this.isCurrentLocationEnable,
     this.zoom,
     this.markers,
     this.polyLines,
@@ -80,7 +84,10 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
       };
 
       widget.uiMapController!.setUserLocation = (UserMarkerModel userMarkerModel) {
+        widget.userMarker = userMarkerModel;
         neshan.NeshanMethods.setUserMarker(userMarkerModel);
+
+        setState(() {});
       };
     }
 
@@ -104,15 +111,40 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
   @override
   Widget build(BuildContext context) {
     setCreationParams();
-    return AndroidView(
-        viewType: 'com.example.example/map_kit_view',
-        creationParams: widget.creationParams,
-        creationParamsCodec: const StandardMessageCodec(),
-        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-        layoutDirection: TextDirection.ltr,
-        onPlatformViewCreated: (int id) {
-          print('the PlatfromId is : $id');
-        });
+    return Stack(
+      alignment: Alignment.bottomRight,
+      children: [
+        AndroidView(
+            viewType: 'com.example.example/map_kit_view',
+            creationParams: widget.creationParams,
+            creationParamsCodec: const StandardMessageCodec(),
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            layoutDirection: TextDirection.ltr,
+            onPlatformViewCreated: (int id) {
+              print('the PlatfromId is : $id');
+            }),
+        Visibility(
+          visible: widget.isCurrentLocationEnable ?? false,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: FloatingActionButton(
+              onPressed: _moveToUserLocation,
+              child: Icon(
+                Icons.my_location,
+                color: widget.userMarker != null ? Colors.blue : Colors.grey,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  void _moveToUserLocation() {
+    if (widget.userMarker != null) {
+      neshan.NeshanMethods.moveCamera(
+          MoveModel(latitude: widget.userMarker!.latitude, longitude: widget.userMarker!.longitude));
+    }
   }
 
   @override

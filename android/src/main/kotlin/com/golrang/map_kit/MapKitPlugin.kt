@@ -7,7 +7,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.LinearLayout
+import android.widget.FrameLayout
 import androidx.annotation.NonNull
 import com.golrang.map_kit.MapKitPlugin.Companion.eventChannel
 import com.golrang.map_kit.MapKitPlugin.Companion.mapKitView
@@ -59,7 +59,7 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         mapKitView.dispose()
-        com.golrang.map_kit.MapKitPlugin.Companion.eventChannel = null
+        eventChannel = null
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
@@ -104,6 +104,10 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
 //            }
             "setUserMarker" -> {
                 handleSetUserMarker(call, result)
+            }
+
+            "moveCamera" -> {
+                handleMoveCamera(call, result)
             }
 
 
@@ -155,6 +159,13 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
         mapKitView.setUserMarker(call.arguments as Map<String, *>)
         result.success("SetUserMarker set successfully")
     }
+
+    private fun handleMoveCamera(call: MethodCall, result: MethodChannel.Result) {
+        Log.d("Native MoveCamera", "")
+
+        mapKitView.moveCamera(call.arguments as Map<String, *>)
+        result.success("MoveCamera successfully")
+    }
 //
 //    private fun handleRemovePolyLines(call: MethodCall, result: MethodChannel.Result) {
 //        Log.d("Native Remove PolyLines", "")
@@ -182,8 +193,8 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     private var polyLines: MutableList<Polyline> = mutableListOf()
     private var userMarker: Marker? = null
 
-    private val layout: LinearLayout =
-        LayoutInflater.from(context).inflate(R.layout.my_activity, null) as LinearLayout
+    private val layout: FrameLayout =
+        LayoutInflater.from(context).inflate(R.layout.my_activity, null) as FrameLayout
 
     init {
         initLayoutReferences()
@@ -211,7 +222,11 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     }
 
     private fun setDefaultZoom(params: Map<String, Any>?) {
-        val zoom = params?.get("zoom") as Double
+        var zoom = params?.get("zoom") as? Double
+        if (zoom == null) {
+            zoom = mapView.zoom.toDouble()
+        }
+
         Log.d("setDefaultZoom", zoom.toString())
 
         defaultZoom = zoom.toFloat()
@@ -322,6 +337,13 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         mapView.addMarker(
             userMarker
         )
+    }
+
+    fun moveCamera(rawPolyLines: Map<String, *>) {
+        val latitude = rawPolyLines["latitude"] as Double
+        val longitude = rawPolyLines["longitude"] as Double
+
+        mapView.moveCamera(LatLng(latitude, longitude), .5f)
     }
 
 

@@ -1,11 +1,20 @@
-import 'package:latlong2/latlong.dart';
+
 
 class MoveModel {
-  LatLng point;
-  double zoom;
+  double latitude;
+  double longitude;
+  double? zoom;
 
   MoveModel({
-    required this.point,
-    required this.zoom,
+    required this.latitude,
+    required this.longitude,
+    this.zoom,
   });
+
+  Map<String, dynamic> toNeshanMoveModel() {
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+    };
+  }
 }

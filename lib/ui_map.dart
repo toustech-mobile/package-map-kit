@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
@@ -85,6 +84,7 @@ class _UiMapState extends State<UiMap> {
           initialCenter: widget.initialCenter,
           zoom: widget.zoom,
           isDarkMode: widget.isDarkMode,
+          isCurrentLocationEnable: widget.isCurrentLocationEnable,
           markers: widget.markers,
           polyLines: widget.polyLines,
           circles: widget.circles,

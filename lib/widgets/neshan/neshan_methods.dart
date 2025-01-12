@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
+import 'package:map_kit/models/move_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/models/user_marker.dart';
 
@@ -31,6 +32,10 @@ abstract class NeshanMethods {
 
   static setUserMarker(UserMarkerModel userMarker) async {
     await _channel.invokeMethod('setUserMarker', userMarker.toNeshanUserMarker());
+  }
+
+  static moveCamera(MoveModel moveMarker) async {
+    await _channel.invokeMethod('moveCamera', moveMarker.toNeshanMoveModel());
   }
 }
 

@@ -75,7 +75,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
       };
 
       widget.uiMapController!.moveCamera = (MoveModel moveModel) {
-        _mapController.move(moveModel.point, moveModel.zoom);
+        _mapController.move(LatLng(moveModel.latitude, moveModel.longitude), moveModel.zoom!);
         setState(() {});
       };
 
@@ -102,7 +102,10 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
       floatingActionButton: widget.isCurrentLocationEnable ?? false
           ? FloatingActionButton(
               onPressed: _moveToUserLocation,
-              child: const Icon(Icons.my_location),
+              child: Icon(
+                Icons.my_location,
+                color: widget.userMarker != null ? Colors.blue : Colors.grey,
+              ),
             )
           : null,
     );
@@ -117,10 +120,8 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
           onTap: _handleMapTap,
           onLongPress: _handleMapLongPress,
           onMapEvent: (MapEvent event) {
+            widget.zoom = event.camera.zoom;
             if (event is MapEventMoveStart) {
-              widget.popupController.hideAllPopups();
-            }
-            if (event is MapEventDoubleTapZoom) {
               widget.popupController.hideAllPopups();
             }
           }),
@@ -254,7 +255,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
 
   void _moveToUserLocation() {
     if (widget.userMarker != null) {
-      _mapController.move(LatLng(widget.userMarker!.latitude, widget.userMarker!.longitude), widget.zoom ?? 11);
+      _mapController.move(LatLng(widget.userMarker!.latitude, widget.userMarker!.longitude), widget.zoom!);
     }
   }
 }
