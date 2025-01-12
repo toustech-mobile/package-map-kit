@@ -11,5 +11,5 @@ mixin class UiMapController {
   late Function(List<CircleModel>) removeCircles;
   late Function(List<PolyLineModel>) addPolyline;
   late Function(MoveModel) moveCamera;
-  late Function(UserMarkerModel) setUserLocation;
+  Function(UserMarkerModel)? setUserLocation;
 }
