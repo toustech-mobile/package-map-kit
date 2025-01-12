@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
           LatLng(36.318721, 59.5302708),
           LatLng(36.3189011, 59.5296759),
           LatLng(36.3191815, 59.5289642),
-        ], color: Colors.green, strokeWidth: 5),
+        ], color: Colors.green, strokeWidth: 5, strokeColor: Colors.red),
         PolyLineModel(points: [
           LatLng(36.3196133, 59.5276296),
           LatLng(36.3198302, 59.5270538),
@@ -90,7 +90,7 @@ class _MyAppState extends State<MyApp> {
           LatLng(36.3227928, 59.5240218),
           LatLng(36.3227517, 59.5238205),
           LatLng(36.3224315, 59.5237103),
-        ], color: Colors.blue, strokeWidth: 5),
+        ], color: Colors.blue, strokeWidth: 5, strokeColor: Colors.red),
       ],
       circles: [
         CircleModel(

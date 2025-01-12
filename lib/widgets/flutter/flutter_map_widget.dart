@@ -132,7 +132,16 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
           subdomains: const ['a', 'b', 'c'],
         ),
         PolylineLayer(
-          polylines: widget.polyLines!.map((polyLineModel) => polyLineModel.toFlutterPolyLine()).toList(),
+          polylines: [
+            ...widget.polyLines!.map((polyLineModel) {
+              final modifiedModel = polyLineModel.copyWith(
+                color: polyLineModel.strokeColor ?? polyLineModel.color.withAlpha(100),
+                strokeWidth: polyLineModel.strokeWidth! + 5,
+              );
+              return modifiedModel.toFlutterPolyLine();
+            }),
+            ...widget.polyLines!.map((polyLineModel) => polyLineModel.toFlutterPolyLine()),
+          ],
         ),
         CircleLayer(
           circles: widget.circles!.map((circleModel) => circleModel.toFlutterCircleMarker()).toList(),

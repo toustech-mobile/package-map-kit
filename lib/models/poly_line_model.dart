@@ -27,7 +27,7 @@ class PolyLineModel {
       }).toList(),
       'color': color.toHex(),
       'strokeWidth': strokeWidth,
-      'strokeColor': strokeColor != null ? strokeColor!.toHex() : color.withAlpha(55).toHex(),
+      'strokeColor': strokeColor != null ? strokeColor!.toHex() : color.withAlpha(100).toHex(),
     };
   }
 
