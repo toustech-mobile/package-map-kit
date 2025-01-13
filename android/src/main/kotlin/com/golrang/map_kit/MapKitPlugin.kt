@@ -302,13 +302,15 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     }
 
     fun addPolyLines(rawPolyLines: List<*>) {
-        val polyLines = PolyLineHelper.toNeshanModel(rawPolyLines)
+        val polyLines = PolyLineHelper.toNeshanModel(rawPolyLines, context)
         Log.d("Native PolyLines", rawPolyLines.toString())
 
-        this.polyLines.addAll(polyLines)
-        polyLines.forEach {
+        this.polyLines.addAll(polyLines.first)
+        polyLines.first.forEach {
             mapView.addPolyline(it)
         }
+
+        mapView.addMarkers(polyLines.second)
     }
 
     fun setUserMarker(rawPolyLines: Map<String, *>) {
@@ -332,7 +334,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         }
 
         userMarker = MarkerHelper.createMarker(
-            LatLng(latitude, longitude), "", "current_location.svg", 24, "", "", context,
+            LatLng(latitude, longitude), "", "current_location.svg", 24, "", "", 0.0, context,
         )
         mapView.addMarker(
             userMarker

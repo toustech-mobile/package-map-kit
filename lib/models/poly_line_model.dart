@@ -2,37 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/extensions/hex_color.dart';
+import 'package:map_kit/models/poly_line_point_model.dart';
 
 class PolyLineModel {
-  List<LatLng>? points;
+  List<PolyLinePointModel>? points;
   Color color;
   double? strokeWidth;
   Color? strokeColor;
+  bool? showArrow;
 
-  PolyLineModel({this.points, required this.color, this.strokeWidth, this.strokeColor});
+  PolyLineModel({this.points, required this.color, this.strokeWidth, this.strokeColor, this.showArrow});
 
   Polyline toFlutterPolyLine() => Polyline(
-        points: points!,
+        points: points!.map((point) => LatLng(point.latitude, point.longitude)).toList(),
         color: color,
         strokeWidth: strokeWidth!,
       );
 
+
   Map<String, dynamic> toNeshanPolyLines() {
     return {
-      'points': points!.map((latLng) {
+      'points': points!.map((point) {
         return {
-          "latitude": latLng.latitude,
-          "longitude": latLng.longitude,
+          "latitude": point.latitude,
+          "longitude": point.longitude,
+          "heading": point.heading,
         };
       }).toList(),
       'color': color.toHex(),
       'strokeWidth': strokeWidth,
       'strokeColor': strokeColor != null ? strokeColor!.toHex() : color.withAlpha(100).toHex(),
+      'showArrow': showArrow,
     };
   }
 
   PolyLineModel copyWith({
-    List<LatLng>? points,
+    List<PolyLinePointModel>? points,
     Color? color,
     double? strokeWidth,
   }) {

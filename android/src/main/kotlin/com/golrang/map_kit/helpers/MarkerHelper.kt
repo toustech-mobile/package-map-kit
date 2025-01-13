@@ -31,6 +31,7 @@ class MarkerHelper {
                         iconSize,
                         snippetTitle,
                         snippetDescription,
+                        0.0,
                         context
                     )
 
@@ -47,15 +48,26 @@ class MarkerHelper {
             iconSize: Int,
             snippetTitle: String?,
             snippetDescription: String?,
+            angle: Double?,
             context: Context
         ): Marker {
             val markStCr = MarkerStyleBuilder()
 
             markStCr.size = iconSize.toFloat()
 
-            markStCr.bitmap = BitmapUtils.createBitmapFromAndroidBitmap(
-                getIconDrawableByReflection(context, icon)!!.toBitmap()
-            )
+
+            if (angle == null) {
+                markStCr.bitmap = BitmapUtils.createBitmapFromAndroidBitmap(
+                    getIconDrawableByReflection(context, icon)!!.toBitmap()
+                )
+
+            } else {
+                markStCr.bitmap = BitmapUtils.createBitmapFromAndroidBitmap(
+                    BitmapUtils.rotate(
+                        getIconDrawableByReflection(context, icon)!!.toBitmap(), angle
+                    )
+                )
+            }
 
             val markSt = markStCr.buildStyle()
             markStCr.anchorPointX = 0f

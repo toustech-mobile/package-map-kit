@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
@@ -143,6 +144,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
             ...widget.polyLines!.map((polyLineModel) => polyLineModel.toFlutterPolyLine()),
           ],
         ),
+        MarkerLayer(markers: _buildHeadingMarkers()),
         CircleLayer(
           circles: widget.circles!.map((circleModel) => circleModel.toFlutterCircleMarker()).toList(),
         ),
@@ -165,6 +167,29 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         ),
       ),
     );
+  }
+
+  List<Marker> _buildHeadingMarkers() {
+    final List<Marker> markers = [];
+
+    for (final polyLine in widget.polyLines!) {
+      if (polyLine.points != null) {
+        for (final point in polyLine.points!) {
+          markers.add(
+            Marker(
+              point: LatLng(point.latitude, point.longitude),
+              width: 16,
+              height: 16,
+              child: Transform.rotate(
+                angle: point.heading * (3.14159265359 / 180.0),
+                child: SvgPicture.asset('assets/icons/arrow.svg',),
+              ),
+            ),
+          );
+        }
+      }
+    }
+    return markers;
   }
 
   PopupMarkerLayer _buildPopupMarkerLayer() {

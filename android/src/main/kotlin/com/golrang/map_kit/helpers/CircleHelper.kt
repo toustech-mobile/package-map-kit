@@ -70,6 +70,7 @@ class CircleHelper {
                     20,
                     snippetTitle,
                     snippetDescription,
+                    0.0,
                     context
                 )
             )

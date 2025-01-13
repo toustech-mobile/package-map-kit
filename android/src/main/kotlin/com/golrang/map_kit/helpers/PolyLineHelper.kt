@@ -1,8 +1,11 @@
 package com.golrang.map_kit.helpers
 
+import android.content.Context
 import com.carto.styles.LineStyle
 import com.carto.styles.LineStyleBuilder
+import com.golrang.map_kit.models.PolyLinePointModel
 import org.neshan.common.model.LatLng
+import org.neshan.mapsdk.model.Marker
 import org.neshan.mapsdk.model.Polyline
 import android.graphics.Color as AndroidColor
 import com.carto.graphics.Color as CartoColor
@@ -10,38 +13,82 @@ import com.carto.graphics.Color as CartoColor
 
 class PolyLineHelper {
     companion object {
-        fun toNeshanModel(polyLines: List<*>): List<Polyline> {
-            val result = mutableListOf<Polyline>()
+        fun toNeshanModel(
+            polyLines: List<*>,
+            context: Context
+        ): Pair<List<Polyline>, List<Marker>> {
+
+            val polylineList = mutableListOf<Polyline>()
+            val markerList = mutableListOf<Marker>()
+
             polyLines.forEach { polyLine ->
                 if (polyLine is Map<*, *>) {
                     val points = polyLine["points"] as? List<Map<*, *>>
                     val color = polyLine["color"] as? String
                     val strokeWidth = polyLine["strokeWidth"] as? Double
                     val strokeColor = polyLine["strokeColor"] as? String
+                    val showArrow = polyLine["showArrow"] as? Boolean
 
                     if (points != null && color != null && strokeWidth != null) {
+
                         val polyLinePoints = points.mapNotNull { point ->
                             val latitude = point["latitude"] as? Double
                             val longitude = point["longitude"] as? Double
+                            val heading = point["heading"] as? Double
+                                ?: 0.0
+
                             if (latitude != null && longitude != null) {
-                                LatLng(latitude, longitude)
-                            } else null
+                                PolyLinePointModel(latitude, longitude, heading)
+                            } else {
+                                null
+                            }
                         }
 
-                        result.add(
+                        val latLngPoints = polyLinePoints.map {
+                            LatLng(it.latitude, it.longitude)
+                        }
+
+                        polylineList.add(
                             createPolyLine(
-                                ArrayList(polyLinePoints),
-                                strokeColor!!,
+                                ArrayList(latLngPoints),
+                                strokeColor ?: "#000000",
                                 strokeWidth + 4
                             )
                         )
-                        result.add(createPolyLine(ArrayList(polyLinePoints), color, strokeWidth))
 
+                        polylineList.add(
+                            createPolyLine(
+                                ArrayList(latLngPoints),
+                                color,
+                                strokeWidth
+                            )
+                        )
+
+                        if (showArrow == true && polyLinePoints.isNotEmpty()) {
+                            polyLinePoints.forEachIndexed { index, pointModel ->
+                                if (index % 2 == 0) {
+                                    val marker = MarkerHelper.createMarker(
+                                        LatLng(pointModel.latitude, pointModel.longitude),
+                                        "",
+                                        "arrow.svg",
+                                        20,
+                                        "",
+                                        "",
+                                        pointModel.heading,
+                                        context = context
+                                    )
+                                    markerList.add(marker)
+                                }
+                            }
+
+                        }
                     }
                 }
             }
-            return result
+
+            return Pair(polylineList, markerList)
         }
+
 
         fun createPolyLine(
             points: ArrayList<LatLng>,
