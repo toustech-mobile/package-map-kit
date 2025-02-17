@@ -326,9 +326,6 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         location.time = System.currentTimeMillis()
         location.speed = 0.0f
 
-        mapView.showAccuracyCircle(location)
-
-
         if (userMarker != null) {
             mapView.removeMarker(userMarker)
         }
@@ -339,6 +336,8 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         mapView.addMarker(
             userMarker
         )
+        mapView.showAccuracyCircle(location)
+
     }
 
     fun moveCamera(rawPolyLines: Map<String, *>) {

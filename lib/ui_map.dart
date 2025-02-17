@@ -62,7 +62,6 @@ class _UiMapState extends State<UiMap> {
   _loadMap() {
     switch (widget.mapProvider) {
       case MapProvider.flutter:
-      case MapProvider.mapIr:
         return FlutterMapWidget(
           uiMapController: widget.controller,
           initialCenter: widget.initialCenter,
@@ -77,6 +76,22 @@ class _UiMapState extends State<UiMap> {
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
           mapProvider: MapProvider.flutter,
+        );
+      case MapProvider.mapIr:
+        return FlutterMapWidget(
+          uiMapController: widget.controller,
+          initialCenter: widget.initialCenter,
+          zoom: widget.zoom,
+          isCurrentLocationEnable: widget.isCurrentLocationEnable,
+          isDarkMode: widget.isDarkMode,
+          markers: widget.markers,
+          polyLines: widget.polyLines,
+          circles: widget.circles,
+          onMarkerTap: widget.onMarkerTap,
+          onCircleTap: widget.onCircleTap,
+          onTap: widget.onTap,
+          onLongPress: widget.onLongPress,
+          mapProvider: MapProvider.mapIr,
         );
 
       case MapProvider.neshan:
