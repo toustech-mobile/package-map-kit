@@ -80,7 +80,7 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "addMarkers" -> {
-                handleAddMarkers(call, result)
+                handleSetStyle(call, result)
             }
 
             "removeMarkers" -> {
@@ -108,6 +108,11 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
 
             "moveCamera" -> {
                 handleMoveCamera(call, result)
+            }
+
+
+            "setMapStyle" -> {
+                handleSetStyle(call, result)
             }
 
 
@@ -166,6 +171,14 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
         mapKitView.moveCamera(call.arguments as Map<String, *>)
         result.success("MoveCamera successfully")
     }
+
+    private fun handleSetStyle(call: MethodCall, result: MethodChannel.Result) {
+        Log.d("Native Add Markers", "")
+        mapKitView.setMapStyle(call.arguments as Map<String, *>)
+
+        result.success("Marker added successfully")
+    }
+
 //
 //    private fun handleRemovePolyLines(call: MethodCall, result: MethodChannel.Result) {
 //        Log.d("Native Remove PolyLines", "")
@@ -201,7 +214,9 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
         setInitialCenter(params)
         setDefaultZoom(params)
-        setMapStyle(params)
+        if (params != null) {
+            setMapStyle(params)
+        }
         addMarkers(params!!["markers"] as List<*>)
         addCircles(params["circles"] as List<*>)
         addPolyLines(params["polyLines"] as List<*>)
@@ -234,8 +249,8 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     }
 
 
-    private fun setMapStyle(params: Map<String, Any>?) {
-        val isDarkMode: Boolean = params?.get("isDarkMode") as Boolean
+    fun setMapStyle(params: Map<String, *>) {
+        val isDarkMode: Boolean = params["isDarkMode"] as Boolean
         Log.d("Native isDarkMode", isDarkMode.toString())
 
         if (isDarkMode) {

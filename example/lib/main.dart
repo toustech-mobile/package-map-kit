@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     mapKitPlugin = UiMap(
-      mapProvider: MapProvider.mapIr,
+      mapProvider: MapProvider.neshan,
       controller: mapController,
       initialCenter: const LatLng(36.3156692, 59.5405541),
       isDarkMode: false,
@@ -181,6 +181,7 @@ class _MyAppState extends State<MyApp> {
             ),
             ElevatedButton(
                 onPressed: () {
+                  mapController.setMapStyle(true);
                   mapController.setUserLocation!(
                     UserMarkerModel(
                       latitude: 36.3219341,
