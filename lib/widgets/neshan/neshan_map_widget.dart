@@ -92,9 +92,9 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
         setState(() {});
       };
 
-      widget.uiMapController!.setMapStyle = (bool isDarkMode) {
+      widget.uiMapController!.setDarkMode = (bool isDarkMode) {
         widget.isDarkMode = isDarkMode;
-        neshan.NeshanMethods.setMapStyle(isDarkMode);
+        neshan.NeshanMethods.setDarkMode(isDarkMode);
         setState(() {});
       };
     }

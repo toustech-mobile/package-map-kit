@@ -181,7 +181,7 @@ class _MyAppState extends State<MyApp> {
             ),
             ElevatedButton(
                 onPressed: () {
-                  mapController.setMapStyle(true);
+                  mapController.setDarkMode(true);
                   mapController.setUserLocation!(
                     UserMarkerModel(
                       latitude: 36.3219341,

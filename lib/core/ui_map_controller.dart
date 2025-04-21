@@ -12,5 +12,5 @@ mixin class UiMapController {
   late Function(List<PolyLineModel>) addPolyline;
   late Function(MoveModel) moveCamera;
   Function(UserMarkerModel)? setUserLocation;
-  late Function(bool) setMapStyle;
+  late Function(bool) setDarkMode;
 }

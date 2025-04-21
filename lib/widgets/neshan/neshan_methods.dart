@@ -47,7 +47,7 @@ abstract class NeshanMethods {
     await _channel.invokeMethod('moveCamera', moveMarker.toNeshanMoveModel());
   }
 
-  static setMapStyle(bool isDarkMode) async {
+  static setDarkMode(bool isDarkMode) async {
     await _channel.invokeMethod('setMapStyle', {'isDarkMode': isDarkMode});
   }
 }
