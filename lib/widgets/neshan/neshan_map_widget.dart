@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
+import 'package:map_kit/map_kit.dart';
 import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/move_model.dart';
@@ -128,7 +131,8 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
     return Stack(
       alignment: Alignment.bottomRight,
       children: [
-        AndroidView(
+
+        Platform.isIOS?const MapKitView():AndroidView(
             viewType: 'com.example.example/map_kit_view',
             creationParams: widget.creationParams,
             creationParamsCodec: const StandardMessageCodec(),

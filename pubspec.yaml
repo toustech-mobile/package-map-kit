@@ -45,7 +45,7 @@ flutter:
         package: com.golrang.map_kit
         pluginClass: MapKitPlugin
       ios:
-        pluginClass: MapKitPlugin
+        pluginClass: SwiftMapKitPlugin
       web:
         pluginClass: MapKitWeb
         fileName: map_kit_web.dart
