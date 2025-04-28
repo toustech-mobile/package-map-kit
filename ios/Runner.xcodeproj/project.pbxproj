@@ -316,6 +316,23 @@
 			};
 			name = Release;
 		};
+		367922BD2DBF5A970054FFFD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = Runner;
+			};
+			name = Debug;
+		};
+		367922BE2DBF5A970054FFFD /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = Runner;
+			};
+			name = Profile;
+		};
 		97C147031CF9000F007C117D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
@@ -444,6 +461,8 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				249021D4217E4ZDB8AE7C68 /* Release */,
+				367922BD2DBF5A970054FFFD /* Debug */,
+				367922BE2DBF5A970054FFFD /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
