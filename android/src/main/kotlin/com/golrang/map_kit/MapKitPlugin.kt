@@ -80,7 +80,7 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "addMarkers" -> {
-                handleSetStyle(call, result)
+                handleAddMarkers(call, result)
             }
 
             "removeMarkers" -> {

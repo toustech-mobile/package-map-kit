@@ -99,16 +99,24 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
     }
 
     return Scaffold(
-      body: _buildFlutterMap(),
-      floatingActionButton: widget.isCurrentLocationEnable ?? false
-          ? FloatingActionButton(
-              onPressed: _moveToUserLocation,
-              child: Icon(
-                Icons.my_location,
-                color: widget.userMarker != null ? Colors.blue : Colors.grey,
+      body: Stack(
+        children: [
+          _buildFlutterMap(),
+          if (widget.isCurrentLocationEnable ?? false)
+            Positioned(
+              right: 24,
+              bottom: 24,
+              child: FloatingActionButton(
+                backgroundColor: Colors.white,
+                onPressed: _moveToUserLocation,
+                child: Icon(
+                  Icons.my_location,
+                  color: widget.userMarker != null ? Colors.blue : Colors.grey,
+                ),
               ),
-            )
-          : null,
+            ),
+        ],
+      ),
     );
   }
 
@@ -182,7 +190,9 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
               height: 16,
               child: Transform.rotate(
                 angle: point.heading * (3.14159265359 / 180.0),
-                child: SvgPicture.asset('assets/icons/arrow.svg',),
+                child: SvgPicture.asset(
+                  'assets/icons/arrow.svg',
+                ),
               ),
             ),
           );

@@ -51,8 +51,7 @@ class NeshanMapWidget extends StatefulWidget {
   State<NeshanMapWidget> createState() => _NeshanMapWidgetState();
 }
 
-class _NeshanMapWidgetState extends State<NeshanMapWidget>
-    implements NeshanCallbackInterface {
+class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCallbackInterface {
   @override
   void initState() {
     NeshanCallback.setNeshanCallback(this);
@@ -87,8 +86,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
         neshan.NeshanMethods.addPolylines(polyLines);
       };
 
-      widget.uiMapController!.setUserLocation =
-          (UserMarkerModel userMarkerModel) {
+      widget.uiMapController!.setUserLocation = (UserMarkerModel userMarkerModel) {
         widget.userMarker = userMarkerModel;
         neshan.NeshanMethods.setUserMarker(userMarkerModel);
 
@@ -113,15 +111,9 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
       },
       'isDarkMode': widget.isDarkMode ?? false,
       'zoom': widget.zoom,
-      'markers': widget.markers!
-          .map((flutterModel) => flutterModel.toNeshanMarker())
-          .toList(),
-      'polyLines': widget.polyLines!
-          .map((flutterModel) => flutterModel.toNeshanPolyLines())
-          .toList(),
-      'circles': widget.circles!
-          .map((flutterModel) => flutterModel.toNeshanCircle())
-          .toList(),
+      'markers': widget.markers!.map((flutterModel) => flutterModel.toNeshanMarker()).toList(),
+      'polyLines': widget.polyLines!.map((flutterModel) => flutterModel.toNeshanPolyLines()).toList(),
+      'circles': widget.circles!.map((flutterModel) => flutterModel.toNeshanCircle()).toList(),
     };
   }
 
@@ -131,21 +123,24 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
     return Stack(
       alignment: Alignment.bottomRight,
       children: [
-
-        Platform.isIOS?const MapKitView():AndroidView(
-            viewType: 'com.example.example/map_kit_view',
-            creationParams: widget.creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-            layoutDirection: TextDirection.ltr,
-            onPlatformViewCreated: (int id) {
-              print('the PlatfromId is : $id');
-            }),
+        Platform.isIOS
+            ? const MapKitView()
+            : AndroidView(
+                viewType: 'com.example.example/map_kit_view',
+                creationParams: widget.creationParams,
+                creationParamsCodec: const StandardMessageCodec(),
+                gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+                layoutDirection: TextDirection.ltr,
+                onPlatformViewCreated: (int id) {
+                  print('the PlatfromId is : $id');
+                }),
         Visibility(
           visible: widget.isCurrentLocationEnable ?? false,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
+          child: Positioned(
+            right: 24,
+            bottom: 24,
             child: FloatingActionButton(
+              backgroundColor: Colors.white,
               onPressed: _moveToUserLocation,
               child: Icon(
                 Icons.my_location,
@@ -160,9 +155,8 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
 
   void _moveToUserLocation() {
     if (widget.userMarker != null) {
-      neshan.NeshanMethods.moveCamera(MoveModel(
-          latitude: widget.userMarker!.latitude,
-          longitude: widget.userMarker!.longitude));
+      neshan.NeshanMethods.moveCamera(
+          MoveModel(latitude: widget.userMarker!.latitude, longitude: widget.userMarker!.longitude));
     }
   }
 
