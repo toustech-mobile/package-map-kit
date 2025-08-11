@@ -34,7 +34,7 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
     companion object {
         lateinit var methodChannel: MethodChannel
         var eventChannel: EventChannel.EventSink? = null
-        var mapKitView: MapKitView? = null
+        lateinit var mapKitView: MapKitView
     }
 
     lateinit var binding: FlutterPlugin.FlutterPluginBinding
@@ -58,7 +58,7 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        mapKitView?.dispose()
+        mapKitView.dispose()
         eventChannel = null
     }
 
@@ -125,35 +125,35 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
 
     private fun handleAddMarkers(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Add Markers", "")
-        mapKitView?.addMarkers(call.arguments as List<*>)
+        mapKitView.addMarkers(call.arguments as List<*>)
 
         result.success("Marker added successfully")
     }
 
     private fun handleRemoveMarkers(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Remove Markers", "")
-        mapKitView?.removeMarkers(call.arguments as List<*>)
+        mapKitView.removeMarkers(call.arguments as List<*>)
 
         result.success("Marker removed successfully")
     }
 
     private fun handleAddCircles(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Add Circles", "")
-        mapKitView?.addCircles(call.arguments as List<*>)
+        mapKitView.addCircles(call.arguments as List<*>)
 
         result.success("Circles added successfully")
     }
 
     private fun handleRemoveCircles(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Remove Circles", "")
-        mapKitView?.removeCircles(call.arguments as List<*>)
+        mapKitView.removeCircles(call.arguments as List<*>)
 
         result.success("Circles removed successfully")
     }
 
     private fun handleAddPolyLines(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Add PolyLines", "")
-        mapKitView?.addPolyLines(call.arguments as List<*>)
+        mapKitView.addPolyLines(call.arguments as List<*>)
 
         result.success("PolyLines added successfully")
     }
@@ -161,20 +161,20 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
     private fun handleSetUserMarker(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native SetUserMarker", "")
 
-        mapKitView?.setUserMarker(call.arguments as Map<String, *>)
+        mapKitView.setUserMarker(call.arguments as Map<String, *>)
         result.success("SetUserMarker set successfully")
     }
 
     private fun handleMoveCamera(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native MoveCamera", "")
 
-        mapKitView?.moveCamera(call.arguments as Map<String, *>)
+        mapKitView.moveCamera(call.arguments as Map<String, *>)
         result.success("MoveCamera successfully")
     }
 
     private fun handleSetStyle(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Add Markers", "")
-        mapKitView?.setMapStyle(call.arguments as Map<String, *>)
+        mapKitView.setMapStyle(call.arguments as Map<String, *>)
 
         result.success("Marker added successfully")
     }
@@ -193,9 +193,8 @@ class MapKitViewFactory : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
     override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
         val params = args as? Map<String, Any>
 
-        var view :MapKitView = MapKitView(context, params)
-        MapKitPlugin.mapKitView = view
-        return view
+        mapKitView = MapKitView(context, params)
+        return mapKitView
     }
 }
 
