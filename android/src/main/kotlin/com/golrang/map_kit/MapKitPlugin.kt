@@ -58,7 +58,9 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        mapKitView.dispose()
+        if (::mapKitView.isInitialized) {
+            mapKitView.dispose()
+        }
         eventChannel = null
     }
 
@@ -125,58 +127,82 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
 
     private fun handleAddMarkers(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Add Markers", "")
-        mapKitView.addMarkers(call.arguments as List<*>)
-
-        result.success("Marker added successfully")
+        if (::mapKitView.isInitialized) {
+            mapKitView.addMarkers(call.arguments as List<*>)
+            result.success("Marker added successfully")
+        } else {
+            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
+        }
     }
 
     private fun handleRemoveMarkers(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Remove Markers", "")
-        mapKitView.removeMarkers(call.arguments as List<*>)
-
-        result.success("Marker removed successfully")
+        if (::mapKitView.isInitialized) {
+            mapKitView.removeMarkers(call.arguments as List<*>)
+            result.success("Marker removed successfully")
+        } else {
+            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
+        }
     }
 
     private fun handleAddCircles(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Add Circles", "")
-        mapKitView.addCircles(call.arguments as List<*>)
-
-        result.success("Circles added successfully")
+        if (::mapKitView.isInitialized) {
+            mapKitView.addCircles(call.arguments as List<*>)
+            result.success("Circles added successfully")
+        } else {
+            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
+        }
     }
 
     private fun handleRemoveCircles(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Remove Circles", "")
-        mapKitView.removeCircles(call.arguments as List<*>)
-
-        result.success("Circles removed successfully")
+        if (::mapKitView.isInitialized) {
+            mapKitView.removeCircles(call.arguments as List<*>)
+            result.success("Circles removed successfully")
+        } else {
+            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
+        }
     }
 
     private fun handleAddPolyLines(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Add PolyLines", "")
-        mapKitView.addPolyLines(call.arguments as List<*>)
-
-        result.success("PolyLines added successfully")
+        if (::mapKitView.isInitialized) {
+            mapKitView.addPolyLines(call.arguments as List<*>)
+            result.success("PolyLines added successfully")
+        } else {
+            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
+        }
     }
 
     private fun handleSetUserMarker(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native SetUserMarker", "")
-
-        mapKitView.setUserMarker(call.arguments as Map<String, *>)
-        result.success("SetUserMarker set successfully")
+        if (::mapKitView.isInitialized) {
+            mapKitView.setUserMarker(call.arguments as Map<String, *>)
+            result.success("SetUserMarker set successfully")
+        } else {
+            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
+        }
     }
 
     private fun handleMoveCamera(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native MoveCamera", "")
-
-        mapKitView.moveCamera(call.arguments as Map<String, *>)
-        result.success("MoveCamera successfully")
+        if (::mapKitView.isInitialized) {
+            mapKitView.moveCamera(call.arguments as Map<String, *>)
+            result.success("MoveCamera successfully")
+        } else {
+            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
+        }
     }
 
     private fun handleSetStyle(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Add Markers", "")
-        mapKitView.setMapStyle(call.arguments as Map<String, *>)
-
-        result.success("Marker added successfully")
+        if (::mapKitView.isInitialized) {
+            mapKitView.setMapStyle(call.arguments as Map<String, *>)
+            result.success("Map style set successfully")
+        } else {
+            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
+        }
     }
 
 //
