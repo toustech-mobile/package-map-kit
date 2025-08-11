@@ -10,7 +10,6 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.NonNull
 import com.golrang.map_kit.MapKitPlugin.Companion.eventChannel
-import com.golrang.map_kit.MapKitPlugin.Companion.mapKitView
 import com.golrang.map_kit.helpers.CircleHelper
 import com.golrang.map_kit.helpers.MarkerHelper
 import com.golrang.map_kit.helpers.PolyLineHelper
@@ -34,8 +33,9 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
     companion object {
         lateinit var methodChannel: MethodChannel
         var eventChannel: EventChannel.EventSink? = null
-        lateinit var mapKitView: MapKitView
     }
+    
+    lateinit var mapKitView: MapKitView
 
     lateinit var binding: FlutterPlugin.FlutterPluginBinding
 
@@ -53,7 +53,7 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
         eventChannel.setStreamHandler(this)
 
         binding.platformViewRegistry.registerViewFactory(
-            "com.example.example/map_kit_view", MapKitViewFactory()
+            "com.example.example/map_kit_view", MapKitViewFactory(this)
         )
     }
 
@@ -215,12 +215,15 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
 
 }
 
-class MapKitViewFactory : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+class MapKitViewFactory(
+    private val plugin: MapKitPlugin
+) : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
     override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
         val params = args as? Map<String, Any>
 
-        mapKitView = MapKitView(context, params)
-        return mapKitView
+        val newMapKitView = MapKitView(context, params)
+        plugin.mapKitView = newMapKitView
+        return newMapKitView
     }
 }
 
