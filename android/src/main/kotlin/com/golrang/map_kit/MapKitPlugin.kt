@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.NonNull
 import com.golrang.map_kit.MapKitPlugin.Companion.eventChannel
+import com.golrang.map_kit.MapKitPlugin.Companion.mapKitView
 import com.golrang.map_kit.helpers.CircleHelper
 import com.golrang.map_kit.helpers.MarkerHelper
 import com.golrang.map_kit.helpers.PolyLineHelper
@@ -33,9 +34,8 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
     companion object {
         lateinit var methodChannel: MethodChannel
         var eventChannel: EventChannel.EventSink? = null
+        lateinit var mapKitView: MapKitView
     }
-    
-    lateinit var mapKitView: MapKitView
 
     lateinit var binding: FlutterPlugin.FlutterPluginBinding
 
@@ -53,14 +53,12 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
         eventChannel.setStreamHandler(this)
 
         binding.platformViewRegistry.registerViewFactory(
-            "com.example.example/map_kit_view", MapKitViewFactory(this)
+            "com.example.example/map_kit_view", MapKitViewFactory()
         )
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        if (::mapKitView.isInitialized) {
-            mapKitView.dispose()
-        }
+        mapKitView.dispose()
         eventChannel = null
     }
 
@@ -127,82 +125,58 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
 
     private fun handleAddMarkers(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Add Markers", "")
-        if (::mapKitView.isInitialized) {
-            mapKitView.addMarkers(call.arguments as List<*>)
-            result.success("Marker added successfully")
-        } else {
-            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
-        }
+        mapKitView.addMarkers(call.arguments as List<*>)
+
+        result.success("Marker added successfully")
     }
 
     private fun handleRemoveMarkers(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Remove Markers", "")
-        if (::mapKitView.isInitialized) {
-            mapKitView.removeMarkers(call.arguments as List<*>)
-            result.success("Marker removed successfully")
-        } else {
-            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
-        }
+        mapKitView.removeMarkers(call.arguments as List<*>)
+
+        result.success("Marker removed successfully")
     }
 
     private fun handleAddCircles(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Add Circles", "")
-        if (::mapKitView.isInitialized) {
-            mapKitView.addCircles(call.arguments as List<*>)
-            result.success("Circles added successfully")
-        } else {
-            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
-        }
+        mapKitView.addCircles(call.arguments as List<*>)
+
+        result.success("Circles added successfully")
     }
 
     private fun handleRemoveCircles(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Remove Circles", "")
-        if (::mapKitView.isInitialized) {
-            mapKitView.removeCircles(call.arguments as List<*>)
-            result.success("Circles removed successfully")
-        } else {
-            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
-        }
+        mapKitView.removeCircles(call.arguments as List<*>)
+
+        result.success("Circles removed successfully")
     }
 
     private fun handleAddPolyLines(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Add PolyLines", "")
-        if (::mapKitView.isInitialized) {
-            mapKitView.addPolyLines(call.arguments as List<*>)
-            result.success("PolyLines added successfully")
-        } else {
-            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
-        }
+        mapKitView.addPolyLines(call.arguments as List<*>)
+
+        result.success("PolyLines added successfully")
     }
 
     private fun handleSetUserMarker(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native SetUserMarker", "")
-        if (::mapKitView.isInitialized) {
-            mapKitView.setUserMarker(call.arguments as Map<String, *>)
-            result.success("SetUserMarker set successfully")
-        } else {
-            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
-        }
+
+        mapKitView.setUserMarker(call.arguments as Map<String, *>)
+        result.success("SetUserMarker set successfully")
     }
 
     private fun handleMoveCamera(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native MoveCamera", "")
-        if (::mapKitView.isInitialized) {
-            mapKitView.moveCamera(call.arguments as Map<String, *>)
-            result.success("MoveCamera successfully")
-        } else {
-            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
-        }
+
+        mapKitView.moveCamera(call.arguments as Map<String, *>)
+        result.success("MoveCamera successfully")
     }
 
     private fun handleSetStyle(call: MethodCall, result: MethodChannel.Result) {
         Log.d("Native Add Markers", "")
-        if (::mapKitView.isInitialized) {
-            mapKitView.setMapStyle(call.arguments as Map<String, *>)
-            result.success("Map style set successfully")
-        } else {
-            result.error("MAP_NOT_INITIALIZED", "Map view is not initialized", null)
-        }
+        mapKitView.setMapStyle(call.arguments as Map<String, *>)
+
+        result.success("Marker added successfully")
     }
 
 //
@@ -215,15 +189,12 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
 
 }
 
-class MapKitViewFactory(
-    private val plugin: MapKitPlugin
-) : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+class MapKitViewFactory : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
     override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
         val params = args as? Map<String, Any>
 
-        val newMapKitView = MapKitView(context, params)
-        plugin.mapKitView = newMapKitView
-        return newMapKitView
+        mapKitView = MapKitView(context, params)
+        return mapKitView
     }
 }
 
