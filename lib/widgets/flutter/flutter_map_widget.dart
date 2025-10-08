@@ -54,6 +54,8 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
   final MapController _mapController = MapController();
   String tileUrl = '';
   final Set<MarkerModel> _circleMarkers = {};
+  MarkerModel? _lastTappedMarker;
+  bool _popupVisible = false;
 
   @override
   void initState() {
@@ -132,6 +134,8 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
             widget.zoom = event.camera.zoom;
             if (event is MapEventMoveStart) {
               widget.popupController.hideAllPopups();
+              _lastTappedMarker = null;
+              _popupVisible = false;
             }
           }),
       children: [
@@ -219,7 +223,6 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
             final tappedMarker = combinedMarkers.firstWhere(
               (m) => m.latitude == marker.point.latitude && m.longitude == marker.point.longitude && m.icon.isNotEmpty,
               orElse: () {
-                //fill hidden marker data
                 final tappedMarker = combinedMarkers.firstWhere((m) =>
                     m.latitude == marker.point.latitude && m.longitude == marker.point.longitude && m.icon.isEmpty);
                 return MarkerModel(
@@ -231,16 +234,23 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
               },
             );
 
-            if (tappedMarker.icon.isNotEmpty) {
-              widget.onMarkerTap?.call(tappedMarker);
-              return _buildPopupContent(tappedMarker);
-            } else {
-              final tappedCircle = widget.circles!.firstWhere(
-                (c) => c.latitude == marker.point.latitude && c.longitude == marker.point.longitude,
-              );
-              widget.onCircleTap?.call(tappedCircle);
-              return _buildPopupContent(tappedMarker);
+            if (!_popupVisible ||
+                _lastTappedMarker == null ||
+                _lastTappedMarker!.latitude != tappedMarker.latitude ||
+                _lastTappedMarker!.longitude != tappedMarker.longitude) {
+              if (tappedMarker.icon.isNotEmpty) {
+                widget.onMarkerTap?.call(tappedMarker);
+              } else {
+                final tappedCircle = widget.circles!.firstWhere(
+                  (c) => c.latitude == marker.point.latitude && c.longitude == marker.point.longitude,
+                );
+                widget.onCircleTap?.call(tappedCircle);
+              }
+              _lastTappedMarker = tappedMarker;
+              _popupVisible = true;
             }
+
+            return _buildPopupContent(tappedMarker);
           },
         ),
       ),
@@ -280,6 +290,8 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
 
   void _handleMapTap(TapPosition tapPosition, LatLng point) {
     widget.popupController.hideAllPopups();
+    _lastTappedMarker = null;
+    _popupVisible = false;
     final circle = widget.circles?.firstWhere(
       (circle) =>
           const Distance().as(LengthUnit.Meter, LatLng(circle.latitude, circle.longitude), point) <= circle.radius,
@@ -289,11 +301,14 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
       widget.onCircleTap?.call(circle);
     } else {
       widget.onTap?.call(point);
+
     }
   }
 
   void _handleMapLongPress(TapPosition tapPosition, LatLng point) {
     widget.popupController.hideAllPopups();
+    _lastTappedMarker = null;
+    _popupVisible = false;
     widget.onLongPress?.call(point);
   }
 
