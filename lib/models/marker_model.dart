@@ -27,9 +27,15 @@ class MarkerModel {
   Marker toFlutterMarker() {
     if (icon.isNotEmpty) {
       return Marker(
-        point: LatLng(latitude, longitude),
-        child: SvgPicture.asset(icon.isEmpty ? 'assets/icons/icon.svg' : "assets/icons/$icon"),
-      );
+          point: LatLng(latitude, longitude),
+          child: SizedBox(
+            width: iconSize?.toDouble() ?? 64,
+            height: iconSize?.toDouble() ?? 64,
+            child: SvgPicture.asset(
+              icon.isEmpty ? 'assets/icons/icon.svg' : "assets/icons/$icon",
+              fit: BoxFit.contain,
+            ),
+          ));
     } else {
       return Marker(
         point: LatLng(latitude, longitude),
