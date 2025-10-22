@@ -28,12 +28,16 @@ class MarkerModel {
     if (icon.isNotEmpty) {
       return Marker(
         point: LatLng(latitude, longitude),
-        child: SvgPicture.asset(icon.isEmpty ? 'assets/icons/icon.svg' : "assets/icons/$icon"),
+        child: SvgPicture.asset(
+          icon.isEmpty ? 'assets/icons/icon.svg' : "assets/icons/$icon",
+          width: iconSize?.toDouble() ?? 30,
+          height: iconSize?.toDouble() ?? 30,
+        ),
       );
     } else {
       return Marker(
         point: LatLng(latitude, longitude),
-        child: const Icon(Icons.circle, color: Colors.transparent),
+        child: const Icon(Icons.circle, color: Colors.transparent, ),
       );
     }
   }
