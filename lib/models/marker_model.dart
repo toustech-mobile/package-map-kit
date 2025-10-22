@@ -30,8 +30,8 @@ class MarkerModel {
         point: LatLng(latitude, longitude),
         child: SvgPicture.asset(
           icon.isEmpty ? 'assets/icons/icon.svg' : "assets/icons/$icon",
-          width: iconSize?.toDouble() ?? 30,
-          height: iconSize?.toDouble() ?? 30,
+          width: iconSize?.toDouble() ?? 64,
+          height: iconSize?.toDouble() ?? 64,
         ),
       );
     } else {
