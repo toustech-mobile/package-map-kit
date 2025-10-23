@@ -28,7 +28,12 @@ class MarkerModel {
     if (icon.isNotEmpty) {
       return Marker(
         point: LatLng(latitude, longitude),
-        child: SvgPicture.asset(icon.isEmpty ? 'assets/icons/icon.svg' : "assets/icons/$icon"),
+        width: iconSize?.toDouble() ?? 30,
+        height: iconSize?.toDouble() ?? 30,
+        child: SvgPicture.asset(
+          icon.isEmpty ? 'assets/icons/icon.svg' : "assets/icons/$icon",
+          fit: BoxFit.contain,
+        ),
       );
     } else {
       return Marker(
