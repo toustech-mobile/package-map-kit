@@ -28,7 +28,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     mapKitPlugin = UiMap(
-      mapProvider: MapProvider.mapIr,
+      mapProvider: MapProvider.flutter,
       controller: mapController,
       initialCenter: const LatLng(36.3156692, 59.5405541),
       isDarkMode: false,
@@ -39,14 +39,15 @@ class _MyAppState extends State<MyApp> {
             latitude: 36.3156692,
             longitude: 59.5405541,
             data: "Test Click On Marker",
-            icon: 'pause.svg',
+            icon: 'ic_map_tour_icon.svg',
+            iconSize: 850,
             snippetTitle: 'marker title',
             snippetDescription: 'marker description'),
         MarkerModel(
           latitude: 36.324915772569966,
           longitude: 59.54904346842852,
           data: "Test Click On Marker",
-          icon: 'end_point.svg',
+          icon: 'ic_map_tour_icon.svg',
         ),
       ],
       polyLines: [

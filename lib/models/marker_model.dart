@@ -12,6 +12,7 @@ class MarkerModel {
   Widget? snippetWidget; //todo must be removed
   String? snippetTitle;
   String? snippetDescription;
+  String? markerTitle;
 
   MarkerModel({
     required this.latitude,
@@ -22,13 +23,28 @@ class MarkerModel {
     this.snippetWidget,
     this.snippetTitle,
     this.snippetDescription,
+    this.markerTitle,
   });
 
   Marker toFlutterMarker() {
     if (icon.isNotEmpty) {
       return Marker(
         point: LatLng(latitude, longitude),
-        child: SvgPicture.asset(icon.isEmpty ? 'assets/icons/icon.svg' : "assets/icons/$icon"),
+        child: Stack(
+          children: [
+            SvgPicture.asset(
+              icon.isEmpty ? 'assets/icons/icon.svg' : "assets/icons/$icon",
+            ),
+            Center(
+                child: Padding(
+              padding: EdgeInsets.only(bottom: iconSize == null ? 8 : iconSize! / 4),
+              child: Text(
+                markerTitle ?? '2',
+                style: const TextStyle(fontSize: 16),
+              ),
+            ))
+          ],
+        ),
       );
     } else {
       return Marker(
