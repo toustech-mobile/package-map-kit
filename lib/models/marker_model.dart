@@ -12,7 +12,7 @@ class MarkerModel {
   Widget? snippetWidget; //todo must be removed
   String? snippetTitle;
   String? snippetDescription;
-  String? markerTitle;
+  String? markerContent = '';
 
   MarkerModel({
     required this.latitude,
@@ -23,7 +23,7 @@ class MarkerModel {
     this.snippetWidget,
     this.snippetTitle,
     this.snippetDescription,
-    this.markerTitle,
+    this.markerContent,
   });
 
   Marker toFlutterMarker() {
@@ -34,15 +34,34 @@ class MarkerModel {
         height: iconSize?.toDouble() ?? 30,
         child: Stack(
           children: [
-            SvgPicture.asset(
-              icon.isEmpty ? 'assets/icons/icon.svg' : "assets/icons/$icon",
+            SizedBox(
+              width: iconSize?.toDouble() ?? 30,
+              height: iconSize?.toDouble() ?? 30,
+              child: SvgPicture.asset(
+                icon.isEmpty ? 'assets/icons/icon.svg' : "assets/icons/$icon",
+                fit: BoxFit.contain,
+              ),
             ),
             Center(
                 child: Padding(
               padding: EdgeInsets.only(bottom: iconSize == null ? 8 : iconSize! / 4),
-              child: Text(
-                markerTitle ?? '2',
-                style: const TextStyle(fontSize: 16),
+              child: Stack(
+                children: [
+                  if (markerContent != null)
+                    markerContent!.length <= 2
+                        ? Text(
+                            markerContent ?? '2',
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                          )
+                        : SizedBox(
+                            width: iconSize! / 2,
+                            height: iconSize! / 2,
+                            child: SvgPicture.asset(
+                              markerContent!,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                ],
               ),
             ))
           ],
