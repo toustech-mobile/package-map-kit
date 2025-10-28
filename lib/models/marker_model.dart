@@ -30,6 +30,8 @@ class MarkerModel {
     if (icon.isNotEmpty) {
       return Marker(
         point: LatLng(latitude, longitude),
+        width: iconSize?.toDouble() ?? 30,
+        height: iconSize?.toDouble() ?? 30,
         child: Stack(
           children: [
             SvgPicture.asset(
