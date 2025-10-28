@@ -44,7 +44,7 @@ class MarkerModel {
             ),
             Center(
                 child: Padding(
-              padding: EdgeInsets.only(bottom: iconSize == null ? 8 : iconSize! / 4),
+              padding: EdgeInsets.only(bottom: iconSize == null ? 6 : (iconSize! / 4) - 2),
               child: Stack(
                 children: [
                   if (markerContent != null)
@@ -57,7 +57,7 @@ class MarkerModel {
                             width: iconSize! / 2,
                             height: iconSize! / 2,
                             child: SvgPicture.asset(
-                              markerContent!,
+                              'assets/icons/$markerContent',
                               fit: BoxFit.contain,
                             ),
                           ),
