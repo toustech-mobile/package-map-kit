@@ -74,6 +74,7 @@ class PolyLineHelper {
                                         20,
                                         "",
                                         "",
+                                        "",
                                         pointModel.heading,
                                         context = context
                                     )

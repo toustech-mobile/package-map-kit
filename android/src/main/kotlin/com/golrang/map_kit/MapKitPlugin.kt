@@ -254,9 +254,9 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         Log.d("Native isDarkMode", isDarkMode.toString())
 
         if (isDarkMode) {
-            mapView.setMapStyle(NeshanMapStyle.NESHAN_NIGHT)
+            mapView.mapStyle = NeshanMapStyle.NESHAN_NIGHT
         } else {
-            mapView.setMapStyle(NeshanMapStyle.STANDARD_DAY)
+            mapView.mapStyle = NeshanMapStyle.STANDARD_DAY
         }
     }
 
@@ -346,7 +346,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         }
 
         userMarker = MarkerHelper.createMarker(
-            LatLng(latitude, longitude), "", "current_location.svg", 24, "", "", 0.0, context,
+            LatLng(latitude, longitude), "", "current_location.svg", 24, "", "", "", 0.0, context,
         )
         mapView.addMarker(
             userMarker

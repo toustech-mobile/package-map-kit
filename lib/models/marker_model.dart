@@ -84,6 +84,7 @@ class MarkerModel {
       'iconSize': iconSize,
       'snippetTitle': snippetTitle,
       'snippetDescription': snippetDescription,
+      'markerContent': markerContent,
     };
   }
 }
