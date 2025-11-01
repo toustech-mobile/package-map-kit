@@ -6,7 +6,6 @@ import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/models/poly_line_point_model.dart';
-import 'package:map_kit/models/user_marker.dart';
 import 'package:map_kit/ui_map.dart';
 
 void main() {
@@ -22,37 +21,42 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late final UiMap mapKitPlugin;
-  final UiMapController mapController = UiMapController();
+  late final UiMapController mapController;
+
+  List<MarkerModel> markers = [
+    MarkerModel(
+        latitude: 36.3156692,
+        longitude: 59.5405541,
+        data: "Test Click On Marker",
+        icon: 'ic_map_tour_icon.svg',
+        iconSize: 50,
+        markerContent: '50',
+        snippetTitle: 'marker title',
+        snippetDescription: 'marker description'),
+    MarkerModel(
+      latitude: 36.324915772569966,
+      longitude: 59.54904346842852,
+      data: "Test Click On Marker",
+      markerContent: 'pause.svg',
+      iconSize: 50,
+      icon: 'ic_map_tour_icon.svg',
+    ),
+  ];
 
   @override
   void initState() {
     super.initState();
+
+    mapController = UiMapController();
+
     mapKitPlugin = UiMap(
-      mapProvider: MapProvider.neshan,
+      mapProvider: MapProvider.flutter,
       controller: mapController,
       initialCenter: const LatLng(36.3156692, 59.5405541),
       isDarkMode: false,
       isCurrentLocationEnable: true,
       zoom: 15,
-      markers: [
-        MarkerModel(
-            latitude: 36.3156692,
-            longitude: 59.5405541,
-            data: "Test Click On Marker",
-            icon: 'ic_map_tour_icon.svg',
-            iconSize: 50,
-            markerContent: '50',
-            snippetTitle: 'marker title',
-            snippetDescription: 'marker description'),
-        MarkerModel(
-          latitude: 36.324915772569966,
-          longitude: 59.54904346842852,
-          data: "Test Click On Marker",
-          markerContent: 'pause.svg',
-          iconSize: 50,
-          icon: 'ic_map_tour_icon.svg',
-        ),
-      ],
+      markers: markers,
       polyLines: [
         PolyLineModel(
           points: [
@@ -142,6 +146,16 @@ class _MyAppState extends State<MyApp> {
         print("onCircleTap: ${(circleMarkerModel as CircleModel).data}");
       },
       onTap: (LatLng point) {
+        mapController.addMarkers([
+          MarkerModel(
+            latitude: point.latitude,
+            longitude: point.longitude,
+            data: "Test Click On Marker",
+            markerContent: 'pause.svg',
+            iconSize: 50,
+            icon: 'ic_map_tour_icon.svg',
+          )
+        ]);
         print('User tapped on: $point');
         // mapController.addMarker(
         //   MarkerModel(
@@ -185,13 +199,7 @@ class _MyAppState extends State<MyApp> {
             ),
             ElevatedButton(
                 onPressed: () {
-                  mapController.setUserLocation!(
-                    UserMarkerModel(
-                      latitude: 36.3219341,
-                      longitude: 59.5214737,
-                      accuracy: 100,
-                    ),
-                  );
+                  mapController.removeAllMarkers();
                 },
                 child: Text('click'))
           ],

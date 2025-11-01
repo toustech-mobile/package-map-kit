@@ -63,28 +63,76 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
 
     if (widget.uiMapController != null) {
       widget.uiMapController!.addMarkers = (List<MarkerModel> markers) {
-        widget.markers!.addAll(markers);
-        setState(() {});
+        // defer update until after current frame
+        if (!mounted) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          widget.markers!.addAll(markers);
+          setState(() {});
+        });
       };
 
-      widget.uiMapController!.addCircles = (circles) {
-        widget.circles!.addAll(circles);
-        setState(() {});
+      widget.uiMapController!.addCircles = (List<CircleModel> circles) {
+        if (!mounted) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          widget.circles!.addAll(circles);
+          // also add new hidden markers for the new circles
+          _circleMarkers.addAll(circles.map((circle) => MarkerModel(
+                latitude: circle.latitude,
+                longitude: circle.longitude,
+                data: '',
+                icon: '',
+                snippetTitle: circle.snippetTitle,
+                snippetDescription: circle.snippetDescription,
+              )));
+          setState(() {});
+        });
       };
 
-      widget.uiMapController!.addPolyline = (polyLines) {
-        widget.polyLines!.addAll(polyLines);
-        setState(() {});
+      widget.uiMapController!.addPolyline = (List<PolyLineModel> polyLines) {
+        if (!mounted) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          widget.polyLines!.addAll(polyLines);
+          setState(() {});
+        });
       };
 
       widget.uiMapController!.moveCamera = (MoveModel moveModel) {
-        _mapController.move(LatLng(moveModel.latitude, moveModel.longitude), moveModel.zoom!);
-        setState(() {});
+        if (!mounted) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _mapController.move(LatLng(moveModel.latitude, moveModel.longitude), moveModel.zoom!);
+          setState(() {});
+        });
       };
 
       widget.uiMapController!.setUserLocation = (userMarker) {
-        widget.userMarker = userMarker;
-        setState(() {});
+        if (!mounted) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          widget.userMarker = userMarker;
+          setState(() {});
+        });
+      };
+
+      widget.uiMapController!.removeMarkers = (List<MarkerModel> markers) {
+        if (!mounted) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          widget.markers!.removeWhere((marker) => markers.contains(marker));
+          setState(() {});
+        });
+      };
+
+      widget.uiMapController!.removeAllMarkers = () {
+        if (!mounted) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          widget.markers!.removeRange(0, widget.markers!.length);
+          setState(() {});
+        });
       };
     }
 
@@ -301,7 +349,6 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
       widget.onCircleTap?.call(circle);
     } else {
       widget.onTap?.call(point);
-
     }
   }
 
