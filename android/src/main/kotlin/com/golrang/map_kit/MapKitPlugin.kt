@@ -283,6 +283,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
     fun removeAllMarkers() {
         mapView.clearMarkers()
+        mapView.addMarker(userMarker)
     }
 
     fun removeMarkers(rawData: List<*>) {
