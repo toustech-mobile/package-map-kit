@@ -385,6 +385,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
             if (circleMarker != null) {
                 sendOnCircleClickCallbackToFlutter(marker.getMetadata("data"))
+                sendOnMarkerClickCallbackToFlutter(marker.getMetadata("data"))
             } else {
                 sendOnMarkerClickCallbackToFlutter(marker.getMetadata("data"))
             }
