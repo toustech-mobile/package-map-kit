@@ -199,7 +199,7 @@ class _MyAppState extends State<MyApp> {
             ),
             ElevatedButton(
                 onPressed: () {
-                  mapController.removeAllMarkers();
+                  mapController.removeAllCircles();
                 },
                 child: Text('click'))
           ],

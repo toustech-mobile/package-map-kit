@@ -8,6 +8,7 @@ mixin class UiMapController {
   late Function(List<MarkerModel>) addMarkers;
   late Function(List<MarkerModel>) removeMarkers;
   late Function() removeAllMarkers;
+  late Function() removeAllCircles;
   late Function(List<CircleModel>) addCircles;
   late Function(List<CircleModel>) removeCircles;
   late Function(List<PolyLineModel>) addPolyline;
