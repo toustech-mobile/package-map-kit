@@ -87,6 +87,10 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
                 handleRemoveMarkers(call, result)
             }
 
+            "removeAllMarkers" -> {
+                handleRemoveAllMarkers(result)
+            }
+
             "addCircles" -> {
                 handleAddCircles(call, result)
             }
@@ -135,6 +139,13 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
         mapKitView.removeMarkers(call.arguments as List<*>)
 
         result.success("Marker removed successfully")
+    }
+
+    private fun handleRemoveAllMarkers(result: MethodChannel.Result) {
+        Log.d("Native Remove Markers", "")
+        mapKitView.removeAllMarkers()
+
+        result.success("All Marker removed successfully")
     }
 
     private fun handleAddCircles(call: MethodCall, result: MethodChannel.Result) {
@@ -268,6 +279,10 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         this.markers.addAll(markers)
         mapView.addMarkers(markers)
 
+    }
+
+    fun removeAllMarkers() {
+        mapView.clearMarkers()
     }
 
     fun removeMarkers(rawData: List<*>) {

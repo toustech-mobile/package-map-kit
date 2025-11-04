@@ -69,6 +69,10 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
         }
       };
 
+      widget.uiMapController!.removeAllMarkers = () {
+        neshan.NeshanMethods.removeAllMarkers();
+      };
+
       widget.uiMapController!.addCircles = (List<CircleModel> circles) {
         widget.circles!.addAll(circles);
         neshan.NeshanMethods.addCircles(circles);
