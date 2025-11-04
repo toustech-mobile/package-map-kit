@@ -43,6 +43,28 @@ class _MyAppState extends State<MyApp> {
     ),
   ];
 
+  List<CircleModel> circles = [
+    CircleModel(
+        latitude: 36.32209806699167,
+        longitude: 59.52369428145562,
+        radius: 700,
+        color: Colors.blue.withOpacity(0.5),
+        borderColor: Colors.blue,
+        data: 'Man Circle Blue hastam',
+        snippetTitle: 'circle Abi hastam',
+        snippetDescription: 'man tozihat circle abi hastam'),
+    CircleModel(
+      latitude: 36.33377358253895,
+      longitude: 59.54590011713316,
+      radius: 500,
+      color: Colors.deepOrange.withOpacity(0.5),
+      borderColor: Colors.deepOrange,
+      data: 'Man Circle Orange Hastam',
+      // snippetTitle: 'asdsadsadasdsadsadaa',
+      // snippetDescription: 'asfagasgasgasgasgasasgasg'
+    )
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -118,27 +140,7 @@ class _MyAppState extends State<MyApp> {
           showArrow: true,
         ),
       ],
-      circles: [
-        CircleModel(
-            latitude: 36.32209806699167,
-            longitude: 59.52369428145562,
-            radius: 700,
-            color: Colors.blue.withOpacity(0.5),
-            borderColor: Colors.blue,
-            data: 'Man Circle Blue hastam',
-            snippetTitle: 'circle Abi hastam',
-            snippetDescription: 'man tozihat circle abi hastam'),
-        CircleModel(
-          latitude: 36.33377358253895,
-          longitude: 59.54590011713316,
-          radius: 500,
-          color: Colors.deepOrange.withOpacity(0.5),
-          borderColor: Colors.deepOrange,
-          data: 'Man Circle Orange Hastam',
-          // snippetTitle: 'asdsadsadasdsadsadaa',
-          // snippetDescription: 'asfagasgasgasgasgasasgasg'
-        ),
-      ],
+      circles: circles,
       onMarkerTap: (markerModel) {
         print("onMarkerTap: ${(markerModel as MarkerModel).data}");
       },
@@ -199,7 +201,7 @@ class _MyAppState extends State<MyApp> {
             ),
             ElevatedButton(
                 onPressed: () {
-                  mapController.removeAllCircles();
+                  mapController.removeCircles(circles);
                 },
                 child: Text('click'))
           ],

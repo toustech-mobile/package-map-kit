@@ -126,6 +126,15 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         });
       };
 
+      widget.uiMapController!.removeCircles = (List<CircleModel> circles) {
+        if (!mounted) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          widget.circles!.removeWhere((circle) => circles.contains(circle));
+          setState(() {});
+        });
+      };
+
       widget.uiMapController!.removeAllMarkers = () {
         if (!mounted) return;
         WidgetsBinding.instance.addPostFrameCallback((_) {
