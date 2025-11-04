@@ -251,7 +251,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
     final List<Marker> markers = [];
 
     for (final polyLine in widget.polyLines!) {
-      if (polyLine.points != null) {
+      if (polyLine.points != null && polyLine.showArrow == true) {
         for (final point in polyLine.points!) {
           markers.add(
             Marker(
