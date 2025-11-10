@@ -51,7 +51,8 @@ class NeshanMapWidget extends StatefulWidget {
   State<NeshanMapWidget> createState() => _NeshanMapWidgetState();
 }
 
-class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCallbackInterface {
+class _NeshanMapWidgetState extends State<NeshanMapWidget>
+    implements NeshanCallbackInterface {
   @override
   void initState() {
     NeshanCallback.setNeshanCallback(this);
@@ -90,10 +91,16 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
         neshan.NeshanMethods.addPolylines(polyLines);
       };
 
-      widget.uiMapController!.setUserLocation = (UserMarkerModel userMarkerModel) {
+      widget.uiMapController!.setUserLocation =
+          (UserMarkerModel userMarkerModel) {
         widget.userMarker = userMarkerModel;
         neshan.NeshanMethods.setUserMarker(userMarkerModel);
 
+        setState(() {});
+      };
+
+      widget.uiMapController!.moveCamera = (MoveModel moveModel) {
+        neshan.NeshanMethods.moveCamera(moveModel);
         setState(() {});
       };
 
@@ -115,9 +122,15 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
       },
       'isDarkMode': widget.isDarkMode ?? false,
       'zoom': widget.zoom,
-      'markers': widget.markers!.map((flutterModel) => flutterModel.toNeshanMarker()).toList(),
-      'polyLines': widget.polyLines!.map((flutterModel) => flutterModel.toNeshanPolyLines()).toList(),
-      'circles': widget.circles!.map((flutterModel) => flutterModel.toNeshanCircle()).toList(),
+      'markers': widget.markers!
+          .map((flutterModel) => flutterModel.toNeshanMarker())
+          .toList(),
+      'polyLines': widget.polyLines!
+          .map((flutterModel) => flutterModel.toNeshanPolyLines())
+          .toList(),
+      'circles': widget.circles!
+          .map((flutterModel) => flutterModel.toNeshanCircle())
+          .toList(),
     };
   }
 
@@ -133,7 +146,8 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
                 viewType: 'com.example.example/map_kit_view',
                 creationParams: widget.creationParams,
                 creationParamsCodec: const StandardMessageCodec(),
-                gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+                gestureRecognizers: const <Factory<
+                    OneSequenceGestureRecognizer>>{},
                 layoutDirection: TextDirection.ltr,
                 onPlatformViewCreated: (int id) {
                   print('the PlatfromId is : $id');
@@ -159,8 +173,9 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
 
   void _moveToUserLocation() {
     if (widget.userMarker != null) {
-      neshan.NeshanMethods.moveCamera(
-          MoveModel(latitude: widget.userMarker!.latitude, longitude: widget.userMarker!.longitude));
+      neshan.NeshanMethods.moveCamera(MoveModel(
+          latitude: widget.userMarker!.latitude,
+          longitude: widget.userMarker!.longitude));
     }
   }
 
