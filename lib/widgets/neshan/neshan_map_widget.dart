@@ -51,15 +51,20 @@ class NeshanMapWidget extends StatefulWidget {
   State<NeshanMapWidget> createState() => _NeshanMapWidgetState();
 }
 
-class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCallbackInterface {
+class _NeshanMapWidgetState extends State<NeshanMapWidget>
+    implements NeshanCallbackInterface {
   @override
   void initState() {
     NeshanCallback.setNeshanCallback(this);
     print('NeshanCallback setNeshanCallback set');
+
     if (widget.uiMapController != null) {
       widget.uiMapController!.addMarkers = (List<MarkerModel> markers) {
         widget.markers!.addAll(markers);
         neshan.NeshanMethods.addMarkers(markers);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
       };
 
       widget.uiMapController!.removeMarkers = (List<MarkerModel> markers) {
@@ -67,15 +72,24 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
         for (var m in markers) {
           widget.markers!.remove(m);
         }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
       };
 
       widget.uiMapController!.removeAllMarkers = () {
         neshan.NeshanMethods.removeAllMarkers();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
       };
 
       widget.uiMapController!.addCircles = (List<CircleModel> circles) {
         widget.circles!.addAll(circles);
         neshan.NeshanMethods.addCircles(circles);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
       };
 
       widget.uiMapController!.removeCircles = (List<CircleModel> circles) {
@@ -83,24 +97,42 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
         for (var c in circles) {
           widget.circles!.remove(c);
         }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
       };
 
       widget.uiMapController!.addPolyline = (List<PolyLineModel> polyLines) {
         widget.polyLines!.addAll(polyLines);
         neshan.NeshanMethods.addPolylines(polyLines);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
       };
 
-      widget.uiMapController!.setUserLocation = (UserMarkerModel userMarkerModel) {
+      widget.uiMapController!.setUserLocation =
+          (UserMarkerModel userMarkerModel) {
         widget.userMarker = userMarkerModel;
         neshan.NeshanMethods.setUserMarker(userMarkerModel);
 
-        setState(() {});
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
+      };
+
+      widget.uiMapController!.moveCamera = (MoveModel moveModel) {
+        neshan.NeshanMethods.moveCamera(moveModel);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
       };
 
       widget.uiMapController!.setDarkMode = (bool isDarkMode) {
         widget.isDarkMode = isDarkMode;
         neshan.NeshanMethods.setDarkMode(isDarkMode);
-        setState(() {});
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
       };
     }
 
@@ -115,9 +147,15 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
       },
       'isDarkMode': widget.isDarkMode ?? false,
       'zoom': widget.zoom,
-      'markers': widget.markers!.map((flutterModel) => flutterModel.toNeshanMarker()).toList(),
-      'polyLines': widget.polyLines!.map((flutterModel) => flutterModel.toNeshanPolyLines()).toList(),
-      'circles': widget.circles!.map((flutterModel) => flutterModel.toNeshanCircle()).toList(),
+      'markers': widget.markers!
+          .map((flutterModel) => flutterModel.toNeshanMarker())
+          .toList(),
+      'polyLines': widget.polyLines!
+          .map((flutterModel) => flutterModel.toNeshanPolyLines())
+          .toList(),
+      'circles': widget.circles!
+          .map((flutterModel) => flutterModel.toNeshanCircle())
+          .toList(),
     };
   }
 
@@ -133,7 +171,8 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
                 viewType: 'com.example.example/map_kit_view',
                 creationParams: widget.creationParams,
                 creationParamsCodec: const StandardMessageCodec(),
-                gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+                gestureRecognizers: const <Factory<
+                    OneSequenceGestureRecognizer>>{},
                 layoutDirection: TextDirection.ltr,
                 onPlatformViewCreated: (int id) {
                   print('the PlatfromId is : $id');
@@ -159,8 +198,9 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
 
   void _moveToUserLocation() {
     if (widget.userMarker != null) {
-      neshan.NeshanMethods.moveCamera(
-          MoveModel(latitude: widget.userMarker!.latitude, longitude: widget.userMarker!.longitude));
+      neshan.NeshanMethods.moveCamera(MoveModel(
+          latitude: widget.userMarker!.latitude,
+          longitude: widget.userMarker!.longitude));
     }
   }
 
