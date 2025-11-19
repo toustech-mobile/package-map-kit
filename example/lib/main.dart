@@ -28,18 +28,18 @@ class _MyAppState extends State<MyApp> {
         latitude: 36.3156692,
         longitude: 59.5405541,
         data: "Test Click On Marker",
-        icon: 'ic_map_tour_icon.svg',
-        iconSize: 50,
-        markerContent: '50',
+        icon: 'ic_map_tour_waiting_icon.svg',
+        iconSize: 28,
+        markerContent: '2',
         snippetTitle: 'marker title',
         snippetDescription: 'marker description'),
     MarkerModel(
       latitude: 36.324915772569966,
       longitude: 59.54904346842852,
       data: "Test Click On Marker",
-      markerContent: 'pause.svg',
-      iconSize: 50,
-      icon: 'ic_map_tour_icon.svg',
+      markerContent: '1',
+      iconSize: 28,
+      icon: 'ic_map_tour_waiting_icon.svg',
     ),
   ];
 
@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
     mapController = UiMapController();
 
     mapKitPlugin = UiMap(
-      mapProvider: MapProvider.flutter,
+      mapProvider: MapProvider.neshan,
       controller: mapController,
       initialCenter: const LatLng(36.3156692, 59.5405541),
       isDarkMode: false,

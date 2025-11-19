@@ -98,16 +98,22 @@ class MarkerHelper {
         private fun addTextToBitmap(context: Context, bitmap: Bitmap, text: String): Bitmap {
             val result = bitmap.copy(Bitmap.Config.ARGB_8888, true)
             val canvas = Canvas(result)
+
             val typeface = Typeface.createFromAsset(context.assets, "fonts/iransans.ttf")
+
+            val isTablet = context.resources.configuration.smallestScreenWidthDp >= 600
+
             val paint = Paint().apply {
                 color = Color.parseColor("#252527")
-                textSize = 28f
+                textSize = if (isTablet) 12f else 24f
                 textAlign = Paint.Align.CENTER
                 isAntiAlias = true
                 this.typeface = typeface
             }
+
             val xPos = canvas.width / 2
-            val yPos = canvas.height - 26 // پایین آیکون
+            val yPos = canvas.height / 2
+
             canvas.drawText(text, xPos.toFloat(), yPos.toFloat(), paint)
             return result
         }
