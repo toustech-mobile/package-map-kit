@@ -6,3 +6,6 @@
     *;
 }
 
+-keep class com.golrang.map_kit.** {
+    *;
+}
