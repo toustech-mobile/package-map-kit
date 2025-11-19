@@ -140,7 +140,6 @@ class _MyAppState extends State<MyApp> {
           showArrow: true,
         ),
       ],
-      circles: circles,
       onMarkerTap: (markerModel) {
         print("onMarkerTap: ${(markerModel as MarkerModel).data}");
       },
@@ -199,11 +198,20 @@ class _MyAppState extends State<MyApp> {
             Center(
               child: mapKitPlugin,
             ),
-            ElevatedButton(
-                onPressed: () {
-                  mapController.removeCircles(circles);
-                },
-                child: Text('click'))
+            Column(
+              children: [
+                ElevatedButton(
+                    onPressed: () {
+                      mapController.removeCircles(circles);
+                    },
+                    child: Text('click')),
+                ElevatedButton(
+                    onPressed: () {
+                      mapController.addCircles(circles);
+                    },
+                    child: Text('add')),
+              ],
+            )
           ],
         ),
         // floatingActionButton: FloatingActionButton(
