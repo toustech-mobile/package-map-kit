@@ -99,6 +99,10 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
                 handleRemoveCircles(call, result)
             }
 
+            "removeAllCircles" -> {
+                handleRemoveAllCircles(result)
+            }
+
             "addPolyLines" -> {
                 handleAddPolyLines(call, result)
             }
@@ -160,6 +164,13 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
         mapKitView.removeCircles(call.arguments as List<*>)
 
         result.success("Circles removed successfully")
+    }
+
+    private fun handleRemoveAllCircles(result: MethodChannel.Result) {
+        Log.d("Native Remove Circles", "")
+        mapKitView.removeAllCircles()
+
+        result.success("All Circles removed successfully")
     }
 
     private fun handleAddPolyLines(call: MethodCall, result: MethodChannel.Result) {
@@ -329,6 +340,14 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
                 mapView.removeCircle(circle.circle)
             }
         }
+        mapView.setZoom(mapView.zoom, 0f)
+    }
+
+    fun removeAllCircles() {
+        circles.forEach {
+            mapView.removeCircle(it.circle)
+        }
+        circles.clear()
         mapView.setZoom(mapView.zoom, 0f)
     }
 

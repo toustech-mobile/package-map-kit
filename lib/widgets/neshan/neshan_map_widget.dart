@@ -84,6 +84,13 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
         });
       };
 
+      widget.uiMapController!.removeAllCircles = () {
+        neshan.NeshanMethods.removeAllCircles();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
+      };
+
       widget.uiMapController!.addCircles = (List<CircleModel> circles) {
         widget.circles!.addAll(circles);
         neshan.NeshanMethods.addCircles(circles);
