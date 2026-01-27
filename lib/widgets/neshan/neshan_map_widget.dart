@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/map_kit.dart';
@@ -21,6 +23,8 @@ class NeshanMapWidget extends StatefulWidget {
   LatLng? initialCenter;
   bool? isDarkMode;
   bool? isCurrentLocationEnable;
+  bool? gpsEnabled;
+
   double? zoom;
   List<MarkerModel>? markers;
   List<PolyLineModel>? polyLines;
@@ -30,6 +34,9 @@ class NeshanMapWidget extends StatefulWidget {
   final void Function(LatLng)? onLongPress;
   final void Function(dynamic)? onMarkerTap;
   final void Function(dynamic)? onCircleTap;
+  final Future<void> Function()? onMyLocationClick;
+
+  StreamSubscription<ServiceStatus>? _serviceStatusStream;
 
   NeshanMapWidget({
     super.key,
@@ -45,14 +52,14 @@ class NeshanMapWidget extends StatefulWidget {
     this.onLongPress,
     this.onMarkerTap,
     this.onCircleTap,
+    this.onMyLocationClick,
   });
 
   @override
   State<NeshanMapWidget> createState() => _NeshanMapWidgetState();
 }
 
-class _NeshanMapWidgetState extends State<NeshanMapWidget>
-    implements NeshanCallbackInterface {
+class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCallbackInterface {
   @override
   void initState() {
     NeshanCallback.setNeshanCallback(this);
@@ -117,8 +124,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
         });
       };
 
-      widget.uiMapController!.setUserLocation =
-          (UserMarkerModel userMarkerModel) {
+      widget.uiMapController!.setUserLocation = (UserMarkerModel userMarkerModel) {
         widget.userMarker = userMarkerModel;
         neshan.NeshanMethods.setUserMarker(userMarkerModel);
 
@@ -143,6 +149,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
       };
     }
 
+    listenGpsStatus() ;
     super.initState();
   }
 
@@ -154,15 +161,9 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
       },
       'isDarkMode': widget.isDarkMode ?? false,
       'zoom': widget.zoom,
-      'markers': widget.markers!
-          .map((flutterModel) => flutterModel.toNeshanMarker())
-          .toList(),
-      'polyLines': widget.polyLines!
-          .map((flutterModel) => flutterModel.toNeshanPolyLines())
-          .toList(),
-      'circles': widget.circles!
-          .map((flutterModel) => flutterModel.toNeshanCircle())
-          .toList(),
+      'markers': widget.markers!.map((flutterModel) => flutterModel.toNeshanMarker()).toList(),
+      'polyLines': widget.polyLines!.map((flutterModel) => flutterModel.toNeshanPolyLines()).toList(),
+      'circles': widget.circles!.map((flutterModel) => flutterModel.toNeshanCircle()).toList(),
     };
   }
 
@@ -178,8 +179,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
                 viewType: 'com.example.example/map_kit_view',
                 creationParams: widget.creationParams,
                 creationParamsCodec: const StandardMessageCodec(),
-                gestureRecognizers: const <Factory<
-                    OneSequenceGestureRecognizer>>{},
+                gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
                 layoutDirection: TextDirection.ltr,
                 onPlatformViewCreated: (int id) {
                   print('the PlatfromId is : $id');
@@ -194,7 +194,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
               onPressed: _moveToUserLocation,
               child: Icon(
                 Icons.my_location,
-                color: widget.userMarker != null ? Colors.blue : Colors.grey,
+                color: widget.userMarker != null && (widget.gpsEnabled??false)  ? Colors.blue : Colors.grey,
               ),
             ),
           ),
@@ -203,11 +203,11 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
     );
   }
 
-  void _moveToUserLocation() {
+  void _moveToUserLocation() async {
+    await widget.onMyLocationClick?.call();
     if (widget.userMarker != null) {
-      neshan.NeshanMethods.moveCamera(MoveModel(
-          latitude: widget.userMarker!.latitude,
-          longitude: widget.userMarker!.longitude));
+      neshan.NeshanMethods.moveCamera(
+          MoveModel(latitude: widget.userMarker!.latitude, longitude: widget.userMarker!.longitude));
     }
   }
 
@@ -237,5 +237,18 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
     if (widget.onCircleTap != null) {
       widget.onCircleTap!(data);
     }
+  }
+
+  void listenGpsStatus() {
+    widget._serviceStatusStream = Geolocator.getServiceStatusStream().listen((ServiceStatus status) {
+      widget.gpsEnabled = status == ServiceStatus.enabled;
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    widget._serviceStatusStream?.cancel();
+    super.dispose();
   }
 }

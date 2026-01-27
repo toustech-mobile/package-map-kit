@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
@@ -17,6 +16,8 @@ class UiMap extends StatefulWidget {
   final void Function(LatLng)? onLongPress;
   final void Function(dynamic)? onMarkerTap;
   final void Function(dynamic)? onCircleTap;
+  final Future<void> Function()? onMyLocationClick;
+
   LatLng? initialCenter;
   bool? isDarkMode;
   double? zoom;
@@ -33,6 +34,7 @@ class UiMap extends StatefulWidget {
     this.onLongPress,
     this.onMarkerTap,
     this.onCircleTap,
+    this.onMyLocationClick,
     this.initialCenter,
     this.isDarkMode,
     this.zoom,
@@ -78,6 +80,8 @@ class _UiMapState extends State<UiMap> {
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
           mapProvider: MapProvider.flutter,
+          onMyLocationClick: widget.onMyLocationClick,
+
         );
       case MapProvider.mapIr:
         return FlutterMapWidget(
@@ -93,6 +97,8 @@ class _UiMapState extends State<UiMap> {
           onCircleTap: widget.onCircleTap,
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
+          onMyLocationClick: widget.onMyLocationClick,
+
           mapProvider: MapProvider.mapIr,
         );
 
@@ -110,6 +116,7 @@ class _UiMapState extends State<UiMap> {
           onCircleTap: widget.onCircleTap,
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
+          onMyLocationClick: widget.onMyLocationClick,
         );
     }
   }

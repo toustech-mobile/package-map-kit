@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:location/location.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
 import 'package:map_kit/models/circle_model.dart';
@@ -183,9 +184,24 @@ class _MyAppState extends State<MyApp> {
               data: "UserCircleData")
         ]);
       },
+      onMyLocationClick: () async {
+        await requestEnableGps() ;
+      },
     );
   }
 
+  Future<void> requestEnableGps() async {
+    Location location = Location();
+
+    bool serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        // کاربر قبول نکرد
+        return;
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
