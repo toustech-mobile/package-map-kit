@@ -57,10 +57,23 @@ class MarkerHelper {
             snippetDescription: String?,
             markerContent: String?,
             angle: Double?,
-            context: Context
+            context: Context,
+            placementPriority: Int? = null,
+            hideIfOverlapped: Boolean? = null,
+            causesOverlap: Boolean? = null
         ): Marker {
             val markStCr = MarkerStyleBuilder()
             markStCr.size = iconSize.toFloat()
+            // Keep high-priority markers (like user marker) visible when markers overlap.
+            if (placementPriority != null) {
+                markStCr.setPlacementPriority(placementPriority)
+            }
+            if (hideIfOverlapped != null) {
+                markStCr.setHideIfOverlapped(hideIfOverlapped)
+            }
+            if (causesOverlap != null) {
+                markStCr.setCausesOverlap(causesOverlap)
+            }
 
             // دریافت Bitmap از آیکون
             val iconBitmap =

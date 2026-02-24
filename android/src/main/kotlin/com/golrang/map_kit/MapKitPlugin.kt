@@ -289,6 +289,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
         this.markers.addAll(markers)
         mapView.addMarkers(markers)
+        ensureUserMarkerOnTop()
 
     }
 
@@ -323,6 +324,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
             mapView.addCircle(it.circle)
             mapView.addMarker(it.centerMarker)
         }
+        ensureUserMarkerOnTop()
     }
 
     fun removeCircles(rawData: List<*>) {
@@ -361,6 +363,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         }
 
         mapView.addMarkers(polyLines.second)
+        ensureUserMarkerOnTop()
     }
 
     fun setUserMarker(rawPolyLines: Map<String, *>) {
@@ -381,7 +384,19 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         }
 
         userMarker = MarkerHelper.createMarker(
-            LatLng(latitude, longitude), "", "current_location.svg", 24, "", "", "", 0.0, context,
+            LatLng(latitude, longitude),
+            "",
+            "current_location.svg",
+            24,
+            "",
+            "",
+            "",
+            0.0,
+            context,
+            placementPriority = Int.MAX_VALUE,
+            hideIfOverlapped = true     ,
+
+            causesOverlap = true
         )
         mapView.addMarker(
             userMarker
@@ -390,10 +405,20 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
     }
 
+    private fun ensureUserMarkerOnTop() {
+        val marker = userMarker ?: return
+        mapView.removeMarker(marker)
+        mapView.addMarker(marker)
+    }
+
     fun moveCamera(rawPolyLines: Map<String, *>) {
         val latitude = rawPolyLines["latitude"] as Double
         val longitude = rawPolyLines["longitude"] as Double
+        val zoom = rawPolyLines["zoom"] as? Double
 
+        if (zoom != null) {
+            mapView.setZoom(zoom.toFloat(), 0f)
+        }
         mapView.moveCamera(LatLng(latitude, longitude), .5f)
     }
 

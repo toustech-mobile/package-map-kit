@@ -10,6 +10,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
 import 'package:map_kit/models/circle_model.dart';
+import 'package:map_kit/models/map_bounds_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/move_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
@@ -113,8 +114,24 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         if (!mounted) return;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          _mapController.move(LatLng(moveModel.latitude, moveModel.longitude), moveModel.zoom!);
+          _mapController.move(
+            LatLng(moveModel.latitude, moveModel.longitude),
+            moveModel.zoom ?? widget.zoom ?? _mapController.camera.zoom,
+          );
           setState(() {});
+        });
+      };
+
+      widget.uiMapController!.fitBounds = (MapBoundsModel mapBoundsModel) {
+        if (!mounted || mapBoundsModel.points.isEmpty) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || mapBoundsModel.points.isEmpty) return;
+          _mapController.fitCamera(
+            CameraFit.bounds(
+              bounds: LatLngBounds.fromPoints(mapBoundsModel.points),
+              padding: EdgeInsets.all(mapBoundsModel.padding),
+            ),
+          );
         });
       };
 

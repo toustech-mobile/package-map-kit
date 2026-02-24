@@ -15,6 +15,7 @@ class MoveModel {
     return {
       'latitude': latitude,
       'longitude': longitude,
+      'zoom': zoom,
     };
   }
 }
