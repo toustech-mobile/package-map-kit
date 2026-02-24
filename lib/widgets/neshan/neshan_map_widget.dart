@@ -201,14 +201,14 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
             Platform.isIOS
                 ? const MapKitView()
                 : AndroidView(
-                viewType: 'com.example.example/map_kit_view',
-                creationParams: widget.creationParams,
-                creationParamsCodec: const StandardMessageCodec(),
-                gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-                layoutDirection: TextDirection.ltr,
-                onPlatformViewCreated: (int id) {
-                  print('the PlatfromId is : $id');
-                }),
+                    viewType: 'com.example.example/map_kit_view',
+                    creationParams: widget.creationParams,
+                    creationParamsCodec: const StandardMessageCodec(),
+                    gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+                    layoutDirection: TextDirection.ltr,
+                    onPlatformViewCreated: (int id) {
+                      print('the PlatfromId is : $id');
+                    }),
             Visibility(
               visible: widget.isCurrentLocationEnable ?? false,
               child: Positioned(
