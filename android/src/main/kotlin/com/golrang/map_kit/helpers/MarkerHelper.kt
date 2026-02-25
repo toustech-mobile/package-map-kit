@@ -18,6 +18,10 @@ import org.neshan.mapsdk.model.Marker
 
 class MarkerHelper {
     companion object {
+        // Tunables for markerContent icon rendering (native-only).
+        private const val CONTENT_ICON_SCALE = 0.6f
+        private const val CONTENT_ICON_PADDING_PX = 0f
+        private const val CONTENT_ICON_OFFSET_Y_DP = -4f
         fun toNeshanModel(context: Context, markers: List<*>): List<Marker> {
             return markers.mapNotNull { marker ->
                 if (marker is Map<*, *>) {
@@ -84,7 +88,7 @@ class MarkerHelper {
 
             // اگر markerContent وجود داشت، روی آیکون بنویس
             val finalBitmap = if (!markerContent.isNullOrEmpty()) {
-                addTextToBitmap(context, iconBitmap, markerContent)
+                addContentToBitmap(context, iconBitmap, markerContent)
             } else {
                 iconBitmap
             }
@@ -107,6 +111,52 @@ class MarkerHelper {
             return marker
         }
 
+
+        private fun addContentToBitmap(context: Context, bitmap: Bitmap, content: String): Bitmap {
+            val contentDrawable = getOptionalDrawableByReflection(context, content)
+            if (contentDrawable != null) {
+                val contentBitmap = contentDrawable.toBitmap()
+                return drawIconOnBitmap(context, bitmap, contentBitmap)
+            }
+
+            return addTextToBitmap(context, bitmap, content)
+        }
+
+        private fun drawIconOnBitmap(
+            context: Context,
+            baseBitmap: Bitmap,
+            iconBitmap: Bitmap
+        ): Bitmap {
+            val result = baseBitmap.copy(Bitmap.Config.ARGB_8888, true)
+            val canvas = Canvas(result)
+
+            val maxSize = (minOf(canvas.width, canvas.height) * CONTENT_ICON_SCALE) -
+                (CONTENT_ICON_PADDING_PX * 2)
+            val scale = minOf(
+                1f,
+                maxSize / iconBitmap.width.toFloat(),
+                maxSize / iconBitmap.height.toFloat()
+            )
+
+            val scaledBitmap = if (scale < 1f) {
+                Bitmap.createScaledBitmap(
+                    iconBitmap,
+                    (iconBitmap.width * scale).toInt(),
+                    (iconBitmap.height * scale).toInt(),
+                    true
+                )
+            } else {
+                iconBitmap
+            }
+
+            val density = context.resources.displayMetrics.density
+            val offsetY = CONTENT_ICON_OFFSET_Y_DP * density
+            val left = ((canvas.width - scaledBitmap.width) / 2f) + CONTENT_ICON_PADDING_PX
+            val top = ((canvas.height - scaledBitmap.height) / 2f) + offsetY
+            canvas.drawBitmap(scaledBitmap, left, top, null)
+
+            return result
+        }
 
         private fun addTextToBitmap(context: Context, bitmap: Bitmap, text: String): Bitmap {
             val result = bitmap.copy(Bitmap.Config.ARGB_8888, true)
@@ -131,14 +181,19 @@ class MarkerHelper {
             return result
         }
 
-        private fun getIconDrawableByReflection(context: Context, iconName: String): Drawable? {
+        private fun getOptionalDrawableByReflection(context: Context, iconName: String): Drawable? {
             return try {
                 val resId =
                     R.drawable::class.java.getField(iconName.replace(".svg", "")).getInt(null)
                 getDrawable(context, resId)
             } catch (e: Exception) {
-                getDrawable(context, R.drawable.end_point)
+                null
             }
+        }
+
+        private fun getIconDrawableByReflection(context: Context, iconName: String): Drawable? {
+            return getOptionalDrawableByReflection(context, iconName)
+                ?: getDrawable(context, R.drawable.end_point)
         }
     }
 }

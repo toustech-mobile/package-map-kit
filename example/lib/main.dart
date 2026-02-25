@@ -153,7 +153,7 @@ class _MyAppState extends State<MyApp> {
             latitude: point.latitude,
             longitude: point.longitude,
             data: "Test Click On Marker",
-            markerContent: 'pause.svg',
+            markerContent: 'ic_add_user.svg',
             iconSize: 50,
             icon: 'ic_map_tour_icon.svg',
           )
