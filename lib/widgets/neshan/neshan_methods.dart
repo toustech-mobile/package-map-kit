@@ -46,6 +46,18 @@ abstract class NeshanMethods {
             .toList());
   }
 
+  static removePolyLines(List<PolyLineModel> polyLines) async {
+    await _channel.invokeMethod(
+        'removePolyLines',
+        polyLines
+            .map((flutterModel) => flutterModel.toNeshanPolyLines())
+            .toList());
+  }
+
+  static removeAllPolyLines() async {
+    await _channel.invokeMethod('removeAllPolyLines', '');
+  }
+
   static setUserMarker(UserMarkerModel userMarker) async {
     await _channel.invokeMethod(
         'setUserMarker', userMarker.toNeshanUserMarker());

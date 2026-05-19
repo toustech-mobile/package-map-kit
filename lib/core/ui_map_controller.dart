@@ -13,6 +13,8 @@ mixin class UiMapController {
   late Function(List<CircleModel>) addCircles;
   late Function(List<CircleModel>) removeCircles;
   late Function(List<PolyLineModel>) addPolyline;
+  late Function(List<PolyLineModel>) removePolyLines;
+  late Function() removeAllPolyLines;
   late Function(MoveModel) moveCamera;
   late Function(MapBoundsModel) fitBounds;
   Function(UserMarkerModel)? setUserLocation;

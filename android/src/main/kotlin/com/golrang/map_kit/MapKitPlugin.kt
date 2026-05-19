@@ -107,9 +107,14 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
                 handleAddPolyLines(call, result)
             }
 
-//            "removePolyLines" -> {
-//                handleRemovePolyLines(call, result)
-//            }
+            "removePolyLines" -> {
+                handleRemovePolyLines(call, result)
+            }
+
+            "removeAllPolyLines" -> {
+                handleRemoveAllPolyLines(result)
+            }
+
             "setUserMarker" -> {
                 handleSetUserMarker(call, result)
             }
@@ -201,13 +206,19 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
         result.success("Marker added successfully")
     }
 
-//
-//    private fun handleRemovePolyLines(call: MethodCall, result: MethodChannel.Result) {
-//        Log.d("Native Remove PolyLines", "")
-//        mapKitView.removeCircles(call.arguments as List<*>)
-//
-//        result.success("PolyLines removed successfully")
-//    }
+    private fun handleRemovePolyLines(call: MethodCall, result: MethodChannel.Result) {
+        Log.d("Native Remove PolyLines", "")
+        mapKitView.removePolyLines(call.arguments as List<*>)
+
+        result.success("PolyLines removed successfully")
+    }
+
+    private fun handleRemoveAllPolyLines(result: MethodChannel.Result) {
+        Log.d("Native RemoveAllPolyLines", "")
+        mapKitView.removeAllPolyLines()
+
+        result.success("All PolyLines removed successfully")
+    }
 
 }
 
@@ -364,6 +375,33 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
         mapView.addMarkers(polyLines.second)
         ensureUserMarkerOnTop()
+    }
+
+    fun removePolyLines(rawData: List<*>) {
+        val parsedData = PolyLineHelper.toNeshanModel(rawData, context)
+
+        parsedData.first.forEach { parsedPolyline ->
+            val polylineToRemove = polyLines.find {
+                it.points.firstOrNull()?.latitude == parsedPolyline.points.firstOrNull()?.latitude &&
+                        it.points.firstOrNull()?.longitude == parsedPolyline.points.firstOrNull()?.longitude
+            }
+
+            if (polylineToRemove != null) {
+                mapView.removePolyline(polylineToRemove)
+                polyLines.remove(polylineToRemove)
+            }
+        }
+
+        mapView.setZoom(mapView.zoom, 0f)
+    }
+
+    fun removeAllPolyLines() {
+        polyLines.forEach {
+            mapView.removePolyline(it)
+        }
+        polyLines.clear()
+
+        mapView.setZoom(mapView.zoom, 0f)
     }
 
     fun setUserMarker(rawPolyLines: Map<String, *>) {

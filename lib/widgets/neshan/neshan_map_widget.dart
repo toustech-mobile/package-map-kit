@@ -128,6 +128,24 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
         });
       };
 
+      widget.uiMapController!.removePolyLines = (List<PolyLineModel> polyLines) {
+        neshan.NeshanMethods.removePolyLines(polyLines);
+        for (var p in polyLines) {
+          widget.polyLines!.remove(p);
+        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
+      };
+
+      widget.uiMapController!.removeAllPolyLines = () {
+        neshan.NeshanMethods.removeAllPolyLines();
+        widget.polyLines?.clear();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() {});
+        });
+      };
+
       widget.uiMapController!.setUserLocation = (UserMarkerModel userMarkerModel) {
         widget.userMarker = userMarkerModel;
         neshan.NeshanMethods.setUserMarker(userMarkerModel);
