@@ -179,6 +179,34 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
           setState(() {});
         });
       };
+
+      widget.uiMapController!.removePolyLines = (List<PolyLineModel> polyLinesToRemove) {
+        if (!mounted) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+
+          widget.polyLines!.removeWhere((existingLine) {
+            return polyLinesToRemove.any((lineToRemove) {
+              if (existingLine.points == null || existingLine.points!.isEmpty) return false;
+              if (lineToRemove.points == null || lineToRemove.points!.isEmpty) return false;
+
+              return existingLine.points!.first.latitude == lineToRemove.points!.first.latitude &&
+                  existingLine.points!.first.longitude == lineToRemove.points!.first.longitude;
+            });
+          });
+
+          setState(() {});
+        });
+      };
+
+      widget.uiMapController!.removeAllPolyLines = () {
+        if (!mounted) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          widget.polyLines!.clear();
+          setState(() {});
+        });
+      };
     }
 
     _initializeHiddenMarkers();

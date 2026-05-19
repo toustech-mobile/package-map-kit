@@ -73,7 +73,7 @@ class _MyAppState extends State<MyApp> {
     mapController = UiMapController();
 
     mapKitPlugin = UiMap(
-      mapProvider: MapProvider.neshan,
+      mapProvider: MapProvider.mapIr,
       controller: mapController,
       initialCenter: const LatLng(36.3156692, 59.5405541),
       isDarkMode: false,
