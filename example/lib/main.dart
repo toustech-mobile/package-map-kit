@@ -73,7 +73,7 @@ class _MyAppState extends State<MyApp> {
     mapController = UiMapController();
 
     mapKitPlugin = UiMap(
-      mapProvider: MapProvider.mapIr,
+      mapProvider: MapProvider.neshan,
       controller: mapController,
       initialCenter: const LatLng(36.3156692, 59.5405541),
       isDarkMode: false,
@@ -159,6 +159,7 @@ class _MyAppState extends State<MyApp> {
           )
         ]);
         print('User tapped on: $point');
+        print("Testtttt");
         // mapController.addMarker(
         //   MarkerModel(
         //     latitude: point.latitude,
