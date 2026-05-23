@@ -4,332 +4,361 @@ import 'package:location/location.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
 import 'package:map_kit/models/circle_model.dart';
+import 'package:map_kit/models/map_bounds_model.dart';
 import 'package:map_kit/models/marker_model.dart';
+import 'package:map_kit/models/move_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/models/poly_line_point_model.dart';
+import 'package:map_kit/models/user_marker.dart';
 import 'package:map_kit/ui_map.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Map Kit Comprehensive Example',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
+      ),
+      home: const MapExampleScreen(),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
-  late final UiMap mapKitPlugin;
+class MapExampleScreen extends StatefulWidget {
+  const MapExampleScreen({super.key});
+
+  @override
+  State<MapExampleScreen> createState() => _MapExampleScreenState();
+}
+
+class _MapExampleScreenState extends State<MapExampleScreen> {
   late final UiMapController mapController;
+  MapProvider currentProvider = MapProvider.neshan;
+  bool isDarkMode = false;
 
-  List<MarkerModel> markers = [
+  final LatLng initialCenter = const LatLng(36.3156692, 59.5405541);
+
+  final List<MarkerModel> initialMarkers = [
     MarkerModel(
-        latitude: 36.3156692,
-        longitude: 59.5405541,
-        data: "Test Click On Marker",
-        icon: 'ic_map_tour_waiting_icon.svg',
-        iconSize: 28,
-        markerContent: '2',
-        snippetTitle: 'marker title',
-        snippetDescription: 'marker description'),
-    MarkerModel(
-      latitude: 36.324915772569966,
-      longitude: 59.54904346842852,
-      data: "Test Click On Marker",
-      markerContent: '1',
-      iconSize: 28,
+      latitude: 36.3156692,
+      longitude: 59.5405541,
+      data: "Center Marker",
       icon: 'ic_map_tour_waiting_icon.svg',
+      iconSize: 28,
+      markerContent: 'C',
+      snippetTitle: 'Center Marker',
+      snippetDescription: 'This is the initial center point.',
     ),
-  ];
-
-  List<CircleModel> circles = [
-    CircleModel(
-        latitude: 36.32209806699167,
-        longitude: 59.52369428145562,
-        radius: 700,
-        color: Colors.blue.withOpacity(0.5),
-        borderColor: Colors.blue,
-        data: 'Man Circle Blue hastam',
-        snippetTitle: 'circle Abi hastam',
-        snippetDescription: 'man tozihat circle abi hastam'),
-    CircleModel(
-      latitude: 36.33377358253895,
-      longitude: 59.54590011713316,
-      radius: 500,
-      color: Colors.deepOrange.withOpacity(0.5),
-      borderColor: Colors.deepOrange,
-      data: 'Man Circle Orange Hastam',
-      // snippetTitle: 'asdsadsadasdsadsadaa',
-      // snippetDescription: 'asfagasgasgasgasgasasgasg'
-    )
   ];
 
   @override
   void initState() {
     super.initState();
-
     mapController = UiMapController();
-
-    mapKitPlugin = UiMap(
-      mapProvider: MapProvider.neshan,
-      controller: mapController,
-      initialCenter: const LatLng(36.3156692, 59.5405541),
-      isDarkMode: false,
-      isCurrentLocationEnable: true,
-      zoom: 15,
-      markers: markers,
-      // polyLines: [
-      //   PolyLineModel(
-      //     points: [
-      //       PolyLinePointModel(36.3156692, 59.5405541, 0),
-      //       PolyLinePointModel(36.315673, 59.5403954, 45),
-      //       PolyLinePointModel(36.3156521, 59.5401282, 90),
-      //       PolyLinePointModel(36.3156776, 59.5398778, 135),
-      //       PolyLinePointModel(36.3157881, 59.5395753, 180),
-      //       PolyLinePointModel(36.3159304, 59.539082, 225),
-      //       PolyLinePointModel(36.3161398, 59.5384948, 270),
-      //       PolyLinePointModel(36.3163329, 59.5379036, 315),
-      //       PolyLinePointModel(36.3165588, 59.5372667, 360),
-      //     ],
-      //     color: Colors.red,
-      //     strokeWidth: 5,
-      //     showArrow: true,
-      //   ),
-      //   PolyLineModel(
-      //     points: [
-      //       PolyLinePointModel(36.3167264, 59.5365894, 270),
-      //       PolyLinePointModel(36.3169662, 59.5359136, 270),
-      //       PolyLinePointModel(36.3172246, 59.5352273, 270),
-      //       PolyLinePointModel(36.3174794, 59.5343151, 270),
-      //       PolyLinePointModel(36.3177497, 59.5334306, 270),
-      //       PolyLinePointModel(36.3179679, 59.5325732, 270),
-      //       PolyLinePointModel(36.3182209, 59.5317401, 180),
-      //       PolyLinePointModel(36.3184893, 59.5309729, 180),
-      //       PolyLinePointModel(36.318721, 59.5302708, 180),
-      //       PolyLinePointModel(36.3189011, 59.5296759, 180),
-      //       PolyLinePointModel(36.3191815, 59.5289642, 180),
-      //     ],
-      //     color: Colors.green,
-      //     strokeWidth: 5,
-      //     strokeColor: Colors.red,
-      //     showArrow: true,
-      //   ),
-      //   PolyLineModel(
-      //     points: [
-      //       PolyLinePointModel(36.3196133, 59.5276296, 0),
-      //       PolyLinePointModel(36.3198302, 59.5270538, 15),
-      //       PolyLinePointModel(36.3200575, 59.5264617, 30),
-      //       PolyLinePointModel(36.3203503, 59.5254298, 45),
-      //       PolyLinePointModel(36.3205295, 59.5250031, 60),
-      //       PolyLinePointModel(36.3208517, 59.5249409, 75),
-      //       PolyLinePointModel(36.3213284, 59.5251547, 90),
-      //       PolyLinePointModel(36.3218684, 59.5254108, 105),
-      //       PolyLinePointModel(36.3229135, 59.5258929, 120),
-      //       PolyLinePointModel(36.3230858, 59.525632, 135),
-      //       PolyLinePointModel(36.3223972, 59.5251941, 150),
-      //       PolyLinePointModel(36.3224258, 59.5248137, 165),
-      //       PolyLinePointModel(36.3226065, 59.5243794, 180),
-      //       PolyLinePointModel(36.3227928, 59.5240218, 195),
-      //       PolyLinePointModel(36.3227517, 59.5238205, 210),
-      //       PolyLinePointModel(36.3224315, 59.5237103, 225),
-      //     ],
-      //     color: Colors.blue,
-      //     strokeWidth: 5,
-      //     strokeColor: Colors.red,
-      //     showArrow: true,
-      //   ),
-      // ],
-      onMarkerTap: (markerModel) {
-        print("onMarkerTap: ${(markerModel as MarkerModel).data}");
-      },
-      onCircleTap: (circleMarkerModel) {
-        print("onCircleTap: ${(circleMarkerModel as CircleModel).data}");
-      },
-      onTap: (LatLng point) {
-        mapController.addMarkers([
-          MarkerModel(
-            latitude: point.latitude,
-            longitude: point.longitude,
-            data: "Test Click On Marker",
-            markerContent: 'ic_add_user.svg',
-            iconSize: 50,
-            icon: 'ic_map_tour_icon.svg',
-          )
-        ]);
-        print('User tapped on: $point');
-        print("Testtttt");
-        // mapController.addMarker(
-        //   MarkerModel(
-        //     latitude: point.latitude,
-        //     longitude: point.longitude,
-        //     data: 123123213,
-        //     child: const Icon(
-        //       Icons.location_on,
-        //       color: Colors.orange,
-        //       size: 40,
-        //     ),
-        //   ),
-        // );
-      },
-      onLongPress: (LatLng point) {
-        mapController.addCircles([
-          CircleModel(
-              latitude: point.latitude,
-              longitude: point.longitude,
-              radius: 200,
-              borderColor: Colors.purple,
-              color: Colors.purple.withOpacity(.5),
-              borderStroke: 2,
-              data: "UserCircleData")
-        ]);
-      },
-      onMyLocationClick: () async {
-        await requestEnableGps() ;
-      },
-    );
   }
 
   Future<void> requestEnableGps() async {
     Location location = Location();
-
     bool serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
-      if (!serviceEnabled) {
-        // کاربر قبول نکرد
-        return;
-      }
+      if (!serviceEnabled) return;
     }
   }
+
+  void _showSnackBar(String message, [BuildContext? c]) {
+    ScaffoldMessenger.of(c ?? context).clearSnackBars();
+    ScaffoldMessenger.of(c ?? context).showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+    );
+  }
+
+  void _addMoreMarkers() {
+    mapController.addMarkers([
+      MarkerModel(
+        latitude: 36.324915,
+        longitude: 59.549043,
+        data: "Dynamic Marker 1",
+        markerContent: '1',
+        iconSize: 28,
+        icon: 'ic_map_tour_waiting_icon.svg',
+        snippetTitle: 'Added Marker',
+      ),
+    ]);
+    _showSnackBar("Markers Added");
+  }
+
+  void _addCircles() {
+    mapController.addCircles([
+      CircleModel(
+        latitude: 36.322098,
+        longitude: 59.523694,
+        radius: 700,
+        color: Colors.blue.withOpacity(0.5),
+        borderColor: Colors.blue,
+        data: 'Blue Circle',
+        snippetTitle: 'Blue Zone',
+        snippetDescription: 'Dynamic radius zone',
+      ),
+      CircleModel(
+        latitude: 36.333773,
+        longitude: 59.545900,
+        radius: 500,
+        color: Colors.deepOrange.withOpacity(0.5),
+        borderColor: Colors.deepOrange,
+        data: 'Orange Circle',
+      )
+    ]);
+    _showSnackBar("Circles Added");
+  }
+
+  void _addPolyline() {
+    mapController.addPolyline([
+      PolyLineModel(
+        points: [
+          PolyLinePointModel(36.319613, 59.527629, 0),
+          PolyLinePointModel(36.320350, 59.525429, 45),
+          PolyLinePointModel(36.321328, 59.525154, 90),
+          PolyLinePointModel(36.322913, 59.525892, 120),
+        ],
+        color: Colors.blue,
+        strokeWidth: 5,
+        strokeColor: Colors.red,
+        showArrow: true,
+      ),
+    ]);
+    _showSnackBar("Polyline Added");
+  }
+
+  void _moveCamera() {
+    mapController.moveCamera(
+      MoveModel(latitude: 36.3219744, longitude: 59.5381364, zoom: 16),
+    );
+    _showSnackBar("Camera Moved");
+  }
+
+  void _fitBounds() {
+    mapController.fitBounds(
+      MapBoundsModel(
+        points: [
+          const LatLng(36.319613, 59.527629),
+          const LatLng(36.322913, 59.525892),
+        ],
+        padding: 50,
+      ),
+    );
+    _showSnackBar("Camera Fit to Bounds");
+  }
+
+  void _setMockUserLocation() {
+    mapController.setUserLocation!(
+      UserMarkerModel(latitude: 36.318000, longitude: 59.535000, accuracy: 1),
+    );
+    _showSnackBar("Mock User Location Set");
+  }
+
+  void _toggleDarkMode() {
+    setState(() {
+      isDarkMode = !isDarkMode;
+    });
+    mapController.setDarkMode(isDarkMode);
+    _showSnackBar(isDarkMode ? "Dark Mode Enabled" : "Light Mode Enabled");
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Stack(
-          children: [
-            Center(
-              child: mapKitPlugin,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Map Kit'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: DropdownButton<MapProvider>(
+              value: currentProvider,
+              dropdownColor: Theme.of(context).colorScheme.surface,
+              underline: const SizedBox(),
+              items: MapProvider.values.map((provider) {
+                return DropdownMenuItem(
+                  value: provider,
+                  child: Text(provider.name.toUpperCase()),
+                );
+              }).toList(),
+              onChanged: (newProvider) {
+                if (newProvider != null) {
+                  setState(() => currentProvider = newProvider);
+                  _showSnackBar("Switched to ${newProvider.name}");
+                }
+              },
             ),
-            Column(
-              children: [
-                ElevatedButton(
-                    onPressed: () {
-                      // mapController.removeCircles(circles);
-                      // mapController.removeAllPolyLines();
-                      mapController.removePolyLines([
-                        PolyLineModel(
-                          points: [
-                            PolyLinePointModel(36.3196133, 59.5276296, 0),
-                            PolyLinePointModel(36.3198302, 59.5270538, 15),
-                            PolyLinePointModel(36.3200575, 59.5264617, 30),
-                            PolyLinePointModel(36.3203503, 59.5254298, 45),
-                            PolyLinePointModel(36.3205295, 59.5250031, 60),
-                            PolyLinePointModel(36.3208517, 59.5249409, 75),
-                            PolyLinePointModel(36.3213284, 59.5251547, 90),
-                            PolyLinePointModel(36.3218684, 59.5254108, 105),
-                            PolyLinePointModel(36.3229135, 59.5258929, 120),
-                            PolyLinePointModel(36.3230858, 59.525632, 135),
-                            PolyLinePointModel(36.3223972, 59.5251941, 150),
-                            PolyLinePointModel(36.3224258, 59.5248137, 165),
-                            PolyLinePointModel(36.3226065, 59.5243794, 180),
-                            PolyLinePointModel(36.3227928, 59.5240218, 195),
-                            PolyLinePointModel(36.3227517, 59.5238205, 210),
-                            PolyLinePointModel(36.3224315, 59.5237103, 225),
-                          ],
-                          color: Colors.blue,
-                          strokeWidth: 5,
-                          strokeColor: Colors.red,
-                          showArrow: true,
-                        ),
-                      ]);
-                    },
-                    child: Text('click')),
-                ElevatedButton(
-                    onPressed: () {
-                      // mapController.addCircles(circles);
-                      mapController.addPolyline(
-                        [
-                          PolyLineModel(
-                            points: [
-                              PolyLinePointModel(36.3196133, 59.5276296, 0),
-                              PolyLinePointModel(36.3198302, 59.5270538, 15),
-                              PolyLinePointModel(36.3200575, 59.5264617, 30),
-                              PolyLinePointModel(36.3203503, 59.5254298, 45),
-                              PolyLinePointModel(36.3205295, 59.5250031, 60),
-                              PolyLinePointModel(36.3208517, 59.5249409, 75),
-                              PolyLinePointModel(36.3213284, 59.5251547, 90),
-                              PolyLinePointModel(36.3218684, 59.5254108, 105),
-                              PolyLinePointModel(36.3229135, 59.5258929, 120),
-                              PolyLinePointModel(36.3230858, 59.525632, 135),
-                              PolyLinePointModel(36.3223972, 59.5251941, 150),
-                              PolyLinePointModel(36.3224258, 59.5248137, 165),
-                              PolyLinePointModel(36.3226065, 59.5243794, 180),
-                              PolyLinePointModel(36.3227928, 59.5240218, 195),
-                              PolyLinePointModel(36.3227517, 59.5238205, 210),
-                              PolyLinePointModel(36.3224315, 59.5237103, 225),
-                            ],
-                            color: Colors.blue,
-                            strokeWidth: 5,
-                            strokeColor: Colors.red,
-                            showArrow: true,
-                          ),
-                        ]
-                      );
-                    },
-                    child: Text('add')),
-              ],
-            )
-          ],
-        ),
-        // floatingActionButton: FloatingActionButton(
-        //   onPressed: () {
-        //     mapController.moveCamera(MoveModel(point: const LatLng(36.3219744, 59.5381364), zoom: 14));
-        //
-        //     // mapController.addPolyline([
-        //     //   PolyLineModel(points: [
-        //     //     LatLng(36.3196133, 59.5276296),
-        //     //     LatLng(36.3198302, 59.5270538),
-        //     //     LatLng(36.3200575, 59.5264617),
-        //     //     LatLng(36.3203503, 59.5254298),
-        //     //     LatLng(36.3205295, 59.5250031),
-        //     //     LatLng(36.3208517, 59.5249409),
-        //     //     LatLng(36.3213284, 59.5251547),
-        //     //     LatLng(36.3218684, 59.5254108),
-        //     //     LatLng(36.3229135, 59.5258929),
-        //     //     LatLng(36.3230858, 59.525632),
-        //     //     LatLng(36.3223972, 59.5251941),
-        //     //     LatLng(36.3224258, 59.5248137),
-        //     //     LatLng(36.3226065, 59.5243794),
-        //     //     LatLng(36.3227928, 59.5240218),
-        //     //     LatLng(36.3227517, 59.5238205),
-        //     //     LatLng(36.3224315, 59.5237103),
-        //     //   ], color: Colors.purple, strokeWidth: 5),
-        //     // ]);
-        //
-        //     // mapController.addMarker(
-        //     //   MarkerModel(
-        //     //     latitude: 36.5422255,
-        //     //     longitude: 59.51455,
-        //     //     child: const Icon(
-        //     //       Icons.location_on,
-        //     //       color: Colors.red,
-        //     //       size: 40,
-        //     //     ),
-        //     //     data: 'test click',
-        //     //   ),
-        //     // );
-        //   },
-        //   child: const Icon(
-        //     Icons.add_location,
-        //     color: Colors.red,
-        //   ),
-        // ),
+          )
+        ],
       ),
+      body: Stack(
+        children: [
+          UiMap(
+            key: ValueKey(currentProvider.toString()),
+            mapProvider: currentProvider,
+            controller: mapController,
+            initialCenter: initialCenter,
+            isDarkMode: isDarkMode,
+            isCurrentLocationEnable: true,
+            zoom: 15,
+            markers: List.from(initialMarkers),
+            onMarkerTap: (markerData) {
+              if (markerData is MarkerModel) {
+                _showSnackBar("Tapped Marker: ${markerData.data ?? 'Unknown'}", context);
+              }
+            },
+            onCircleTap: (circleData) {
+              if (circleData is CircleModel) {
+                _showSnackBar("Tapped Circle: ${circleData.data ?? 'Unknown'}", context);
+              }
+            },
+            onTap: (LatLng point) {
+              mapController.addMarkers([
+                MarkerModel(
+                  latitude: point.latitude,
+                  longitude: point.longitude,
+                  data: "Tap Dropped Marker",
+                  iconSize: 40,
+                  icon: 'ic_map_tour_icon.svg',
+                )
+              ]);
+              _showSnackBar("Dropped Marker at ${point.latitude.toStringAsFixed(4)}, ${point.longitude.toStringAsFixed(4)}");
+            },
+            onLongPress: (LatLng point) {
+              mapController.addCircles([
+                CircleModel(
+                  latitude: point.latitude,
+                  longitude: point.longitude,
+                  radius: 150,
+                  borderColor: Colors.purple,
+                  color: Colors.purple.withOpacity(.5),
+                  borderStroke: 2,
+                  data: "Long Press Circle",
+                )
+              ]);
+              _showSnackBar("Dropped Circle at ${point.latitude.toStringAsFixed(4)}");
+            },
+            onMyLocationClick: requestEnableGps,
+          ),
+
+          Positioned(
+            bottom: 24,
+            left: 24,
+            child: FloatingActionButton.extended(
+              onPressed: _openControlPanel,
+              icon: const Icon(Icons.dashboard_customize),
+              label: const Text("Controls"),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openControlPanel() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Center(
+                    child: Text(
+                      "Map Controllers",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const Divider(height: 30),
+
+                  const Text("Add Elements", style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ActionChip(label: const Text('+ Markers'), onPressed: _addMoreMarkers),
+                      ActionChip(label: const Text('+ Circles'), onPressed: _addCircles),
+                      ActionChip(label: const Text('+ Polyline'), onPressed: _addPolyline),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  const Text("Clear Elements", style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ActionChip(
+                        label: const Text('Clear Markers'),
+                        backgroundColor: Colors.red.shade50,
+                        onPressed: () {
+                          mapController.removeAllMarkers();
+                          _showSnackBar("All Markers Cleared");
+                        },
+                      ),
+                      ActionChip(
+                        label: const Text('Clear Circles'),
+                        backgroundColor: Colors.red.shade50,
+                        onPressed: () {
+                          mapController.removeAllCircles();
+                          _showSnackBar("All Circles Cleared");
+                        },
+                      ),
+                      ActionChip(
+                        label: const Text('Clear Polylines'),
+                        backgroundColor: Colors.red.shade50,
+                        onPressed: () {
+                          mapController.removeAllPolyLines();
+                          _showSnackBar("All Polylines Cleared");
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  const Text("Camera & State", style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ActionChip(label: const Text('Move Camera'), onPressed: _moveCamera),
+                      ActionChip(label: const Text('Fit Bounds'), onPressed: _fitBounds),
+                      ActionChip(label: const Text('Set User Loc'), onPressed: _setMockUserLocation),
+                      ActionChip(
+                        label: Text(isDarkMode ? 'Light Mode' : 'Dark Mode'),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _toggleDarkMode();
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
