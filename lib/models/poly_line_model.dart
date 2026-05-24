@@ -7,21 +7,24 @@ import 'package:map_kit/extensions/hex_color.dart';
 import 'package:map_kit/models/poly_line_point_model.dart';
 
 class PolyLineModel {
-  List<PolyLinePointModel>? points;
-  Color color;
-  double? strokeWidth;
-  Color? strokeColor;
-  bool? showArrow;
+  final List<PolyLinePointModel>? points;
+  final Color color;
+  final double? strokeWidth;
+  final Color? strokeColor;
+  final bool? showArrow;
   final dynamic data;
 
   PolyLineModel({this.points, required this.color, this.strokeWidth, this.strokeColor, this.showArrow, this.data});
+
+  PolyLineModel.decodePoints(
+      {String? encodedPoints, required this.color, this.strokeWidth, this.strokeColor, this.showArrow, this.data})
+      : points = _decode(encodedPoints);
 
   Polyline toFlutterPolyLine() => Polyline(
         points: points!.map((point) => LatLng(point.latitude, point.longitude)).toList(),
         color: color,
         strokeWidth: strokeWidth!,
       );
-
 
   Map<String, dynamic> toNeshanPolyLines() {
     return {
@@ -40,12 +43,7 @@ class PolyLineModel {
     };
   }
 
-  PolyLineModel copyWith({
-    List<PolyLinePointModel>? points,
-    Color? color,
-    double? strokeWidth,
-    dynamic data
-  }) {
+  PolyLineModel copyWith({List<PolyLinePointModel>? points, Color? color, double? strokeWidth, dynamic data}) {
     return PolyLineModel(
       points: points ?? this.points,
       color: color ?? this.color,
@@ -94,5 +92,37 @@ class PolyLineModel {
     }
 
     return minDistance <= threshold;
+  }
+
+  static List<PolyLinePointModel> _decode(String? encoded) {
+    if (encoded == null) return [];
+    if (encoded.isEmpty) return [];
+    List<PolyLinePointModel> points = [];
+    int index = 0, len = encoded.length;
+    int lat = 0, lng = 0;
+
+    while (index < len) {
+      int b, shift = 0, result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+
+      points.add(PolyLinePointModel(lat / 1e5, lng / 1e5, 0.0));
+    }
+    return points;
   }
 }
