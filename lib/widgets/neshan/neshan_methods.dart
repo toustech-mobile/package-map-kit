@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:map_kit/core/ui_map_camera.dart';
 import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/move_model.dart';
@@ -69,6 +70,14 @@ abstract class NeshanMethods {
 
   static setDarkMode(bool isDarkMode) async {
     await _channel.invokeMethod('setMapStyle', {'isDarkMode': isDarkMode});
+  }
+
+  static Future<UiMapCamera> getCamera() async {
+    final Map<dynamic, dynamic> result = await _channel.invokeMethod('getCamera');
+    return UiMapCamera(
+      result['zoom'] as double,
+      LatLng(result['latitude'] as double, result['longitude'] as double),
+    );
   }
 }
 

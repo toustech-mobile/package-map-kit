@@ -128,6 +128,10 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
                 handleSetStyle(call, result)
             }
 
+            "getCamera" -> {
+                handleGetCamera(result)
+            }
+
 
             else -> {
                 result.notImplemented()
@@ -135,86 +139,90 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
         }
     }
 
+    private fun handleGetCamera(result: MethodChannel.Result) {
+        // Fetch the data from the view and send it across the MethodChannel
+        result.success(mapKitView.getCamera())
+    }
 
     private fun handleAddMarkers(call: MethodCall, result: MethodChannel.Result) {
-        Log.d("Native Add Markers", "")
+        //Log.d("Native Add Markers", "")
         mapKitView.addMarkers(call.arguments as List<*>)
 
         result.success("Marker added successfully")
     }
 
     private fun handleRemoveMarkers(call: MethodCall, result: MethodChannel.Result) {
-        Log.d("Native Remove Markers", "")
+        //Log.d("Native Remove Markers", "")
         mapKitView.removeMarkers(call.arguments as List<*>)
 
         result.success("Marker removed successfully")
     }
 
     private fun handleRemoveAllMarkers(result: MethodChannel.Result) {
-        Log.d("Native Remove Markers", "")
+        //Log.d("Native Remove Markers", "")
         mapKitView.removeAllMarkers()
 
         result.success("All Marker removed successfully")
     }
 
     private fun handleAddCircles(call: MethodCall, result: MethodChannel.Result) {
-        Log.d("Native Add Circles", "")
+        //Log.d("Native Add Circles", "")
         mapKitView.addCircles(call.arguments as List<*>)
 
         result.success("Circles added successfully")
     }
 
     private fun handleRemoveCircles(call: MethodCall, result: MethodChannel.Result) {
-        Log.d("Native Remove Circles", "")
+        //Log.d("Native Remove Circles", "")
         mapKitView.removeCircles(call.arguments as List<*>)
 
         result.success("Circles removed successfully")
     }
 
     private fun handleRemoveAllCircles(result: MethodChannel.Result) {
-        Log.d("Native Remove Circles", "")
+        //Log.d("Native Remove Circles", "")
         mapKitView.removeAllCircles()
 
         result.success("All Circles removed successfully")
     }
 
     private fun handleAddPolyLines(call: MethodCall, result: MethodChannel.Result) {
-        Log.d("Native Add PolyLines", "")
+        //Log.d("Native Add PolyLines", "")
         mapKitView.addPolyLines(call.arguments as List<*>)
 
         result.success("PolyLines added successfully")
     }
 
     private fun handleSetUserMarker(call: MethodCall, result: MethodChannel.Result) {
-        Log.d("Native SetUserMarker", "")
+        //Log.d("Native SetUserMarker", "")
 
         mapKitView.setUserMarker(call.arguments as Map<String, *>)
         result.success("SetUserMarker set successfully")
     }
 
     private fun handleMoveCamera(call: MethodCall, result: MethodChannel.Result) {
-        Log.d("Native MoveCamera", "")
+        //Log.d("Native MoveCamera", "")
 
         mapKitView.moveCamera(call.arguments as Map<String, *>)
         result.success("MoveCamera successfully")
     }
 
     private fun handleSetStyle(call: MethodCall, result: MethodChannel.Result) {
-        Log.d("Native Add Markers", "")
+        //Log.d("Native Add Markers", "")
         mapKitView.setMapStyle(call.arguments as Map<String, *>)
 
         result.success("Marker added successfully")
     }
 
     private fun handleRemovePolyLines(call: MethodCall, result: MethodChannel.Result) {
-        Log.d("Native Remove PolyLines", "")
+        //Log.d("Native Remove PolyLines", "")
         mapKitView.removePolyLines(call.arguments as List<*>)
 
         result.success("PolyLines removed successfully")
     }
 
     private fun handleRemoveAllPolyLines(result: MethodChannel.Result) {
-        Log.d("Native RemoveAllPolyLines", "")
+        //Log.d("Native RemoveAllPolyLines", "")
         mapKitView.removeAllPolyLines()
 
         result.success("All PolyLines removed successfully")
@@ -256,9 +264,17 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
     }
 
+    fun getCamera(): Map<String, Double> {
+        return mapOf(
+            "zoom" to mapView.zoom.toDouble(),
+            "latitude" to mapView.cameraTargetPosition.latitude,
+            "longitude" to mapView.cameraTargetPosition.longitude
+        )
+    }
+
     private fun setInitialCenter(params: Map<String, Any>?) {
         val initialCenter = params?.get("initialCenter") as Map<*, *>
-        Log.d("Native InitialCenter", initialCenter.toString())
+        //Log.d("Native InitialCenter", initialCenter.toString())
 
         mapView.moveCamera(
             LatLng(
@@ -275,7 +291,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
             zoom = mapView.zoom.toDouble()
         }
 
-        Log.d("setDefaultZoom", zoom.toString())
+        //Log.d("setDefaultZoom", zoom.toString())
 
         defaultZoom = zoom.toFloat()
         mapView.setZoom(defaultZoom, 0f)
@@ -284,7 +300,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
     fun setMapStyle(params: Map<String, *>) {
         val isDarkMode: Boolean = params["isDarkMode"] as Boolean
-        Log.d("Native isDarkMode", isDarkMode.toString())
+        //Log.d("Native isDarkMode", isDarkMode.toString())
 
         if (isDarkMode) {
             mapView.mapStyle = NeshanMapStyle.NESHAN_NIGHT
@@ -296,7 +312,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
     fun addMarkers(rawData: List<*>) {
         val markers = MarkerHelper.toNeshanModel(context, rawData)
-        Log.d("Native Markers", markers.toString())
+        //Log.d("Native Markers", markers.toString())
 
         this.markers.addAll(markers)
         mapView.addMarkers(markers)
@@ -328,7 +344,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
     fun addCircles(rawCircles: List<*>) {
         val circles = CircleHelper.toNeshanModel(rawCircles, context)
-        Log.d("Native Circles", rawCircles.toString())
+        //Log.d("Native Circles", rawCircles.toString())
 
         this.circles.addAll(circles)
         circles.forEach {
@@ -366,7 +382,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
     fun addPolyLines(rawPolyLines: List<*>) {
         val polyLines = PolyLineHelper.toNeshanModel(rawPolyLines, context)
-        Log.d("Native PolyLines", rawPolyLines.toString())
+        //Log.d("Native PolyLines", rawPolyLines.toString())
 
         this.polyLines.addAll(polyLines.first)
         polyLines.first.forEach {

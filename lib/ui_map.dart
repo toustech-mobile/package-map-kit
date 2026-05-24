@@ -17,6 +17,7 @@ class UiMap extends StatefulWidget {
   final void Function(dynamic)? onMarkerTap;
   final void Function(dynamic)? onCircleTap;
   final Future<void> Function()? onMyLocationClick;
+  final void Function(dynamic data)? onPolylineTap;
 
   LatLng? initialCenter;
   bool? isDarkMode;
@@ -42,6 +43,7 @@ class UiMap extends StatefulWidget {
     List<MarkerModel>? markers,
     List<CircleModel>? circles,
     List<PolyLineModel>? polyLines,
+    this.onPolylineTap
   }) {
     this.markers = markers ?? [];
     this.circles = circles ?? [];
@@ -81,7 +83,7 @@ class _UiMapState extends State<UiMap> {
           onLongPress: widget.onLongPress,
           mapProvider: MapProvider.flutter,
           onMyLocationClick: widget.onMyLocationClick,
-
+          onPolylineTap: widget.onPolylineTap,
         );
       case MapProvider.mapIr:
         return FlutterMapWidget(
@@ -98,8 +100,8 @@ class _UiMapState extends State<UiMap> {
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
           onMyLocationClick: widget.onMyLocationClick,
-
           mapProvider: MapProvider.mapIr,
+          onPolylineTap: widget.onPolylineTap,
         );
 
       case MapProvider.neshan:
@@ -117,6 +119,7 @@ class _UiMapState extends State<UiMap> {
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
           onMyLocationClick: widget.onMyLocationClick,
+          onPolylineTap: widget.onPolylineTap,
         );
     }
   }

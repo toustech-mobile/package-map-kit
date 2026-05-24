@@ -1,3 +1,4 @@
+import 'package:map_kit/core/ui_map_camera.dart';
 import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/map_bounds_model.dart';
 import 'package:map_kit/models/marker_model.dart';
@@ -19,4 +20,6 @@ mixin class UiMapController {
   late Function(MapBoundsModel) fitBounds;
   Function(UserMarkerModel)? setUserLocation;
   late Function(bool) setDarkMode;
+  late Future<UiMapCamera> Function() cameraCallback;
+  Future<UiMapCamera> get camera => cameraCallback();
 }

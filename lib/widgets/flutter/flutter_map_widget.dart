@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:map_kit/core/ui_map_camera.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/enums/map_provider.dart';
 import 'package:map_kit/models/circle_model.dart';
@@ -37,10 +37,12 @@ class FlutterMapWidget extends StatefulWidget {
   final void Function(MarkerModel)? onMarkerTap;
   final void Function(CircleModel)? onCircleTap;
   final Future<void> Function()? onMyLocationClick;
+  final void Function(dynamic)? onPolylineTap;
 
   MapProvider? mapProvider;
 
   FlutterMapWidget({
+    super.key,
     this.uiMapController,
     this.markers,
     this.polyLines,
@@ -55,6 +57,7 @@ class FlutterMapWidget extends StatefulWidget {
     this.onCircleTap,
     this.onMyLocationClick,
     this.mapProvider,
+    this.onPolylineTap,
   });
 
   @override
@@ -89,7 +92,8 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
           if (!mounted) return;
           widget.circles!.addAll(circles);
           // also add new hidden markers for the new circles
-          _circleMarkers.addAll(circles.map((circle) => MarkerModel(
+          _circleMarkers.addAll(circles.map((circle) =>
+              MarkerModel(
                 latitude: circle.latitude,
                 longitude: circle.longitude,
                 data: '',
@@ -207,10 +211,18 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
           setState(() {});
         });
       };
+
+      widget.uiMapController!.cameraCallback = () async {
+        return UiMapCamera(
+          _mapController.camera.zoom,
+          _mapController.camera.center,
+        );
+      };
+
     }
 
     _initializeHiddenMarkers();
-    listenGpsStatus() ;
+    listenGpsStatus();
   }
 
   @override
@@ -235,7 +247,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
                 onPressed: _moveToUserLocation,
                 child: Icon(
                   Icons.my_location,
-                  color: widget.userMarker != null && (widget.gpsEnabled??false) ? Colors.blue : Colors.grey,
+                  color: widget.userMarker != null && (widget.gpsEnabled ?? false) ? Colors.blue : Colors.grey,
                 ),
               ),
             ),
@@ -263,7 +275,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
       children: [
         TileLayer(
           urlTemplate:
-              widget.isDarkMode ?? false ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : tileUrl,
+          widget.isDarkMode ?? false ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : tileUrl,
           subdomains: const ['a', 'b', 'c'],
         ),
         PolylineLayer(
@@ -291,14 +303,15 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
   void _initializeHiddenMarkers() {
     _circleMarkers.addAll(
       widget.circles!.map(
-        (circle) => MarkerModel(
-          latitude: circle.latitude,
-          longitude: circle.longitude,
-          data: '',
-          icon: '',
-          snippetTitle: circle.snippetTitle,
-          snippetDescription: circle.snippetDescription,
-        ),
+            (circle) =>
+            MarkerModel(
+              latitude: circle.latitude,
+              longitude: circle.longitude,
+              data: '',
+              icon: '',
+              snippetTitle: circle.snippetTitle,
+              snippetDescription: circle.snippetDescription,
+            ),
       ),
     );
   }
@@ -343,10 +356,11 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         popupDisplayOptions: PopupDisplayOptions(
           builder: (BuildContext context, Marker marker) {
             final tappedMarker = combinedMarkers.firstWhere(
-              (m) => m.latitude == marker.point.latitude && m.longitude == marker.point.longitude && m.icon.isNotEmpty,
+                  (m) =>
+              m.latitude == marker.point.latitude && m.longitude == marker.point.longitude && m.icon.isNotEmpty,
               orElse: () {
                 final tappedMarker = combinedMarkers.firstWhere((m) =>
-                    m.latitude == marker.point.latitude && m.longitude == marker.point.longitude && m.icon.isEmpty);
+                m.latitude == marker.point.latitude && m.longitude == marker.point.longitude && m.icon.isEmpty);
                 return MarkerModel(
                     latitude: marker.point.latitude,
                     longitude: marker.point.longitude,
@@ -364,7 +378,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
                 widget.onMarkerTap?.call(tappedMarker);
               } else {
                 final tappedCircle = widget.circles!.firstWhere(
-                  (c) => c.latitude == marker.point.latitude && c.longitude == marker.point.longitude,
+                      (c) => c.latitude == marker.point.latitude && c.longitude == marker.point.longitude,
                 );
                 widget.onCircleTap?.call(tappedCircle);
               }
@@ -416,28 +430,44 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
     _popupVisible = false;
 
     final circle = widget.circles?.firstWhere(
-      (circle) =>
-          const Distance().as(
-            LengthUnit.Meter,
-            LatLng(circle.latitude, circle.longitude),
-            point,
-          ) <=
+          (circle) =>
+      const Distance().as(
+        LengthUnit.Meter,
+        LatLng(circle.latitude, circle.longitude),
+        point,
+      ) <=
           circle.radius,
-      orElse: () => CircleModel(
-        latitude: 0,
-        longitude: 0,
-        radius: 0,
-        color: Colors.red,
-        borderColor: Colors.red,
-      ),
+      orElse: () =>
+          CircleModel(
+            latitude: 0,
+            longitude: 0,
+            radius: 0,
+            color: Colors.red,
+            borderColor: Colors.red,
+          ),
     );
 
     if (circle != null && circle.longitude != 0) {
       widget.onCircleTap?.call(circle);
-      widget.onTap?.call(point);
-    } else {
-      widget.onTap?.call(point);
+      return;
     }
+
+    PolyLineModel? tappedPolyline;
+    double currentZoom = _mapController.camera.zoom;
+
+    for (final polyline in widget.polyLines ?? []) {
+      if (polyline.isPointNear(point, currentZoom)) {
+        tappedPolyline = polyline;
+        break;
+      }
+    }
+
+    if (tappedPolyline != null) {
+      widget.onPolylineTap?.call(tappedPolyline.data);
+      return;
+    }
+
+    widget.onTap?.call(point);
   }
 
   void _handleMapLongPress(TapPosition tapPosition, LatLng point) {
@@ -447,7 +477,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
     widget.onLongPress?.call(point);
   }
 
-  void _moveToUserLocation() async{
+  void _moveToUserLocation() async {
     await widget.onMyLocationClick?.call();
     if (widget.userMarker != null) {
       _mapController.move(LatLng(widget.userMarker!.latitude, widget.userMarker!.longitude), widget.zoom!);

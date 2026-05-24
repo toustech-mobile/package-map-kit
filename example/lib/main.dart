@@ -132,7 +132,7 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
         color: Colors.blue,
         strokeWidth: 5,
         strokeColor: Colors.red,
-        showArrow: true,
+        data: "Polyline Data"
       ),
     ]);
     _showSnackBar("Polyline Added");
@@ -171,6 +171,22 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
     });
     mapController.setDarkMode(isDarkMode);
     _showSnackBar(isDarkMode ? "Dark Mode Enabled" : "Light Mode Enabled");
+  }
+
+  void _getCurrentCameraState() async {
+    try {
+      // 1. Await the getter seamlessly!
+      final currentCamera = await mapController.camera;
+
+      final lat = currentCamera.center.latitude.toStringAsFixed(4);
+      final lng = currentCamera.center.longitude.toStringAsFixed(4);
+      final zoom = currentCamera.zoom.toStringAsFixed(1);
+
+      _showSnackBar("Camera Target: $lat, $lng | Zoom: $zoom");
+
+    } catch (e) {
+      _showSnackBar("Failed to get camera: $e");
+    }
   }
 
   @override
@@ -248,6 +264,9 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
               ]);
               _showSnackBar("Dropped Circle at ${point.latitude.toStringAsFixed(4)}");
             },
+             onPolylineTap: (data) {
+               _showSnackBar("Tapped Polyline: ${data ?? 'Unknown'}", context);
+             },
             onMyLocationClick: requestEnableGps,
           ),
 
@@ -344,6 +363,14 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
                       ActionChip(label: const Text('Move Camera'), onPressed: _moveCamera),
                       ActionChip(label: const Text('Fit Bounds'), onPressed: _fitBounds),
                       ActionChip(label: const Text('Set User Loc'), onPressed: _setMockUserLocation),
+                      ActionChip(
+                          label: const Text('Get Camera Info'),
+                          backgroundColor: Colors.blue.shade50,
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _getCurrentCameraState();
+                          }
+                      ),
                       ActionChip(
                         label: Text(isDarkMode ? 'Light Mode' : 'Dark Mode'),
                         onPressed: () {

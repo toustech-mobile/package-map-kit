@@ -37,6 +37,8 @@ class NeshanMapWidget extends StatefulWidget {
   final void Function(dynamic)? onMarkerTap;
   final void Function(dynamic)? onCircleTap;
   final Future<void> Function()? onMyLocationClick;
+  final void Function(dynamic)? onPolylineTap;
+
 
   StreamSubscription<ServiceStatus>? _serviceStatusStream;
 
@@ -55,6 +57,7 @@ class NeshanMapWidget extends StatefulWidget {
     this.onMarkerTap,
     this.onCircleTap,
     this.onMyLocationClick,
+    this.onPolylineTap,
   });
 
   @override
@@ -144,6 +147,10 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) setState(() {});
         });
+      };
+
+      widget.uiMapController!.cameraCallback = () async {
+        return await neshan.NeshanMethods.getCamera();
       };
 
       widget.uiMapController!.setUserLocation = (UserMarkerModel userMarkerModel) {
@@ -257,8 +264,20 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
   }
 
   @override
-  void onMapTap(LatLng point) {
-    if (widget.onTap != null) {
+  Future<void> onMapTap(LatLng point) async {
+    PolyLineModel? tappedPolyline;
+    double currentZoom = (await widget.uiMapController?.camera)?.zoom ?? widget.zoom ?? 15;
+
+    for (final polyline in widget.polyLines ?? []) {
+      if (polyline.isPointNear(point, currentZoom)) {
+        tappedPolyline = polyline;
+        break;
+      }
+    }
+
+    if (tappedPolyline != null) {
+      widget.onPolylineTap?.call(tappedPolyline.data);
+    } else if (widget.onTap != null) {
       widget.onTap!(point);
     }
   }
