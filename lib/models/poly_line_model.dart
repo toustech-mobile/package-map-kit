@@ -69,7 +69,6 @@ class PolyLineModel {
       double px2 = points![i + 1].longitude * math.pi / 180;
       double py2 = points![i + 1].latitude * math.pi / 180;
 
-      // Project to local coordinates (meters)
       double dx2 = (px2 - px1) * math.cos(py1) * R;
       double dy2 = (py2 - py1) * R;
       double dx0 = (px0 - px1) * math.cos(py1) * R;

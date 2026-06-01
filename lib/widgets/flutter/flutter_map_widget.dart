@@ -278,6 +278,9 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
           widget.isDarkMode ?? false ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : tileUrl,
           subdomains: const ['a', 'b', 'c'],
         ),
+        CircleLayer(
+          circles: widget.circles!.map((circleModel) => circleModel.toFlutterCircleMarker()).toList(),
+        ),
         PolylineLayer(
           polylines: [
             ...widget.polyLines!.map((polyLineModel) {
@@ -291,9 +294,6 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
           ],
         ),
         MarkerLayer(markers: _buildHeadingMarkers()),
-        CircleLayer(
-          circles: widget.circles!.map((circleModel) => circleModel.toFlutterCircleMarker()).toList(),
-        ),
         _buildPopupMarkerLayer(),
         if (widget.userMarker != null) widget.userMarker!.toUserMarker(),
       ],
@@ -448,6 +448,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
     );
 
     if (circle != null && circle.longitude != 0) {
+      print("hiiiiiiiiiii");
       widget.onCircleTap?.call(circle);
       return;
     }

@@ -13,7 +13,9 @@ A new Flutter project.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+#   s.source_files = 'Classes/**/*'
+  s.source_files = 'map_kit/Sources/map_kit/**/*.swift'
+  s.resource_bundles = {'map_kit_privacy' => ['map_kit/Sources/map_kit/PrivacyInfo.xcprivacy']}
   s.dependency 'Flutter'
   s.platform = :ios, '12.0'
 
