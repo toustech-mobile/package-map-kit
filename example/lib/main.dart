@@ -231,12 +231,16 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
             onMarkerTap: (markerData) {
               if (markerData is MarkerModel) {
                 _showSnackBar("Tapped Marker: ${markerData.data ?? 'Unknown'}", context);
+                return;
               }
+              _showSnackBar("Tapped Circle: ${markerData ?? 'Unknown'}", context);
             },
             onCircleTap: (circleData) {
               if (circleData is CircleModel) {
                 _showSnackBar("Tapped Circle: ${circleData.data ?? 'Unknown'}", context);
+                return;
               }
+              _showSnackBar("Tapped Circle: ${circleData ?? 'Unknown'}", context);
             },
             onTap: (LatLng point) {
               mapController.addMarkers([
