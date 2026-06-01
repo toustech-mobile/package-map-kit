@@ -1,4 +1,4 @@
-# UiMap
+# <img src="https://github.com/toustechmobile/package-map-kit/blob/dev/example/assets/icons/package-map.png?raw=true" width="28"> MapKit
 
 `UiMap` is a customizable map widget designed to support multiple map providers, such as `flutter_map` and others. It allows the integration of markers, circles, and polylines, with configurable options for interactions and map customization.
 
