@@ -1,4 +1,4 @@
-# UiMap
+# ![Logo](./example/assets/icons/logo.png) UiMap
 
 `UiMap` is a customizable map widget designed to support multiple map providers, such as `flutter_map` and others. It allows the integration of markers, circles, and polylines, with configurable options for interactions and map customization.
 
