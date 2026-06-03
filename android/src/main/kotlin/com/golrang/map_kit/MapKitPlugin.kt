@@ -58,7 +58,7 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        if (::mapKitView.isInitialized) {
+        if (Companion::mapKitView.isInitialized) {
             mapKitView.dispose()
         }
         eventChannel = null
