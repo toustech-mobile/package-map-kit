@@ -23,6 +23,7 @@ class PolyLineHelper {
 
             polyLines.forEach { polyLine ->
                 if (polyLine is Map<*, *>) {
+                    @Suppress("UNCHECKED_CAST")
                     val points = polyLine["points"] as? List<Map<*, *>>
                     val color = polyLine["color"] as? String
                     val strokeWidth = polyLine["strokeWidth"] as? Double

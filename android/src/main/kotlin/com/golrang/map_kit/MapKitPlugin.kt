@@ -198,20 +198,26 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
     private fun handleSetUserMarker(call: MethodCall, result: MethodChannel.Result) {
         //Log.d("Native SetUserMarker", "")
 
-        mapKitView?.setUserMarker(call.arguments as Map<String, *>)
+        @Suppress("UNCHECKED_CAST")
+        val args = call.arguments as Map<String, *>
+        mapKitView?.setUserMarker(args)
         result.success("SetUserMarker set successfully")
     }
 
     private fun handleMoveCamera(call: MethodCall, result: MethodChannel.Result) {
         //Log.d("Native MoveCamera", "")
 
-        mapKitView?.moveCamera(call.arguments as Map<String, *>)
+        @Suppress("UNCHECKED_CAST")
+        val args = call.arguments as Map<String, *>
+        mapKitView?.moveCamera(args)
         result.success("MoveCamera successfully")
     }
 
     private fun handleSetStyle(call: MethodCall, result: MethodChannel.Result) {
         //Log.d("Native Add Markers", "")
-        mapKitView?.setMapStyle(call.arguments as Map<String, *>)
+        @Suppress("UNCHECKED_CAST")
+        val args = call.arguments as Map<String, *>
+        mapKitView?.setMapStyle(args)
 
         result.success("Marker added successfully")
     }
@@ -234,6 +240,7 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChanne
 
 class MapKitViewFactory : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
     override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
+        @Suppress("UNCHECKED_CAST")
         val params = args as? Map<String, Any>
 
         val view = MapKitView(context, params)
