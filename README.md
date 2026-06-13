@@ -1,6 +1,8 @@
 # <img src="https://github.com/toustechmobile/package-map-kit/blob/dev/example/assets/icons/package-map.png?raw=true" width="28"> MapKit
 
-`UiMap` is a customizable map widget designed to support multiple map providers, such as `flutter_map` and others. It allows the integration of markers, circles, and polylines, with configurable options for interactions and map customization.
+`UiMap` is a customizable map widget designed to support multiple map providers, such as
+`flutter_map` and others. It allows the integration of markers, circles, and polylines, with
+configurable options for interactions and map customization.
 
 ## Class Definition
 
@@ -48,37 +50,39 @@ class UiMap extends StatefulWidget {
 
 ## Constructor Parameters
 
-| Parameter                | Type                                | Description                                                                                           |
-|--------------------------|-------------------------------------|-------------------------------------------------------------------------------------------------------|
-| `mapProvider`            | `MapProvider`                      | Specifies the map provider to use (e.g., `flutter_map`).                                             |
-| `controller`             | `UiMapController?`                 | Optional controller to manage the map programmatically.                                              |
-| `onTap`                  | `void Function(LatLng)?`           | Callback for when the map is tapped.                                                                 |
-| `onLongPress`            | `void Function(LatLng)?`           | Callback for when the map is long-pressed.                                                           |
-| `onMarkerTap`            | `void Function(MarkerModel)?`      | Callback for when a marker is tapped.                                                                |
-| `onCircleTap`            | `void Function(CircleMarkerModel)?`| Callback for when a circle is tapped.                                                                |
-| `initialCenter`          | `LatLng?`                          | Initial center position of the map.                                                                  |
-| `isDarkMode`             | `bool?`                            | Enables dark mode for the map (if supported by the provider).                                        |
-| `zoom`                   | `double?`                          | Initial zoom level of the map.                                                                       |
-| `isCurrentLocationEnable`| `bool?`                            | Enables or disables showing the user's current location.                                             |
-| `markers`                | `List<MarkerModel>?`               | List of markers to be displayed on the map.                                                          |
-| `circles`                | `List<CircleMarkerModel>?`         | List of circle markers to be displayed on the map.                                                   |
-| `polyLines`              | `List<PolyLineModel>?`             | List of polylines to be displayed on the map.                                                        |
+| Parameter                 | Type                                | Description                                                   |
+|:--------------------------|:------------------------------------|:--------------------------------------------------------------|
+| `mapProvider`             | `MapProvider`                       | Specifies the map provider to use (e.g., `flutter_map`).      |
+| `controller`              | `UiMapController?`                  | Optional controller to manage the map programmatically.       |
+| `onTap`                   | `void Function(LatLng)?`            | Callback for when the map is tapped.                          |
+| `onLongPress`             | `void Function(LatLng)?`            | Callback for when the map is long-pressed.                    |
+| `onMarkerTap`             | `void Function(MarkerModel)?`       | Callback for when a marker is tapped.                         |
+| `onCircleTap`             | `void Function(CircleMarkerModel)?` | Callback for when a circle is tapped.                         |
+| `onPolylineTap`           | `void Function(PolyLineModel)?`     | Callback for when a polyline is tapped.                       |
+| `initialCenter`           | `LatLng?`                           | Initial center position of the map.                           |
+| `isDarkMode`              | `bool?`                             | Enables dark mode for the map (if supported by the provider). |
+| `zoom`                    | `double?`                           | Initial zoom level of the map.                                |
+| `isCurrentLocationEnable` | `bool?`                             | Enables or disables showing the user's current location.      |
+| `markers`                 | `List<MarkerModel>?`                | List of markers to be displayed on the map.                   |
+| `circles`                 | `List<CircleMarkerModel>?`          | List of circle markers to be displayed on the map.            |
+| `polyLines`               | `List<PolyLineModel>?`              | List of polylines to be displayed on the map.                 |
 
 ## Example Usage
 
 ```dart
-UiMap(
-  mapProvider: MapProvider.flutter,
-  initialCenter: LatLng(35.6892, 51.3890),
-  zoom: 12.0,
-  isDarkMode: false,
-  isCurrentLocationEnable: true,
-  markers: [
-    MarkerModel(position: LatLng(35.6892, 51.3890), id: "marker1"),
-  ],
-  onMarkerTap: (marker) {
-    print("Marker tapped: ${marker.id}");
-  },
+UiMap
+(
+mapProvider: MapProvider.flutter,
+initialCenter: LatLng(35.6892, 51.3890),
+zoom: 12.0,
+isDarkMode: false,
+isCurrentLocationEnable: true,
+markers: [
+MarkerModel(position: LatLng(35.6892, 51.3890), id: "marker1"),
+],
+onMarkerTap: (marker) {
+print("Marker tapped: ${marker.id}");
+},
 );
 ```
 
@@ -88,17 +92,27 @@ UiMap(
 
 ### Methods
 
-| Method           | Type                                | Description                                           |
-|------------------|-------------------------------------|-------------------------------------------------------|
-| `addMarker`      | `Function(MarkerModel)`             | Adds a marker to the map.                             |
-| `addCircle`      | `Function(CircleMarkerModel)`       | Adds a circle to the map.                             |
-| `addPolyline`    | `Function(List<PolyLineModel>)`     | Adds one or more polylines to the map.                |
-| `moveCamera`     | `Function(MoveModel)`               | Moves the camera to a specified position.             |
-| `setUserLocation`| `Function(UserMarkerModel)`         | Updates the user's location on the map.               |
+| Method               | Type                            | Description                                                                   |
+|:---------------------|:--------------------------------|:------------------------------------------------------------------------------|
+| `addMarkers`         | `Function(List<MarkerModel>)`   | Batch adds a list of markers to the map.                                      |
+| `removeMarkers`      | `Function(List<MarkerModel>)`   | Removes specific markers from the map.                                        |
+| `removeAllMarkers`   | `Function()`                    | Clears all markers currently on the map.                                      |
+| `addCircles`         | `Function(List<CircleModel>)`   | Batch adds a list of circles to the map.                                      |
+| `removeCircles`      | `Function(List<CircleModel>)`   | Removes specific circles from the map.                                        |
+| `removeAllCircles`   | `Function()`                    | Clears all circles currently on the map.                                      |
+| `addPolyline`        | `Function(List<PolyLineModel>)` | Adds one or more polylines to the map.                                        |
+| `removePolyLines`    | `Function(List<PolyLineModel>)` | Removes specific polylines from the map.                                      |
+| `removeAllPolyLines` | `Function()`                    | Clears all polylines currently on the map.                                    |
+| `moveCamera`         | `Function(MoveModel)`           | Moves the camera to a specified position.                                     |
+| `fitBounds`          | `Function(MapBoundsModel)`      | Adjusts the camera view to fit given geographic boundaries.                   |
+| `setUserLocation`    | `Function(UserMarkerModel)?`    | Updates or sets the user's location overlay marker.                           |
+| `setDarkMode`        | `Function(bool)`                | Switches the map style theme programmatically between dark and light modes.   |
+| `camera`             | `Future<UiMapCamera>`           | Getter that returns the current camera position, zoom, and orientation state. |
 
 ## State Class
 
-The `_UiMapState` class handles the map rendering and delegates functionality to the selected map provider.
+The `_UiMapState` class handles the map rendering and delegates functionality to the selected map
+provider.
 
 ### `_UiMapState.build`
 
@@ -108,19 +122,19 @@ Widget build(BuildContext context) {
   return Scaffold(
     body: widget.mapProvider == MapProvider.flutter
         ? FlutterMapWidget(
-            uiMapController: widget.controller,
-            initialCenter: widget.initialCenter,
-            zoom: widget.zoom,
-            isCurrentLocationEnable: widget.isCurrentLocationEnable,
-            isDarkMode: widget.isDarkMode,
-            markers: widget.markers,
-            polyLines: widget.polyLines,
-            circles: widget.circles,
-            onMarkerTap: widget.onMarkerTap,
-            onCircleTap: widget.onCircleTap,
-            onTap: widget.onTap,
-            onLongPress: widget.onLongPress,
-          )
+      uiMapController: widget.controller,
+      initialCenter: widget.initialCenter,
+      zoom: widget.zoom,
+      isCurrentLocationEnable: widget.isCurrentLocationEnable,
+      isDarkMode: widget.isDarkMode,
+      markers: widget.markers,
+      polyLines: widget.polyLines,
+      circles: widget.circles,
+      onMarkerTap: widget.onMarkerTap,
+      onCircleTap: widget.onCircleTap,
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
+    )
         : _buildNeshanMap(),
   );
 }
@@ -129,6 +143,7 @@ Widget build(BuildContext context) {
 ### Dependencies
 
 Ensure the following models and dependencies are available:
+
 - `MarkerModel`
 - `CircleMarkerModel`
 - `PolyLineModel`
