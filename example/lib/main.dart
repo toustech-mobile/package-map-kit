@@ -9,6 +9,7 @@ import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/move_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/models/poly_line_point_model.dart';
+import 'package:map_kit/models/circle_polyline_model.dart';
 import 'package:map_kit/models/user_marker.dart';
 import 'package:map_kit/ui_map.dart';
 
@@ -43,6 +44,7 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
   late final UiMapController mapController;
   MapProvider currentProvider = MapProvider.neshan;
   bool isDarkMode = false;
+  List<CirclePolylineModel> circlePolylines = [];
 
   final LatLng initialCenter = const LatLng(36.3156692, 59.5405541);
 
@@ -122,18 +124,12 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
 
   void _addPolyline() {
     mapController.addPolyline([
-      PolyLineModel(
-        points: [
-          PolyLinePointModel(36.319613, 59.527629, 0),
-          PolyLinePointModel(36.320350, 59.525429, 45),
-          PolyLinePointModel(36.321328, 59.525154, 90),
-          PolyLinePointModel(36.322913, 59.525892, 120),
-        ],
-        color: Colors.blue,
-        strokeWidth: 5,
-        strokeColor: Colors.red,
-        data: "Polyline Data"
-      ),
+      PolyLineModel(points: [
+        PolyLinePointModel(36.319613, 59.527629, 0),
+        PolyLinePointModel(36.320350, 59.525429, 45),
+        PolyLinePointModel(36.321328, 59.525154, 90),
+        PolyLinePointModel(36.322913, 59.525892, 120),
+      ], color: Colors.blue, strokeWidth: 5, strokeColor: Colors.red, data: "Polyline Data"),
     ]);
     _showSnackBar("Polyline Added");
   }
@@ -183,7 +179,6 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
       final zoom = currentCamera.zoom.toStringAsFixed(1);
 
       _showSnackBar("Camera Target: $lat, $lng | Zoom: $zoom");
-
     } catch (e) {
       _showSnackBar("Failed to get camera: $e");
     }
@@ -229,7 +224,6 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
             zoom: 15,
             markers: List.from(initialMarkers),
             onMarkerTap: (markerData, point) {
-              print("Marker$point");
               if (markerData is MarkerModel) {
                 _showSnackBar("Tapped Marker: ${markerData.data ?? 'Unknown'}", context);
                 return;
@@ -237,8 +231,6 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
               _showSnackBar("Tapped Circle: ${markerData ?? 'Unknown'}", context);
             },
             onCircleTap: (circleData, point) {
-              print("Circle$point");
-              print(circleData);
               if (circleData is CircleModel) {
                 _showSnackBar("Tapped Circle: ${circleData.data ?? 'Unknown'}", context);
                 return;
@@ -246,6 +238,16 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
               _showSnackBar("Tapped Circle: ${circleData ?? 'Unknown'}", context);
             },
             onTap: (LatLng point) {
+              for (var e in circlePolylines) {
+                if (e.isPointInside(point)) {
+                  _showSnackBar(
+                      "${point.latitude.toStringAsFixed(4)}, ${point.longitude.toStringAsFixed(4)} inside of circle polyline ${e.data}");
+                } else {
+                  _showSnackBar(
+                      "${point.latitude.toStringAsFixed(4)}, ${point.longitude.toStringAsFixed(4)} outside of circle");
+                }
+              }
+
               mapController.addMarkers([
                 MarkerModel(
                   latitude: point.latitude,
@@ -255,29 +257,38 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
                   icon: 'ic_map_tour_icon.svg',
                 )
               ]);
-              _showSnackBar("Dropped Marker at ${point.latitude.toStringAsFixed(4)}, ${point.longitude.toStringAsFixed(4)}");
+              // _showSnackBar(
+              //     "Dropped Marker at ${point.latitude.toStringAsFixed(4)}, ${point.longitude.toStringAsFixed(4)}");
             },
             onLongPress: (LatLng point) {
-              mapController.addCircles([
-                CircleModel(
-                  latitude: point.latitude,
-                  longitude: point.longitude,
-                  radius: 150,
-                  borderColor: Colors.purple,
-                  color: Colors.purple.withOpacity(.5),
-                  borderStroke: 2,
-                  data: "Long Press Circle",
-                )
-              ]);
-              _showSnackBar("Dropped Circle at ${point.latitude.toStringAsFixed(4)}");
+              CirclePolylineModel e = CirclePolylineModel(
+                  center: point,
+                  radius: 500,
+                  strokeWidth: 1,
+                  strokeColor: Colors.purple,
+                  color: Colors.purple,
+                  data: circlePolylines.length + 1);
+              circlePolylines.add(e);
+              mapController.addPolyline([e]);
+              // mapController.addCircles([
+              //   CircleModel(
+              //     latitude: point.latitude,
+              //     longitude: point.longitude,
+              //     radius: 150,
+              //     borderColor: Colors.purple,
+              //     color: Colors.purple.withOpacity(.5),
+              //     borderStroke: 2,
+              //     data: "Long Press Circle",
+              //   )
+              // ]);
+              // _showSnackBar("Dropped Circle at ${point.latitude.toStringAsFixed(4)}");
             },
-             onPolylineTap: (data, point) {
-               print("Polyline$point");
-               _showSnackBar("Tapped Polyline: ${data ?? 'Unknown'}", context);
-             },
+            onPolylineTap: (data, point) {
+              print("Polyline$point");
+              _showSnackBar("Tapped Polyline: ${data ?? 'Unknown'}", context);
+            },
             onMyLocationClick: requestEnableGps,
           ),
-
           Positioned(
             bottom: 24,
             left: 24,
@@ -314,7 +325,6 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
                     ),
                   ),
                   const Divider(height: 30),
-
                   const Text("Add Elements", style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Wrap(
@@ -327,7 +337,6 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-
                   const Text("Clear Elements", style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Wrap(
@@ -355,13 +364,13 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
                         backgroundColor: Colors.red.shade50,
                         onPressed: () {
                           mapController.removeAllPolyLines();
+                          circlePolylines.clear();
                           _showSnackBar("All Polylines Cleared");
                         },
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-
                   const Text("Camera & State", style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Wrap(
@@ -377,8 +386,7 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
                           onPressed: () {
                             Navigator.pop(context);
                             _getCurrentCameraState();
-                          }
-                      ),
+                          }),
                       ActionChip(
                         label: Text(isDarkMode ? 'Light Mode' : 'Dark Mode'),
                         onPressed: () {
