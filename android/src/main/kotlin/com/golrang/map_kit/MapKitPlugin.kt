@@ -15,6 +15,7 @@ import com.golrang.map_kit.helpers.CircleHelper
 import com.golrang.map_kit.helpers.MarkerHelper
 import com.golrang.map_kit.helpers.PolyLineHelper
 import com.golrang.map_kit.models.MyCircle
+import com.golrang.map_kit.models.MyPolyline
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -256,7 +257,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     private var defaultZoom: Float = 12.0f
     private var markers: MutableList<Marker> = mutableListOf()
     private var circles: MutableList<MyCircle> = mutableListOf()
-    private var polyLines: MutableList<Polyline> = mutableListOf()
+    private var polyLines: MutableList<MyPolyline> = mutableListOf()
     private var userMarker: Marker? = null
 
     private val layout: FrameLayout =
@@ -356,12 +357,9 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
     fun addCircles(rawCircles: List<*>) {
         val circles = CircleHelper.toNeshanModel(rawCircles, context)
-        //Log.d("Native Circles", rawCircles.toString())
-
         this.circles.addAll(circles)
         circles.forEach {
             mapView.addCircle(it.circle)
-            mapView.addMarker(it.centerMarker)
         }
         ensureUserMarkerOnTop()
     }
@@ -393,29 +391,28 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
     }
 
     fun addPolyLines(rawPolyLines: List<*>) {
-        val polyLines = PolyLineHelper.toNeshanModel(rawPolyLines, context)
-        //Log.d("Native PolyLines", rawPolyLines.toString())
+        val parsedData = PolyLineHelper.toNeshanModel(rawPolyLines, context)
 
-        this.polyLines.addAll(polyLines.first)
-        polyLines.first.forEach {
-            mapView.addPolyline(it)
+        // Add our wrappers to the list
+        this.polyLines.addAll(parsedData)
+
+        // Add the raw native lines to the map
+        polyLines.forEach {
+            mapView.addPolyline(it.polyline)
         }
-
-        mapView.addMarkers(polyLines.second)
-        ensureUserMarkerOnTop()
     }
 
     fun removePolyLines(rawData: List<*>) {
         val parsedData = PolyLineHelper.toNeshanModel(rawData, context)
 
-        parsedData.first.forEach { parsedPolyline ->
+        parsedData.forEach { parsedPolyline ->
             val polylineToRemove = polyLines.find {
-                it.points.firstOrNull()?.latitude == parsedPolyline.points.firstOrNull()?.latitude &&
-                        it.points.firstOrNull()?.longitude == parsedPolyline.points.firstOrNull()?.longitude
+                it.polyline.points.firstOrNull()?.latitude == parsedPolyline.polyline.points.firstOrNull()?.latitude &&
+                        it.polyline.points.firstOrNull()?.longitude == parsedPolyline.polyline.points.firstOrNull()?.longitude
             }
 
             if (polylineToRemove != null) {
-                mapView.removePolyline(polylineToRemove)
+                mapView.removePolyline(polylineToRemove.polyline)
                 polyLines.remove(polylineToRemove)
             }
         }
@@ -425,7 +422,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
 
     fun removeAllPolyLines() {
         polyLines.forEach {
-            mapView.removePolyline(it)
+            mapView.removePolyline(it.polyline)
         }
         polyLines.clear()
 
@@ -460,7 +457,7 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
             0.0,
             context,
             placementPriority = Int.MAX_VALUE,
-            hideIfOverlapped = true     ,
+            hideIfOverlapped = true,
 
             causesOverlap = true
         )
@@ -497,23 +494,40 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         }
 
         mapView.setOnMapClickListener { latLng ->
+            Log.d("onMapClick", latLng.longitude.toString() + "  " + latLng.longitude.toString())
             sendOnMapClickCallbackToFlutter(latLng)
+        }
+
+        mapView.setOnPolylineClickListener { polyline ->
+            val matchedMyPolyline = polyLines.find { it.polyline == polyline }
+            if (matchedMyPolyline != null) {
+
+                val flutterData = matchedMyPolyline.data?.toString() ?: "{}"
+
+                sendOnPolylineClickCallbackToFlutter(flutterData, null)
+            }
+
+        }
+
+        mapView.setOnCircleClickListener { circle ->
+
+            val matchedMyCircle = circles.find { it.circle == circle }
+
+            if (matchedMyCircle != null) {
+                val exactCenter = LatLng(matchedMyCircle.latitude, matchedMyCircle.longitude)
+
+                val flutterData = matchedMyCircle.data?.toString() ?: "{}"
+
+                sendOnCircleClickCallbackToFlutter(flutterData, exactCenter)
+            }
         }
 
         mapView.setOnMarkerClickListener { marker: Marker ->
             if (!marker.title.isNullOrEmpty() || !marker.description.isNullOrEmpty()) {
                 marker.showInfoWindow()
             }
+            sendOnMarkerClickCallbackToFlutter(marker.getMetadata("data"), marker.latLng)
 
-            val circleMarker = circles.find { myCircle ->
-                myCircle.centerMarker == marker
-            }
-
-            if (circleMarker != null) {
-                sendOnCircleClickCallbackToFlutter(marker.getMetadata("data"))
-            } else {
-                sendOnMarkerClickCallbackToFlutter(marker.getMetadata("data"))
-            }
             mapView.setZoom(mapView.zoom, 0f)
         }
     }
@@ -537,13 +551,25 @@ class MapKitView(private val context: Context, params: Map<String, Any>?) : Plat
         sendEventToFlutter("onMapLongPress", pointMap)
     }
 
-    private fun sendOnMarkerClickCallbackToFlutter(data: String) {
-        sendEventToFlutter("onMarkerTap", mapOf("data" to data))
+    private fun sendOnMarkerClickCallbackToFlutter(data: String, point: LatLng) {
+        sendEventToFlutter(
+            "onMarkerTap",
+            mapOf("data" to data, "latitude" to point.latitude, "longitude" to point.longitude)
+        )
     }
 
-    private fun sendOnCircleClickCallbackToFlutter(data: String) {
-        sendEventToFlutter("onCircleTap", mapOf("data" to data))
+    private fun sendOnCircleClickCallbackToFlutter(data: String, point: LatLng?) {
+        sendEventToFlutter(
+            "onCircleTap",
+            mapOf("data" to data, "latitude" to point?.latitude, "longitude" to point?.longitude)
+        )
+    }
 
+    private fun sendOnPolylineClickCallbackToFlutter(data: String, point: LatLng?) {
+        sendEventToFlutter(
+            "onPolylineTap",
+            mapOf("data" to data, "latitude" to point?.latitude, "longitude" to point?.longitude)
+        )
     }
 
     private fun sendEventToFlutter(event: String, data: Map<String, *>) {

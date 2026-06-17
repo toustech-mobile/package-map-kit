@@ -228,14 +228,17 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
             isCurrentLocationEnable: true,
             zoom: 15,
             markers: List.from(initialMarkers),
-            onMarkerTap: (markerData) {
+            onMarkerTap: (markerData, point) {
+              print("Marker$point");
               if (markerData is MarkerModel) {
                 _showSnackBar("Tapped Marker: ${markerData.data ?? 'Unknown'}", context);
                 return;
               }
               _showSnackBar("Tapped Circle: ${markerData ?? 'Unknown'}", context);
             },
-            onCircleTap: (circleData) {
+            onCircleTap: (circleData, point) {
+              print("Circle$point");
+              print(circleData);
               if (circleData is CircleModel) {
                 _showSnackBar("Tapped Circle: ${circleData.data ?? 'Unknown'}", context);
                 return;
@@ -268,7 +271,8 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
               ]);
               _showSnackBar("Dropped Circle at ${point.latitude.toStringAsFixed(4)}");
             },
-             onPolylineTap: (data) {
+             onPolylineTap: (data, point) {
+               print("Polyline$point");
                _showSnackBar("Tapped Polyline: ${data ?? 'Unknown'}", context);
              },
             onMyLocationClick: requestEnableGps,

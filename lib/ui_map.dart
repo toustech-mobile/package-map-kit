@@ -12,12 +12,12 @@ import 'package:map_kit/widgets/neshan/neshan_map_widget.dart';
 class UiMap extends StatefulWidget {
   final MapProvider mapProvider;
   final UiMapController? controller;
-  final void Function(LatLng)? onTap;
-  final void Function(LatLng)? onLongPress;
-  final void Function(dynamic)? onMarkerTap;
-  final void Function(dynamic)? onCircleTap;
+  final void Function(LatLng point)? onTap;
+  final void Function(LatLng point)? onLongPress;
+  final void Function(dynamic data, LatLng point)? onMarkerTap;
+  final void Function(dynamic data, LatLng? point)? onCircleTap;
   final Future<void> Function()? onMyLocationClick;
-  final void Function(dynamic data)? onPolylineTap;
+  final void Function(dynamic data, LatLng? point)? onPolylineTap;
 
   LatLng? initialCenter;
   bool? isDarkMode;

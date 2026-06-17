@@ -32,10 +32,7 @@ class CircleHelper {
                             borderStroke!!,
                             color!!,
                             borderColor!!,
-                            snippetTitle!!,
-                            snippetDescription!!,
-                            data,
-                            context
+                            data
                         )
                     } else {
                         null
@@ -52,10 +49,7 @@ class CircleHelper {
             borderStroke: Double,
             color: String,
             borderColor: String,
-            snippetTitle: String,
-            snippetDescription: String,
-            data: Any?,
-            context: Context,
+            data: Any?
         ): MyCircle {
             return MyCircle(
                 point.latitude, point.longitude, radius, "", "", Circle(
@@ -63,23 +57,12 @@ class CircleHelper {
                     radius,
                     convertToCartoColor(android.graphics.Color.parseColor(color)),
                     getLineStyle(borderColor, borderStroke)
-                ), MarkerHelper.createMarker(
-                    LatLng(point.latitude, point.longitude),
-                    data,
-                    "circle.svg",
-                    20,
-                    snippetTitle,
-                    snippetDescription,
-                    "",
-                    0.0,
-                    context
-                )
+                ), data
             )
         }
 
         private fun getLineStyle(
-            color: String,
-            strokeWidth: Double
+            color: String, strokeWidth: Double
         ): LineStyle {
             val lineStyleBuilder = LineStyleBuilder()
             lineStyleBuilder.color = convertToCartoColor(android.graphics.Color.parseColor(color))

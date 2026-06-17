@@ -11,13 +11,12 @@ class PolyLineModel {
   final Color color;
   final double? strokeWidth;
   final Color? strokeColor;
-  final bool? showArrow;
   final dynamic data;
 
-  PolyLineModel({this.points, required this.color, this.strokeWidth, this.strokeColor, this.showArrow, this.data});
+  PolyLineModel({this.points, required this.color, this.strokeWidth, this.strokeColor, this.data});
 
   PolyLineModel.decodePoints(
-      {String? encodedPoints, required this.color, this.strokeWidth, this.strokeColor, this.showArrow, this.data})
+      {String? encodedPoints, required this.color, this.strokeWidth, this.strokeColor, this.data})
       : points = PolyLinePointModel.decodePoints(encodedPoints);
 
   Polyline toFlutterPolyLine() => Polyline(
@@ -38,7 +37,6 @@ class PolyLineModel {
       'color': color.toHex(),
       'strokeWidth': strokeWidth,
       'strokeColor': strokeColor != null ? strokeColor!.toHex() : color.withAlpha(100).toHex(),
-      'showArrow': showArrow,
       'data': data?.toString(),
     };
   }

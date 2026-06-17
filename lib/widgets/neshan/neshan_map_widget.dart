@@ -32,12 +32,12 @@ class NeshanMapWidget extends StatefulWidget {
   List<PolyLineModel>? polyLines;
   List<CircleModel>? circles;
   UserMarkerModel? userMarker;
-  final void Function(LatLng)? onTap;
-  final void Function(LatLng)? onLongPress;
-  final void Function(dynamic)? onMarkerTap;
-  final void Function(dynamic)? onCircleTap;
+  final void Function(LatLng point)? onTap;
+  final void Function(LatLng point)? onLongPress;
+  final void Function(dynamic data, LatLng point)? onMarkerTap;
+  final void Function(dynamic data, LatLng? point)? onCircleTap;
   final Future<void> Function()? onMyLocationClick;
-  final void Function(dynamic)? onPolylineTap;
+  final void Function(dynamic data, LatLng? point)? onPolylineTap;
 
 
   StreamSubscription<ServiceStatus>? _serviceStatusStream;
@@ -265,21 +265,22 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
 
   @override
   Future<void> onMapTap(LatLng point) async {
-    PolyLineModel? tappedPolyline;
-    double currentZoom = (await widget.uiMapController?.camera)?.zoom ?? widget.zoom ?? 15;
-
-    for (final polyline in widget.polyLines ?? []) {
-      if (polyline.isPointNear(point, currentZoom)) {
-        tappedPolyline = polyline;
-        break;
-      }
-    }
-
-    if (tappedPolyline != null) {
-      widget.onPolylineTap?.call(tappedPolyline.data);
-    } else if (widget.onTap != null) {
-      widget.onTap!(point);
-    }
+    widget.onTap?.call(point);
+    // PolyLineModel? tappedPolyline;
+    // double currentZoom = (await widget.uiMapController?.camera)?.zoom ?? widget.zoom ?? 15;
+    //
+    // for (final polyline in widget.polyLines ?? []) {
+    //   if (polyline.isPointNear(point, currentZoom)) {
+    //     tappedPolyline = polyline;
+    //     break;
+    //   }
+    // }
+    //
+    // if (tappedPolyline != null) {
+    //   widget.onPolylineTap?.call(tappedPolyline.data, point);
+    // } else if (widget.onTap != null) {
+    //   widget.onTap!(point);
+    // }
   }
 
   @override
@@ -290,16 +291,23 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
   }
 
   @override
-  void onMarkerTap(data) {
+  void onMarkerTap(data, LatLng point) {
     if (widget.onMarkerTap != null) {
-      widget.onMarkerTap!(data);
+      widget.onMarkerTap!(data, point);
     }
   }
 
   @override
-  void onCircleTap(data) {
+  void onCircleTap(data, LatLng? point) {
     if (widget.onCircleTap != null) {
-      widget.onCircleTap!(data);
+      widget.onCircleTap!(data, point);
+    }
+  }
+
+  @override
+  void onPolylineTap(data, LatLng? point) {
+    if (widget.onPolylineTap != null) {
+      widget.onPolylineTap!(data, point);
     }
   }
 

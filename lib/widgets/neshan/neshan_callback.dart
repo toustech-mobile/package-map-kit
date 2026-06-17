@@ -17,11 +17,30 @@ abstract class NeshanCallback {
           break;
 
         case 'onMarkerTap':
-          callbacks.onMarkerTap((streamData['data']['data'] as String));
+          callbacks.onMarkerTap((streamData['data']['data'] as String),
+              LatLng((streamData['data'] as Map)['latitude'], (streamData['data'] as Map)['longitude']));
           break;
 
         case 'onCircleTap':
-          callbacks.onCircleTap((streamData['data']['data'] as String));
+          final mapData = streamData['data'] as Map;
+          final lat = mapData['latitude'] as double?;
+          final lng = mapData['longitude'] as double?;
+
+          callbacks.onCircleTap(
+            mapData['data'] as String,
+            (lat != null && lng != null) ? LatLng(lat, lng) : null,
+          );
+          break;
+
+        case 'onPolylineTap':
+          final mapData = streamData['data'] as Map;
+          final lat = mapData['latitude'] as double?;
+          final lng = mapData['longitude'] as double?;
+
+          callbacks.onPolylineTap(
+            mapData['data'] as String,
+            (lat != null && lng != null) ? LatLng(lat, lng) : null,
+          );
           break;
       }
     }, onError: (error) {
@@ -36,7 +55,9 @@ abstract class NeshanCallbackInterface {
 
   void onMapLongPress(LatLng point);
 
-  void onMarkerTap(dynamic data);
+  void onMarkerTap(dynamic data, LatLng point);
 
-  void onCircleTap(dynamic data);
+  void onCircleTap(dynamic data, LatLng? point);
+
+  void onPolylineTap(dynamic data, LatLng? point);
 }

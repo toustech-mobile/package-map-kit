@@ -32,12 +32,12 @@ class FlutterMapWidget extends StatefulWidget {
   bool? isCurrentLocationEnable;
   bool? gpsEnabled;
   double? zoom;
-  final void Function(LatLng)? onTap;
-  final void Function(LatLng)? onLongPress;
-  final void Function(MarkerModel)? onMarkerTap;
-  final void Function(CircleModel)? onCircleTap;
+  final void Function(LatLng point)? onTap;
+  final void Function(LatLng point)? onLongPress;
+  final void Function(MarkerModel data, LatLng point)? onMarkerTap;
+  final void Function(CircleModel data, LatLng? point)? onCircleTap;
   final Future<void> Function()? onMyLocationClick;
-  final void Function(dynamic)? onPolylineTap;
+  final void Function(dynamic data, LatLng? point)? onPolylineTap;
 
   MapProvider? mapProvider;
 
@@ -293,7 +293,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
             ...widget.polyLines!.map((polyLineModel) => polyLineModel.toFlutterPolyLine()),
           ],
         ),
-        MarkerLayer(markers: _buildHeadingMarkers()),
+        // MarkerLayer(markers: _buildHeadingMarkers()),
         _buildPopupMarkerLayer(),
         if (widget.userMarker != null) widget.userMarker!.toUserMarker(),
       ],
@@ -316,30 +316,30 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
     );
   }
 
-  List<Marker> _buildHeadingMarkers() {
-    final List<Marker> markers = [];
-
-    for (final polyLine in widget.polyLines!) {
-      if (polyLine.points != null && polyLine.showArrow == true) {
-        for (final point in polyLine.points!) {
-          markers.add(
-            Marker(
-              point: LatLng(point.latitude, point.longitude),
-              width: 16,
-              height: 16,
-              child: Transform.rotate(
-                angle: point.heading * (3.14159265359 / 180.0),
-                child: SvgPicture.asset(
-                  'assets/icons/arrow.svg',
-                ),
-              ),
-            ),
-          );
-        }
-      }
-    }
-    return markers;
-  }
+  // List<Marker> _buildHeadingMarkers() {
+  //   final List<Marker> markers = [];
+  //
+  //   for (final polyLine in widget.polyLines!) {
+  //     if (polyLine.points != null && polyLine.showArrow == true) {
+  //       for (final point in polyLine.points!) {
+  //         markers.add(
+  //           Marker(
+  //             point: LatLng(point.latitude, point.longitude),
+  //             width: 16,
+  //             height: 16,
+  //             child: Transform.rotate(
+  //               angle: point.heading * (3.14159265359 / 180.0),
+  //               child: SvgPicture.asset(
+  //                 'assets/icons/arrow.svg',
+  //               ),
+  //             ),
+  //           ),
+  //         );
+  //       }
+  //     }
+  //   }
+  //   return markers;
+  // }
 
   PopupMarkerLayer _buildPopupMarkerLayer() {
     final combinedMarkers = [
@@ -375,12 +375,12 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
                 _lastTappedMarker!.latitude != tappedMarker.latitude ||
                 _lastTappedMarker!.longitude != tappedMarker.longitude) {
               if (tappedMarker.icon.isNotEmpty) {
-                widget.onMarkerTap?.call(tappedMarker);
+                widget.onMarkerTap?.call(tappedMarker, LatLng(tappedMarker.latitude, tappedMarker.longitude));
               } else {
                 final tappedCircle = widget.circles!.firstWhere(
                       (c) => c.latitude == marker.point.latitude && c.longitude == marker.point.longitude,
                 );
-                widget.onCircleTap?.call(tappedCircle);
+                widget.onCircleTap?.call(tappedCircle, LatLng(marker.point.latitude, marker.point.longitude));
               }
               _lastTappedMarker = tappedMarker;
               _popupVisible = true;
@@ -448,8 +448,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
     );
 
     if (circle != null && circle.longitude != 0) {
-      print("hiiiiiiiiiii");
-      widget.onCircleTap?.call(circle);
+      widget.onCircleTap?.call(circle, point);
       return;
     }
 
@@ -464,7 +463,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
     }
 
     if (tappedPolyline != null) {
-      widget.onPolylineTap?.call(tappedPolyline.data);
+      widget.onPolylineTap?.call(tappedPolyline.data, point);
       return;
     }
 
