@@ -1,20 +1,6 @@
 group = "com.golrang.map_kit"
 version = "1.0-SNAPSHOT"
 
-buildscript {
-    // Keep in sync with Flutter's supported Kotlin range for this Flutter version.
-    ext.kotlin_version = "2.1.0"
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("com.android.tools.build:gradle:8.9.1")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
-    }
-}
-
 allprojects {
     repositories {
         google()
@@ -24,22 +10,23 @@ allprojects {
 }
 
 apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
 
 android {
     if (project.android.hasProperty("namespace")) {
         namespace = "com.golrang.map_kit"
     }
 
-    compileSdk = 35
+    compileSdk = 36
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
+        }
     }
 
     sourceSets {
@@ -85,7 +72,6 @@ android {
         implementation 'com.google.android.gms:play-services-gcm:16.1.0'
         implementation 'com.google.android.gms:play-services-location:17.0.0'
 
-        implementation 'com.google.code.gson:gson:2.10.1'
     }
 
     testOptions {
