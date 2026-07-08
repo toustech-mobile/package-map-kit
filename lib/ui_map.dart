@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
@@ -16,35 +15,30 @@ class UiMap extends StatefulWidget {
   final void Function(LatLng point)? onLongPress;
   final void Function(dynamic data, LatLng point)? onMarkerTap;
   final void Function(dynamic data, LatLng? point)? onCircleTap;
-  final Future<void> Function()? onMyLocationClick;
   final void Function(dynamic data, LatLng? point)? onPolylineTap;
 
   LatLng? initialCenter;
   bool? isDarkMode;
   double? zoom;
-  bool? isCurrentLocationEnable;
   List<MarkerModel>? markers;
   List<CircleModel>? circles;
   List<PolyLineModel>? polyLines;
 
-  UiMap({
-    super.key,
-    required this.mapProvider,
-    this.controller,
-    this.onTap,
-    this.onLongPress,
-    this.onMarkerTap,
-    this.onCircleTap,
-    this.onMyLocationClick,
-    this.initialCenter,
-    this.isDarkMode,
-    this.zoom,
-    this.isCurrentLocationEnable,
-    List<MarkerModel>? markers,
-    List<CircleModel>? circles,
-    List<PolyLineModel>? polyLines,
-    this.onPolylineTap
-  }) {
+  UiMap(
+      {super.key,
+      required this.mapProvider,
+      this.controller,
+      this.onTap,
+      this.onLongPress,
+      this.onMarkerTap,
+      this.onCircleTap,
+      this.initialCenter,
+      this.isDarkMode,
+      this.zoom,
+      List<MarkerModel>? markers,
+      List<CircleModel>? circles,
+      List<PolyLineModel>? polyLines,
+      this.onPolylineTap}) {
     this.markers = markers ?? [];
     this.circles = circles ?? [];
     this.polyLines = polyLines ?? [];
@@ -72,7 +66,6 @@ class _UiMapState extends State<UiMap> {
           uiMapController: widget.controller,
           initialCenter: widget.initialCenter,
           zoom: widget.zoom,
-          isCurrentLocationEnable: widget.isCurrentLocationEnable,
           isDarkMode: widget.isDarkMode,
           markers: widget.markers,
           polyLines: widget.polyLines,
@@ -82,7 +75,6 @@ class _UiMapState extends State<UiMap> {
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
           mapProvider: MapProvider.flutter,
-          onMyLocationClick: widget.onMyLocationClick,
           onPolylineTap: widget.onPolylineTap,
         );
       case MapProvider.mapIr:
@@ -90,7 +82,6 @@ class _UiMapState extends State<UiMap> {
           uiMapController: widget.controller,
           initialCenter: widget.initialCenter,
           zoom: widget.zoom,
-          isCurrentLocationEnable: widget.isCurrentLocationEnable,
           isDarkMode: widget.isDarkMode,
           markers: widget.markers,
           polyLines: widget.polyLines,
@@ -99,7 +90,6 @@ class _UiMapState extends State<UiMap> {
           onCircleTap: widget.onCircleTap,
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
-          onMyLocationClick: widget.onMyLocationClick,
           mapProvider: MapProvider.mapIr,
           onPolylineTap: widget.onPolylineTap,
         );
@@ -110,7 +100,6 @@ class _UiMapState extends State<UiMap> {
           initialCenter: widget.initialCenter,
           zoom: widget.zoom,
           isDarkMode: widget.isDarkMode,
-          isCurrentLocationEnable: widget.isCurrentLocationEnable,
           markers: widget.markers,
           polyLines: widget.polyLines,
           circles: widget.circles,
@@ -118,7 +107,6 @@ class _UiMapState extends State<UiMap> {
           onCircleTap: widget.onCircleTap,
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
-          onMyLocationClick: widget.onMyLocationClick,
           onPolylineTap: widget.onPolylineTap,
         );
     }

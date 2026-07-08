@@ -220,7 +220,6 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
             controller: mapController,
             initialCenter: initialCenter,
             isDarkMode: isDarkMode,
-            isCurrentLocationEnable: true,
             zoom: 15,
             markers: List.from(initialMarkers),
             onMarkerTap: (markerData, point) {
@@ -287,15 +286,24 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
               print("Polyline$point");
               _showSnackBar("Tapped Polyline: ${data ?? 'Unknown'}", context);
             },
-            onMyLocationClick: requestEnableGps,
           ),
           Positioned(
             bottom: 24,
             left: 24,
-            child: FloatingActionButton.extended(
-              onPressed: _openControlPanel,
-              icon: const Icon(Icons.dashboard_customize),
-              label: const Text("Controls"),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton.extended(
+                  onPressed: requestEnableGps,
+                  icon: const Icon(Icons.dashboard_customize),
+                  label: const Text("Controls"),
+                ),
+                FloatingActionButton.extended(
+                  onPressed: _openControlPanel,
+                  icon: const Icon(Icons.dashboard_customize),
+                  label: const Text("Controls"),
+                ),
+              ],
             ),
           ),
         ],
