@@ -1,122 +1,30 @@
+@file:Suppress("DEPRECATION")
+
 package com.golrang.map_kit.helpers
 
-import android.content.Context
-import com.carto.styles.LineStyle
-import com.carto.styles.LineStyleBuilder
-import com.golrang.map_kit.models.PolyLinePointModel
-import org.neshan.common.model.LatLng
-import org.neshan.mapsdk.model.Marker
-import org.neshan.mapsdk.model.Polyline
-import android.graphics.Color as AndroidColor
-import com.carto.graphics.Color as CartoColor
+import android.graphics.Color
 import com.golrang.map_kit.models.MyPolyline
+import org.maplibre.android.annotations.PolylineOptions
+import org.maplibre.android.maps.MapLibreMap
 
+internal object PolyLineHelper {
+    fun add(map: MapLibreMap, data: Map<*, *>): MyPolyline {
+        val points = data["points"].mapList().map { it.coordinate() }
+        require(points.size >= 2) { "A polyline requires at least two points" }
+        val width = data.number("strokeWidth", 3.0)
+        require(width > 0) { "strokeWidth must be positive" }
+        val color = Color.parseColor(data["color"] as? String ?: "#FF0000FF")
+        val strokeColor = Color.parseColor(data["strokeColor"] as? String ?: "#640000FF")
+        fun options(value: Int, lineWidth: Double) = PolylineOptions().addAll(points)
+            .color(value or (0xFF shl 24)).alpha(Color.alpha(value) / 255f)
+            .width(lineWidth.toFloat())
+        val outline = map.addPolyline(options(strokeColor, width + 4))
+        val line = map.addPolyline(options(color, width))
+        return MyPolyline(line, outline, data["data"]?.toString() ?: "{}")
+    }
 
-
-class PolyLineHelper {
-    companion object {
-        fun toNeshanModel(
-            polyLines: List<*>,
-            context: Context
-        ): List<MyPolyline> {
-
-            val polylineList = mutableListOf<MyPolyline>()
-//            val markerList = mutableListOf<Marker>()
-
-            polyLines.forEach { polyLine ->
-                if (polyLine is Map<*, *>) {
-                    @Suppress("UNCHECKED_CAST")
-                    val points = polyLine["points"] as? List<Map<*, *>>
-                    val color = polyLine["color"] as? String
-                    val strokeWidth = polyLine["strokeWidth"] as? Double
-                    val strokeColor = polyLine["strokeColor"] as? String
-//                    val showArrow = polyLine["showArrow"] as? Boolean
-                    val flutterData = polyLine["data"]
-
-                    if (points != null && color != null && strokeWidth != null) {
-
-                        val polyLinePoints = points.mapNotNull { point ->
-                            val latitude = point["latitude"] as? Double
-                            val longitude = point["longitude"] as? Double
-                            val heading = point["heading"] as? Double ?: 0.0
-
-                            if (latitude != null && longitude != null) {
-                                PolyLinePointModel(latitude, longitude, heading)
-                            } else {
-                                null
-                            }
-                        }
-
-                        val latLngPoints = polyLinePoints.map {
-                            LatLng(it.latitude, it.longitude)
-                        }
-
-                        val strokePolyline = createPolyLine(
-                            ArrayList(latLngPoints),
-                            strokeColor ?: "#000000",
-                            strokeWidth + 4
-                        )
-                        polylineList.add(MyPolyline(strokePolyline, flutterData))
-
-                        // <-- Change 4: Wrap the MAIN line
-                        val mainPolyline = createPolyLine(
-                            ArrayList(latLngPoints),
-                            color,
-                            strokeWidth
-                        )
-                        polylineList.add(MyPolyline(mainPolyline, flutterData))
-
-//                        if (showArrow == true && polyLinePoints.isNotEmpty()) {
-//                            polyLinePoints.forEachIndexed { index, pointModel ->
-//                                if (index % 2 == 0) {
-//                                    val marker = MarkerHelper.createMarker(
-//                                        LatLng(pointModel.latitude, pointModel.longitude),
-//                                        "",
-//                                        "arrow.svg",
-//                                        20,
-//                                        "",
-//                                        "",
-//                                        "",
-//                                        pointModel.heading,
-//                                        context = context
-//                                    )
-//                                    markerList.add(marker)
-//                                }
-//                            }
-//
-//                        }
-                    }
-                }
-            }
-
-            return polylineList
-        }
-
-
-        fun createPolyLine(
-            points: ArrayList<LatLng>,
-            color: String,
-            strokeWidth: Double
-        ): Polyline {
-            return Polyline(points, getLineStyle(color, strokeWidth))
-        }
-
-        private fun convertToCartoColor(androidColor: Int): CartoColor {
-            val alpha: Short = AndroidColor.alpha(androidColor).toShort()
-            val red: Short = AndroidColor.red(androidColor).toShort()
-            val green: Short = AndroidColor.green(androidColor).toShort()
-            val blue: Short = AndroidColor.blue(androidColor).toShort()
-            return CartoColor(red, green, blue, alpha)
-        }
-
-        private fun getLineStyle(
-            color: String,
-            strokeWidth: Double
-        ): LineStyle {
-            val lineStyleBuilder = LineStyleBuilder()
-            lineStyleBuilder.color = convertToCartoColor(AndroidColor.parseColor(color))
-            lineStyleBuilder.width = strokeWidth.toFloat()
-            return lineStyleBuilder.buildStyle()
-        }
+    fun remove(map: MapLibreMap, line: MyPolyline) {
+        map.removePolyline(line.polyline)
+        map.removePolyline(line.outline)
     }
 }

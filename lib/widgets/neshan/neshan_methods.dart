@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_camera.dart';
 import 'package:map_kit/models/circle_model.dart';
+import 'package:map_kit/models/map_bounds_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/move_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
@@ -68,21 +69,29 @@ abstract class NeshanMethods {
     await _channel.invokeMethod('moveCamera', moveMarker.toNeshanMoveModel());
   }
 
+  static Future<void> fitBounds(MapBoundsModel bounds) async {
+    await _channel.invokeMethod('fitBounds', {
+      'points': bounds.points
+          .map((point) => {
+                'latitude': point.latitude,
+                'longitude': point.longitude,
+              })
+          .toList(),
+      'padding': bounds.padding,
+    });
+  }
+
   static setDarkMode(bool isDarkMode) async {
     await _channel.invokeMethod('setMapStyle', {'isDarkMode': isDarkMode});
   }
 
   static Future<UiMapCamera> getCamera() async {
-    final Map<dynamic, dynamic> result = await _channel.invokeMethod('getCamera');
+    final Map<dynamic, dynamic> result =
+        await _channel.invokeMethod('getCamera');
     return UiMapCamera(
-      result['zoom'] as double,
-      LatLng(result['latitude'] as double, result['longitude'] as double),
+      (result['zoom'] as num).toDouble(),
+      LatLng((result['latitude'] as num).toDouble(),
+          (result['longitude'] as num).toDouble()),
     );
   }
-}
-
-abstract class NeshanCallbackInterface {
-  void onMapTap(LatLng point);
-
-  void onMarkerTap(dynamic data);
 }

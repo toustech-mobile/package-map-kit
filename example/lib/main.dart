@@ -53,7 +53,7 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
       latitude: 36.3156692,
       longitude: 59.5405541,
       data: "Center Marker",
-      icon: 'ic_map_tour_waiting_icon.svg',
+      icon: 'ic_map_tour_icon.svg',
       iconSize: 28,
       markerContent: 'C',
       snippetTitle: 'Center Marker',
@@ -91,7 +91,7 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
         data: "Dynamic Marker 1",
         markerContent: '1',
         iconSize: 28,
-        icon: 'ic_map_tour_waiting_icon.svg',
+        icon: 'ic_map_tour_icon.svg',
         snippetTitle: 'Added Marker',
       ),
     ]);
@@ -161,12 +161,18 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
     _showSnackBar("Mock User Location Set");
   }
 
-  void _toggleDarkMode() {
-    setState(() {
-      isDarkMode = !isDarkMode;
-    });
-    mapController.setDarkMode(isDarkMode);
-    _showSnackBar(isDarkMode ? "Dark Mode Enabled" : "Light Mode Enabled");
+  Future<void> _toggleDarkMode() async {
+    final dark = !isDarkMode;
+    try {
+      await mapController.setDarkMode(dark);
+      if (!mounted) return;
+      // The controller updates the map. Rebuilding the whole demo here would
+      // replace its mutable overlay lists with the initial constructor inputs.
+      isDarkMode = dark;
+      _showSnackBar(dark ? "Dark Mode Enabled" : "Light Mode Enabled");
+    } catch (error) {
+      if (mounted) _showSnackBar("Theme change failed: $error");
+    }
   }
 
   void _getCurrentCameraState() async {
@@ -215,6 +221,7 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
       body: Stack(
         children: [
           UiMap(
+            userAgentPackageName: 'com.golrang.map_kit_example',
             key: ValueKey(currentProvider.toString()),
             mapProvider: currentProvider,
             controller: mapController,
@@ -227,7 +234,7 @@ class _MapExampleScreenState extends State<MapExampleScreen> {
                 _showSnackBar("Tapped Marker: ${markerData.data ?? 'Unknown'}", context);
                 return;
               }
-              _showSnackBar("Tapped Circle: ${markerData ?? 'Unknown'}", context);
+              _showSnackBar("Tapped Marker: ${markerData ?? 'Unknown'}", context);
             },
             onCircleTap: (circleData, point) {
               if (circleData is CircleModel) {

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
@@ -16,6 +14,7 @@ import 'package:map_kit/models/poly_line_model.dart';
 import '../../models/user_marker.dart';
 
 class FlutterMapWidget extends StatefulWidget {
+  final String userAgentPackageName;
   final PopupController popupController = PopupController();
 
   UiMapController? uiMapController;
@@ -36,6 +35,7 @@ class FlutterMapWidget extends StatefulWidget {
 
   FlutterMapWidget({
     super.key,
+    this.userAgentPackageName = 'com.golrang.map_kit',
     this.uiMapController,
     this.markers,
     this.polyLines,
@@ -97,15 +97,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           widget.circles!.addAll(safeCircles);
-          // also add new hidden markers for the new circles
-          _circleMarkers.addAll(safeCircles.map((circle) => MarkerModel(
-                latitude: circle.latitude,
-                longitude: circle.longitude,
-                data: '',
-                icon: '',
-                snippetTitle: circle.snippetTitle,
-                snippetDescription: circle.snippetDescription,
-              )));
+          _initializeHiddenMarkers();
           setState(() {});
         });
       };
@@ -182,6 +174,8 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           widget.circles!.removeWhere((circle) => circles.contains(circle));
+          widget.popupController.hideAllPopups();
+          _initializeHiddenMarkers();
           setState(() {});
         });
       };
@@ -200,6 +194,8 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           widget.circles!.clear();
+          widget.popupController.hideAllPopups();
+          _initializeHiddenMarkers();
           setState(() {});
         });
       };
@@ -237,6 +233,11 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
           _mapController.camera.zoom,
           _mapController.camera.center,
         );
+      };
+
+      widget.uiMapController!.setDarkMode = (bool dark) {
+        if (!mounted) return;
+        setState(() => widget.isDarkMode = dark);
       };
     }
 
@@ -284,6 +285,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
           }),
       children: [
         TileLayer(
+          userAgentPackageName: widget.userAgentPackageName,
           urlTemplate:
               widget.isDarkMode ?? false ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : tileUrl,
           subdomains: const ['a', 'b', 'c'],
@@ -305,11 +307,27 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         ),
         _buildPopupMarkerLayer(),
         if (widget.userMarker != null) widget.userMarker!.toUserMarker(),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: ColoredBox(
+            color: Colors.white70,
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Text((widget.isDarkMode ?? false)
+                  ? '© OpenStreetMap contributors, CARTO'
+                  : widget.mapProvider == MapProvider.mapIr
+                      ? '© OpenStreetMap contributors, map.ir'
+                      : '© OpenStreetMap contributors',
+                  style: const TextStyle(fontSize: 11, color: Colors.black)),
+            ),
+          ),
+        ),
       ],
     );
   }
 
   void _initializeHiddenMarkers() {
+    _circleMarkers.clear();
     _circleMarkers.addAll(
       widget.circles!.map(
         (circle) => MarkerModel(

@@ -1,11 +1,13 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <org.neshan.mapsdk.MapView
+    <org.maplibre.android.maps.MapView
         android:id="@+id/map"
+        app:maplibre_renderTextureMode="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

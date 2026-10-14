@@ -1,0 +1,4 @@
+<resources>
+    <!-- Match the SVG name used by the Flutter example. -->
+    <item name="ic_map_tour_icon" type="drawable">@drawable/ic_map_tour_waiting_icon</item>
+</resources>

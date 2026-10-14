@@ -11,6 +11,8 @@ import 'package:map_kit/widgets/neshan/neshan_map_widget.dart';
 class UiMap extends StatefulWidget {
   final MapProvider mapProvider;
   final UiMapController? controller;
+  /// Stable host application identity sent to raster tile providers.
+  final String userAgentPackageName;
   final void Function(LatLng point)? onTap;
   final void Function(LatLng point)? onLongPress;
   final void Function(dynamic data, LatLng point)? onMarkerTap;
@@ -28,6 +30,7 @@ class UiMap extends StatefulWidget {
       {super.key,
       required this.mapProvider,
       this.controller,
+      this.userAgentPackageName = 'com.golrang.map_kit',
       this.onTap,
       this.onLongPress,
       this.onMarkerTap,
@@ -63,6 +66,7 @@ class _UiMapState extends State<UiMap> {
     switch (widget.mapProvider) {
       case MapProvider.flutter:
         return FlutterMapWidget(
+          userAgentPackageName: widget.userAgentPackageName,
           uiMapController: widget.controller,
           initialCenter: widget.initialCenter,
           zoom: widget.zoom,
@@ -79,6 +83,7 @@ class _UiMapState extends State<UiMap> {
         );
       case MapProvider.mapIr:
         return FlutterMapWidget(
+          userAgentPackageName: widget.userAgentPackageName,
           uiMapController: widget.controller,
           initialCenter: widget.initialCenter,
           zoom: widget.zoom,

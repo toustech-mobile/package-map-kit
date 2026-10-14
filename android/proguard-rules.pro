@@ -12,16 +12,5 @@
     *;
 }
 
-# Neshan SDK talks to native code through JNI and resolves parts of itself
-# reflectively; stripping or renaming these classes breaks markers,
-# polylines and circles in minified release builds.
--keep class org.neshan.** {
-    *;
-}
-
--keep class com.carto.** {
-    *;
-}
-
--dontwarn org.neshan.**
--dontwarn com.carto.**
+# The MapLibre AAR supplies its own JNI/SDK consumer rules. Keep the reflected
+# plugin resources above; the old Carto/Neshan packages are no longer used.

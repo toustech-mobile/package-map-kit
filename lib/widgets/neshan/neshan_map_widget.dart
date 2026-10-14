@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -10,13 +9,11 @@ import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
 import 'package:map_kit/map_kit.dart';
 import 'package:map_kit/models/circle_model.dart';
-import 'package:map_kit/models/map_bounds_model.dart';
 import 'package:map_kit/models/marker_model.dart';
-import 'package:map_kit/models/move_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/models/user_marker.dart';
 import 'package:map_kit/widgets/neshan/neshan_callback.dart';
-import 'package:map_kit/widgets/neshan/neshan_methods.dart' as neshan;
+import 'package:map_kit/widgets/neshan/neshan_methods.dart';
 
 class NeshanMapWidget extends StatefulWidget {
   late Map<String, dynamic> creationParams;
@@ -24,7 +21,6 @@ class NeshanMapWidget extends StatefulWidget {
   LatLng? initialCenter;
   bool? isDarkMode;
   bool? gpsEnabled;
-
   double? zoom;
   List<MarkerModel>? markers;
   List<PolyLineModel>? polyLines;
@@ -56,157 +52,91 @@ class NeshanMapWidget extends StatefulWidget {
   State<NeshanMapWidget> createState() => _NeshanMapWidgetState();
 }
 
-class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCallbackInterface {
-  Size? _mapSize;
+class _NeshanMapWidgetState extends State<NeshanMapWidget>
+    implements NeshanCallbackInterface {
+  StreamSubscription<dynamic>? _subscription;
 
   @override
   void initState() {
     super.initState();
-    NeshanCallback.setNeshanCallback(this);
-    print('NeshanCallback setNeshanCallback set');
+    widget.initialCenter ??= const LatLng(35.6892, 51.3890);
+    widget.markers ??= [];
+    widget.circles ??= [];
+    widget.polyLines ??= [];
+    // iOS still uses the separate Apple MapKit prototype.
+    if (!Platform.isIOS) _subscription = NeshanCallback.setNeshanCallback(this);
 
-    if (widget.uiMapController != null) {
-      widget.uiMapController!.addMarkers = (List<MarkerModel> markers) {
-        widget.markers!.addAll(markers);
-        neshan.NeshanMethods.addMarkers(markers);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-
-      widget.uiMapController!.removeMarkers = (List<MarkerModel> markers) {
-        neshan.NeshanMethods.removeMarkers(markers);
-        for (var m in markers) {
-          widget.markers!.remove(m);
-        }
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-
-      widget.uiMapController!.removeAllMarkers = () {
-        neshan.NeshanMethods.removeAllMarkers();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-
-      widget.uiMapController!.removeAllCircles = () {
-        neshan.NeshanMethods.removeAllCircles();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-
-      widget.uiMapController!.addCircles = (List<CircleModel> circles) {
-        widget.circles!.addAll(circles);
-        neshan.NeshanMethods.addCircles(circles);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-
-      widget.uiMapController!.removeCircles = (List<CircleModel> circles) {
-        neshan.NeshanMethods.removeCircles(circles);
-        for (var c in circles) {
-          widget.circles!.remove(c);
-        }
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-
-      widget.uiMapController!.addPolyline = (List<PolyLineModel> polyLines) {
-        widget.polyLines!.addAll(polyLines);
-        neshan.NeshanMethods.addPolylines(polyLines);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-
-      widget.uiMapController!.removePolyLines = (List<PolyLineModel> polyLines) {
-        neshan.NeshanMethods.removePolyLines(polyLines);
-        for (var p in polyLines) {
-          widget.polyLines!.remove(p);
-        }
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-
-      widget.uiMapController!.removeAllPolyLines = () {
-        neshan.NeshanMethods.removeAllPolyLines();
-        widget.polyLines?.clear();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-
-      widget.uiMapController!.cameraCallback = () async {
-        return await neshan.NeshanMethods.getCamera();
-      };
-
-      widget.uiMapController!.setUserLocation = (UserMarkerModel userMarkerModel) {
-        widget.userMarker = userMarkerModel;
-        neshan.NeshanMethods.setUserMarker(userMarkerModel);
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-
-      widget.uiMapController!.moveCamera = (MoveModel moveModel) {
-        neshan.NeshanMethods.moveCamera(moveModel);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-
-      widget.uiMapController!.fitBounds = (MapBoundsModel mapBoundsModel) {
-        final moveModel = _calculateMoveModelForBounds(mapBoundsModel);
-        if (moveModel == null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            final retryMoveModel = _calculateMoveModelForBounds(mapBoundsModel);
-            if (retryMoveModel == null) return;
-            neshan.NeshanMethods.moveCamera(retryMoveModel);
-            if (mounted) setState(() {});
-          });
-          return;
-        }
-
-        neshan.NeshanMethods.moveCamera(moveModel);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-
-      widget.uiMapController!.setDarkMode = (bool isDarkMode) {
-        widget.isDarkMode = isDarkMode;
-        neshan.NeshanMethods.setDarkMode(isDarkMode);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) setState(() {});
-        });
-      };
-    }
-  }
-
-  void setCreationParams() {
-    widget.creationParams = <String, dynamic>{
-      'initialCenter': {
-        'latitude': widget.initialCenter!.latitude,
-        'longitude': widget.initialCenter!.longitude,
-      },
-      'isDarkMode': widget.isDarkMode ?? false,
-      'zoom': widget.zoom,
-      'markers': widget.markers!.map((flutterModel) => flutterModel.toNeshanMarker()).toList(),
-      'polyLines': widget.polyLines!.map((flutterModel) => flutterModel.toNeshanPolyLines()).toList(),
-      'circles': widget.circles!.map((flutterModel) => flutterModel.toNeshanCircle()).toList(),
+    final controller = widget.uiMapController;
+    if (controller == null) return;
+    controller.addMarkers = (markers) async {
+      await NeshanMethods.addMarkers(markers);
+      if (mounted) widget.markers!.addAll(markers);
+    };
+    controller.removeMarkers = (markers) async {
+      await NeshanMethods.removeMarkers(markers);
+      if (mounted) widget.markers!.removeWhere(markers.contains);
+    };
+    controller.removeAllMarkers = () async {
+      await NeshanMethods.removeAllMarkers();
+      if (mounted) widget.markers!.clear();
+    };
+    controller.addCircles = (circles) async {
+      await NeshanMethods.addCircles(circles);
+      if (mounted) widget.circles!.addAll(circles);
+    };
+    controller.removeCircles = (circles) async {
+      await NeshanMethods.removeCircles(circles);
+      if (mounted) widget.circles!.removeWhere(circles.contains);
+    };
+    controller.removeAllCircles = () async {
+      await NeshanMethods.removeAllCircles();
+      if (mounted) widget.circles!.clear();
+    };
+    controller.addPolyline = (lines) async {
+      await NeshanMethods.addPolylines(lines);
+      if (mounted) widget.polyLines!.addAll(lines);
+    };
+    controller.removePolyLines = (lines) async {
+      await NeshanMethods.removePolyLines(lines);
+      if (mounted) widget.polyLines!.removeWhere(lines.contains);
+    };
+    controller.removeAllPolyLines = () async {
+      await NeshanMethods.removeAllPolyLines();
+      if (mounted) widget.polyLines!.clear();
+    };
+    controller.cameraCallback = NeshanMethods.getCamera;
+    controller.setUserLocation = (user) async {
+      await NeshanMethods.setUserMarker(user);
+      if (mounted) widget.userMarker = user;
+    };
+    controller.moveCamera = NeshanMethods.moveCamera;
+    controller.fitBounds = NeshanMethods.fitBounds;
+    controller.setDarkMode = (dark) async {
+      await NeshanMethods.setDarkMode(dark);
+      if (mounted) widget.isDarkMode = dark;
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    setCreationParams();
+    final center = widget.initialCenter ?? const LatLng(35.6892, 51.3890);
+    widget.markers ??= [];
+    widget.circles ??= [];
+    widget.polyLines ??= [];
+    widget.creationParams = {
+      'initialCenter': {
+        'latitude': center.latitude,
+        'longitude': center.longitude,
+      },
+      'isDarkMode': widget.isDarkMode ?? false,
+      'zoom': widget.zoom,
+      'markers':
+          widget.markers!.map((model) => model.toNeshanMarker()).toList(),
+      'polyLines':
+          widget.polyLines!.map((model) => model.toNeshanPolyLines()).toList(),
+      'circles':
+          widget.circles!.map((model) => model.toNeshanCircle()).toList(),
+    };
     return Platform.isIOS
         ? const MapKitView()
         : AndroidView(
@@ -217,116 +147,26 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget> implements NeshanCall
               Factory<OneSequenceGestureRecognizer>(PanGestureRecognizer.new),
             },
             layoutDirection: TextDirection.ltr,
-            onPlatformViewCreated: (int id) => debugPrint('the PlatfromId is : $id'));
+          );
   }
 
   @override
-  Future<void> onMapTap(LatLng point) async {
-    widget.onTap?.call(point);
-    // PolyLineModel? tappedPolyline;
-    // double currentZoom = (await widget.uiMapController?.camera)?.zoom ?? widget.zoom ?? 15;
-    //
-    // for (final polyline in widget.polyLines ?? []) {
-    //   if (polyline.isPointNear(point, currentZoom)) {
-    //     tappedPolyline = polyline;
-    //     break;
-    //   }
-    // }
-    //
-    // if (tappedPolyline != null) {
-    //   widget.onPolylineTap?.call(tappedPolyline.data, point);
-    // } else if (widget.onTap != null) {
-    //   widget.onTap!(point);
-    // }
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 
   @override
-  void onMapLongPress(LatLng point) {
-    if (widget.onLongPress != null) {
-      widget.onLongPress!(point);
-    }
-  }
-
+  void onMapTap(LatLng point) => widget.onTap?.call(point);
   @override
-  void onMarkerTap(data, LatLng point) {
-    if (widget.onMarkerTap != null) {
-      widget.onMarkerTap!(data, point);
-    }
-  }
-
+  void onMapLongPress(LatLng point) => widget.onLongPress?.call(point);
   @override
-  void onCircleTap(data, LatLng? point) {
-    if (widget.onCircleTap != null) {
-      widget.onCircleTap!(data, point);
-    }
-  }
-
+  void onMarkerTap(dynamic data, LatLng point) =>
+      widget.onMarkerTap?.call(data, point);
   @override
-  void onPolylineTap(data, LatLng? point) {
-    if (widget.onPolylineTap != null) {
-      widget.onPolylineTap!(data, point);
-    }
-  }
-
-  MoveModel? _calculateMoveModelForBounds(MapBoundsModel mapBoundsModel) {
-    if (mapBoundsModel.points.isEmpty) return null;
-    if (mapBoundsModel.points.length == 1) {
-      final point = mapBoundsModel.points.first;
-      return MoveModel(
-        latitude: point.latitude,
-        longitude: point.longitude,
-        zoom: widget.zoom ?? 15,
-      );
-    }
-
-    final mapSize = _mapSize;
-    if (mapSize == null || mapSize.width <= 0 || mapSize.height <= 0) {
-      return null;
-    }
-
-    final lats = mapBoundsModel.points.map((p) => p.latitude);
-    final lngs = mapBoundsModel.points.map((p) => p.longitude);
-
-    final minLat = lats.reduce(math.min);
-    final maxLat = lats.reduce(math.max);
-    final minLng = lngs.reduce(math.min);
-    final maxLng = lngs.reduce(math.max);
-
-    final centerLat = (minLat + maxLat) / 2;
-    final centerLng = (minLng + maxLng) / 2;
-
-    final horizontalPadding = (mapBoundsModel.padding * 2).clamp(0, mapSize.width - 1);
-    final verticalPadding = (mapBoundsModel.padding * 2).clamp(0, mapSize.height - 1);
-    final usableWidth = math.max(1.0, mapSize.width - horizontalPadding);
-    final usableHeight = math.max(1.0, mapSize.height - verticalPadding);
-
-    final latFraction = (_latRad(maxLat) - _latRad(minLat)).abs() / math.pi;
-    final lngDiff = (maxLng - minLng).abs();
-    final lngFraction = (lngDiff > 180 ? 360 - lngDiff : lngDiff) / 360;
-
-    double zoom = widget.zoom ?? 15;
-    const worldPx = 256.0;
-
-    if (latFraction > 0 && lngFraction > 0) {
-      final latZoom = math.log(usableHeight / worldPx / latFraction) / math.ln2;
-      final lngZoom = math.log(usableWidth / worldPx / lngFraction) / math.ln2;
-      zoom = math.min(latZoom, lngZoom);
-    } else if (latFraction > 0) {
-      zoom = math.log(usableHeight / worldPx / latFraction) / math.ln2;
-    } else if (lngFraction > 0) {
-      zoom = math.log(usableWidth / worldPx / lngFraction) / math.ln2;
-    }
-
-    return MoveModel(
-      latitude: centerLat,
-      longitude: centerLng,
-      zoom: zoom.clamp(1, 20).toDouble(),
-    );
-  }
-
-  double _latRad(double lat) {
-    final sinValue = math.sin(lat * math.pi / 180);
-    final radX2 = math.log((1 + sinValue) / (1 - sinValue)) / 2;
-    return radX2.clamp(-math.pi, math.pi).toDouble();
-  }
+  void onCircleTap(dynamic data, LatLng? point) =>
+      widget.onCircleTap?.call(data, point);
+  @override
+  void onPolylineTap(dynamic data, LatLng? point) =>
+      widget.onPolylineTap?.call(data, point);
 }
