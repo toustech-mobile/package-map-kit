@@ -5,6 +5,14 @@ This reference includes the uncommitted Android migration and Samsung device val
 See DEVICE_TEST_REPORT.md for the current test evidence and remaining limits.
 Recheck relevant source when making changes.
 
+Flutter theme update (2026-10-17): `MapProvider.flutter` now defaults to bundled
+Google Maps-inspired vector styles (`assets/maps/google-light.json` and
+`google-dark.json`) rendered inside the existing flutter_map camera/overlays.
+`UiMap.vectorStyle` customizes Flutter only; null keeps its raster fallback.
+Map.ir ignores this input and stays on its original tiles, including in dark
+mode. Neshan's native styling is unchanged. The vector dependency requires
+Dart 3.6 / Flutter 3.27. Older raster-only details below predate this update.
+
 ## 1. Copy-ready context for future prompts
 
 ```text

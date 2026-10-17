@@ -1,5 +1,14 @@
 ## Unreleased
 
+* Fix missing vector style configuration and stale style tests. Keep loading
+  indicators from consuming map taps, and handle omitted overlays/default center
+  safely when Flutter maps are created or rebuilt during theme changes.
+
+* Apply a bundled Google Maps-inspired light/dark vector theme to Flutter maps
+  only. Keep Map.ir on its own raster tiles and preserve Neshan's native styles.
+  Optional `UiMap.vectorStyle` affects only Flutter; null selects legacy raster
+  tiles. The vector renderer requires Flutter 3.27+ / Dart 3.6+.
+
 * Migrate Android maps from the legacy Neshan/Carto SDK to
   `org.neshan.maplibre:android-sdk-opengl:13.4.1` from Maven Central.
 * **Breaking Android setup:** minimum Android API is now 23. Configure

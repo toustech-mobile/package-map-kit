@@ -10,11 +10,15 @@ import 'package:map_kit/models/map_bounds_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/move_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
+import 'package:map_kit/models/vector_map_style.dart';
+import 'package:map_kit/widgets/flutter/vector_map_layer.dart';
 
 import '../../models/user_marker.dart';
 
 class FlutterMapWidget extends StatefulWidget {
   final String userAgentPackageName;
+  /// Applied only to the Flutter provider, never map.ir.
+  final VectorMapStyle? vectorStyle;
   final PopupController popupController = PopupController();
 
   UiMapController? uiMapController;
@@ -36,6 +40,7 @@ class FlutterMapWidget extends StatefulWidget {
   FlutterMapWidget({
     super.key,
     this.userAgentPackageName = 'com.golrang.map_kit',
+    this.vectorStyle = VectorMapStyle.googleLike,
     this.uiMapController,
     this.markers,
     this.polyLines,
@@ -49,7 +54,11 @@ class FlutterMapWidget extends StatefulWidget {
     this.onCircleTap,
     this.mapProvider,
     this.onPolylineTap,
-  });
+  }) {
+    markers ??= [];
+    polyLines ??= [];
+    circles ??= [];
+  }
 
   @override
   State<FlutterMapWidget> createState() => _FlutterMapWidgetState();
@@ -269,7 +278,7 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         //   print("visibleBounds: ${camera.visibleBounds}");
         //   print(hasGesture);
         // },
-          initialCenter: widget.initialCenter!,
+          initialCenter: _safeInitialCenter,
           initialZoom: widget.zoom ?? 13,
           minZoom: 2,
           maxZoom: 18,
@@ -284,10 +293,15 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
             }
           }),
       children: [
-        TileLayer(
+        if (_usesVectorStyle)
+          VectorMapLayer(
+            style: widget.vectorStyle!,
+            dark: widget.isDarkMode ?? false,
+          )
+        else TileLayer(
           userAgentPackageName: widget.userAgentPackageName,
           urlTemplate:
-              widget.isDarkMode ?? false ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : tileUrl,
+              _useCartoDark ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : tileUrl,
           subdomains: const ['a', 'b', 'c'],
         ),
         CircleLayer(
@@ -307,13 +321,13 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
         ),
         _buildPopupMarkerLayer(),
         if (widget.userMarker != null) widget.userMarker!.toUserMarker(),
-        Align(
+        if (!_usesVectorStyle) Align(
           alignment: Alignment.bottomRight,
           child: ColoredBox(
             color: Colors.white70,
             child: Padding(
               padding: const EdgeInsets.all(4),
-              child: Text((widget.isDarkMode ?? false)
+              child: Text(_useCartoDark
                   ? '© OpenStreetMap contributors, CARTO'
                   : widget.mapProvider == MapProvider.mapIr
                       ? '© OpenStreetMap contributors, map.ir'
@@ -325,6 +339,23 @@ class _FlutterMapWidgetState extends State<FlutterMapWidget> {
       ],
     );
   }
+
+  bool get _usesVectorStyle =>
+      (widget.mapProvider == null || widget.mapProvider == MapProvider.flutter) &&
+      widget.vectorStyle != null;
+
+  LatLng get _safeInitialCenter {
+    final center = widget.initialCenter;
+    if (center == null ||
+        !center.latitude.isFinite ||
+        !center.longitude.isFinite) {
+      return const LatLng(35.6892, 51.3890);
+    }
+    return center;
+  }
+
+  bool get _useCartoDark =>
+      widget.mapProvider != MapProvider.mapIr && (widget.isDarkMode ?? false);
 
   void _initializeHiddenMarkers() {
     _circleMarkers.clear();

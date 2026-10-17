@@ -115,6 +115,25 @@ Neshan marker names refer to plugin Android drawables. Flutter/map.ir marker nam
 refer to SVG files declared by the host under `assets/icons/`; supply matching
 assets if switching providers.
 
+## Flutter map theme
+
+`MapProvider.flutter` uses a bundled Google Maps-inspired vector theme by
+default: light gray land, green parks, blue water, white streets, yellow main
+roads and gray labels. `isDarkMode` / `controller.setDarkMode` selects the
+matching dark theme while preserving the camera and overlays. This uses
+OpenFreeMap / OpenMapTiles data; it is not the Google Maps service.
+
+Map.ir does not receive this theme and keeps its own raster tiles in either
+mode. Neshan retains its existing native styles and theme controls.
+
+No extra style setup is needed in the consuming app. Colors are defined in
+`assets/maps/google-light.json` and `assets/maps/google-dark.json`. Optional
+`UiMap.vectorStyle` accepts `VectorMapStyle(uri: ..., darkUri: ...)` for a custom
+MapLibre JSON document (HTTPS or `asset://...`); it only applies to Flutter.
+Set `vectorStyle: null` to retain the original Flutter OSM/CARTO raster tiles.
+The vector renderer requires Flutter 3.27+ / Dart 3.6+ and uses Flutter fonts
+for labels. Its remote source needs network access.
+
 ## Controller and overlays
 
 `UiMap` accepts marker, circle, and polyline lists plus map tap, long press, and
@@ -138,7 +157,9 @@ the new style.
 
 ## Platform status
 
-- **Flutter / map.ir:** use `flutter_map`; dark mode selects CARTO raster tiles.
+- **Flutter:** uses `flutter_map` with a Google Maps-inspired vector theme.
+  The optional raster fallback uses OSM/CARTO tiles.
+- **map.ir:** uses `flutter_map` with its original map.ir raster tiles.
   Set `UiMap.userAgentPackageName` to your host application ID for raster
   tile requests. Raster attribution is displayed on the map. map.ir still
   has a hard-coded credential requiring separate cleanup.
