@@ -7,14 +7,15 @@ import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/move_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/models/user_marker.dart';
+import 'package:map_kit/widgets/neshan/neshan_marker_codec.dart';
 
 abstract class NeshanMethods {
   static const MethodChannel _channel =
       MethodChannel('com.example.example/method_channel');
 
   static addMarkers(List<MarkerModel> markers) async {
-    await _channel.invokeMethod('addMarkers',
-        markers.map((flutterModel) => flutterModel.toNeshanMarker()).toList());
+    await _channel.invokeMethod(
+        'addMarkers', await NeshanMarkerCodec.encode(markers));
   }
 
   static removeMarkers(List<MarkerModel> markers) async {

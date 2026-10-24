@@ -1,6 +1,6 @@
 # Map Kit
 
-A Flutter map widget with OpenStreetMap, map.ir, and native Android Neshan providers.
+A Flutter map widget with OpenStreetMap, map.ir, and native Android/iOS Neshan providers.
 
 ## Android Neshan SDK migration
 
@@ -65,10 +65,81 @@ old `mobile-sdk`, `services-sdk`, or `common-sdk` artifacts alongside it. The ke
 empty/missing API key is rejected when creating the native view. A real key and
 network connectivity are needed to load Neshan styles and tiles.
 
+## iOS Neshan setup
+
+The iOS provider uses Neshan's official MapLibre Native **6.28.0** binary,
+following the [current iOS guide](https://platform.neshan.org/docs/sdk/ios/neshan-ios-sdk-getting-started/)
+and [installation instructions](https://platform.neshan.org/docs/sdk/ios/installation/).
+It replaces the Apple Maps prototype. The old `NeshanMobileSDK` / Carto pods
+and `neshan.license` are not used.
+
+Requirements:
+
+- iOS 13 or later and a macOS/Xcode build environment.
+- A Neshan API key authorized for your iOS application's bundle identifier.
+- Network access to download the SDK and load Neshan styles/tiles.
+
+Add the key to the **host application's** `ios/Runner/Info.plist`:
+
+```xml
+<key>MLNApiKey</key>
+<string>YOUR_API_KEY</string>
+```
+
+Prefer an ignored Xcode configuration file and a build-setting reference for
+real projects. The example already uses `$(NESHAN_API_KEY)`. Copy
+`example/ios/Flutter/Neshan.xcconfig.example` to
+`example/ios/Flutter/Neshan.xcconfig` and set your key there. Debug, Profile and
+Release configurations include this ignored file. The example's iOS bundle
+identifier is `com.golrang.mapKitExample` (different from its Android ID).
+
+**Swift Package Manager:** the plugin manifest downloads the official Neshan
+archive automatically using a pinned SHA-256 checksum. Do not separately add
+upstream MapLibre or the local MapLibre package to the same target; the plugin
+already supplies the Neshan build and its authentication support.
+
+**CocoaPods:** set `platform :ios, '13.0'` in your host Podfile. The plugin's
+podspec downloads and verifies the same SDK using `ios/prepare_sdk.rb` before
+resolving the vendored framework. This also handles Flutter's local plugin
+pods, for which CocoaPods skips `prepare_command`. The extracted framework is
+cached in the plugin's ignored `ios/Frameworks/` directory; no extra map pod
+declaration is needed. The first install requires `curl`, `unzip`, and access
+to `static.neshan.org`; later installs reuse the cached version.
+
+Then, on a Mac:
+
+```sh
+cd example
+flutter pub get
+flutter build ios --simulator
+flutter run -d YOUR_IOS_DEVICE_ID
+```
+
+The shared `UiMap` and `UiMapController` APIs work on both native providers.
+iOS receives the initial camera, theme and overlays and uses the same method
+and event protocol as Android. Commands accepted during style loading wait
+for readiness, and style changes restore overlays. A style load that fails or
+times out returns `STYLE_LOAD_FAILED`; use `setDarkMode` to retry after
+correcting network/key configuration. Missing keys or invalid creation inputs
+return `MAP_INITIALIZATION_FAILED` on controller calls.
+
+On iOS, marker SVGs are read from the same host `assets/icons/` directory used
+by Flutter maps and converted to PNGs at the display scale. Missing files fall
+back to a matching iOS asset-catalog image, then a native pin. Marker content
+supports an SVG asset or text. Overlay callback metadata is a string, matching
+Android. Circles use geodesic polygons; polylines include their outline.
+
+`setUserLocation` only draws a supplied position and accuracy circle. The
+plugin does not request GPS or location permission. Hosts that acquire a real
+location must configure their own permission flow and purpose string.
+
+The Swift implementation and packaging still require an Xcode build and real
+iOS validation. See [IOS_SUPPORT_REVIEW.md](IOS_SUPPORT_REVIEW.md) for the exact
+checks completed here and the remaining device checklist.
+
 ## Usage
 
-Import the shared widget and controller directly; `map_kit.dart` is a separate
-iOS prototype rather than a shared export file.
+Import the shared widget and controller directly.
 
 ```dart
 import 'package:flutter/material.dart';
@@ -97,12 +168,12 @@ Widget buildMap() => UiMap(
     ),
   ],
   onMarkerTap: (data, point) {
-    // Flutter providers return MarkerModel; Android returns string data.
+    // Flutter providers return MarkerModel; native providers return string data.
     debugPrint('$data at $point');
   },
 );
 
-// Call after the map widget has attached. Commands received by Android while
+// Call after the map widget has attached. Commands received by native maps while
 // its initial style is loading wait for readiness.
 Future<void> moveToOffice() async {
   await controller.moveCamera(
@@ -111,9 +182,9 @@ Future<void> moveToOffice() async {
 }
 ```
 
-Neshan marker names refer to plugin Android drawables. Flutter/map.ir marker names
-refer to SVG files declared by the host under `assets/icons/`; supply matching
-assets if switching providers.
+Android Neshan marker names refer to plugin drawables. iOS Neshan and
+Flutter/map.ir use SVG files declared by the host under `assets/icons/`;
+supply matching assets if switching providers.
 
 ## Flutter map theme
 
@@ -166,8 +237,10 @@ the new style.
 - **Android Neshan:** migrated to MapLibre. Existing global channel names remain;
   commands target the most recently created map. Independent multiple-map
   control is not supported by this protocol.
-- **iOS Neshan:** remains an Apple MapKit demo without the shared overlay and
-  controller implementation.
+- **iOS Neshan:** implemented with Neshan's MapLibre SDK, shared controller,
+  overlays, theme switching and callbacks. SDK checksum and framework slices
+  inspected; Flutter iOS channel tests pass. Swift compilation and real-device
+  validation remain outstanding. Global commands target the newest live map.
 - **Web:** plugin registration/platform selection are unfinished.
 
 ## Development and validation

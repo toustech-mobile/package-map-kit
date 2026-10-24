@@ -13,6 +13,7 @@ class MapKit {
     }
   }
 
+  @Deprecated('The prototype button was removed. Use UiMap callbacks.')
   static void setButtonCallback(Function() onButtonTapped) {
     _viewChannel.setMethodCallHandler((call) async {
       if (call.method == 'onButtonTapped') {
@@ -24,8 +25,10 @@ class MapKit {
 
 class MapKitView extends StatefulWidget {
   final Function()? onButtonTapped;
+  final Map<String, dynamic> creationParams;
 
-  const MapKitView({Key? key, this.onButtonTapped}) : super(key: key);
+  const MapKitView(
+      {super.key, this.onButtonTapped, this.creationParams = const {}});
 
   @override
   State<MapKitView> createState() => _MapKitViewState();
@@ -36,18 +39,14 @@ class _MapKitViewState extends State<MapKitView> {
   void initState() {
     super.initState();
     MapKit.initialize();
-    if (widget.onButtonTapped != null) {
-      MapKit.setButtonCallback(widget.onButtonTapped!);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return  Container(
-      color: Colors.red,
-      child: UiKitView(
-        viewType: 'map_kit_view',
-      ),
+    return UiKitView(
+      viewType: 'map_kit_view',
+      creationParams: widget.creationParams,
+      creationParamsCodec: const StandardMessageCodec(),
     );
   }
-} 
+}

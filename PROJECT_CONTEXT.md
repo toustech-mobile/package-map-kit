@@ -1,5 +1,18 @@
 # Map Kit — project analysis and reusable prompt context
 
+## iOS implementation update — 2026-10-24
+
+The historical iOS findings below are superseded by the implementation in
+`ios/map_kit/Sources/map_kit` and [IOS_SUPPORT_REVIEW.md](IOS_SUPPORT_REVIEW.md).
+Neshan now distributes a MapLibre-based iOS SDK; the current official guide
+supersedes the old Carto/NTMapView starters. The plugin pins version 6.28.0,
+uses host `MLNApiKey` authentication, and supports SwiftPM and CocoaPods.
+The shared widget forwards creation settings and receives native events on
+iOS; Swift handles controller commands, overlays, bounds and theme reloads.
+The prototype button and duplicate `ios/Classes` tree were removed.
+This was implemented on Windows. Flutter regression tests and source/header
+checks are separate from the still-required Xcode/SDK/device validation.
+
 Updated: 2026-10-14. Original analyzed commit: `e4edd83e2ffdeb74893dc7d2cfc10d53cfdce5bf`.
 This reference includes the uncommitted Android migration and Samsung device validation.
 See DEVICE_TEST_REPORT.md for the current test evidence and remaining limits.

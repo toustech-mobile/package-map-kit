@@ -1,0 +1,2 @@
+// Copy to Neshan.xcconfig and set a key authorized for com.golrang.mapKitExample.
+NESHAN_API_KEY = YOUR_API_KEY

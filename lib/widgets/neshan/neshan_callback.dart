@@ -31,8 +31,8 @@ abstract class NeshanCallback {
 
         case 'onCircleTap':
           final mapData = streamData['data'] as Map;
-          final lat = mapData['latitude'] as double?;
-          final lng = mapData['longitude'] as double?;
+          final lat = (mapData['latitude'] as num?)?.toDouble();
+          final lng = (mapData['longitude'] as num?)?.toDouble();
 
           callbacks.onCircleTap(
             mapData['data'] as String,
@@ -42,8 +42,8 @@ abstract class NeshanCallback {
 
         case 'onPolylineTap':
           final mapData = streamData['data'] as Map;
-          final lat = mapData['latitude'] as double?;
-          final lng = mapData['longitude'] as double?;
+          final lat = (mapData['latitude'] as num?)?.toDouble();
+          final lng = (mapData['longitude'] as num?)?.toDouble();
 
           callbacks.onPolylineTap(
             mapData['data'] as String,

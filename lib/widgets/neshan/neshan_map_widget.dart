@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -7,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:map_kit/core/ui_map_controller.dart';
-import 'package:map_kit/map_kit.dart';
 import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
 import 'package:map_kit/models/user_marker.dart';
 import 'package:map_kit/widgets/neshan/neshan_callback.dart';
 import 'package:map_kit/widgets/neshan/neshan_methods.dart';
+import 'package:map_kit/widgets/neshan/neshan_marker_codec.dart';
 
 class NeshanMapWidget extends StatefulWidget {
   late Map<String, dynamic> creationParams;
@@ -55,6 +54,7 @@ class NeshanMapWidget extends StatefulWidget {
 class _NeshanMapWidgetState extends State<NeshanMapWidget>
     implements NeshanCallbackInterface {
   StreamSubscription<dynamic>? _subscription;
+  Future<Map<String, dynamic>>? _iosCreationParams;
 
   @override
   void initState() {
@@ -63,8 +63,10 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
     widget.markers ??= [];
     widget.circles ??= [];
     widget.polyLines ??= [];
-    // iOS still uses the separate Apple MapKit prototype.
-    if (!Platform.isIOS) _subscription = NeshanCallback.setNeshanCallback(this);
+    _subscription = NeshanCallback.setNeshanCallback(this);
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      _iosCreationParams = _prepareIosParams();
+    }
 
     final controller = widget.uiMapController;
     if (controller == null) return;
@@ -119,6 +121,45 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
 
   @override
   Widget build(BuildContext context) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      return FutureBuilder<Map<String, dynamic>>(
+        future: _iosCreationParams,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) return ErrorWidget(snapshot.error!);
+          if (!snapshot.hasData) return const SizedBox.expand();
+          return UiKitView(
+            viewType: 'map_kit_view',
+            creationParams: snapshot.data,
+            creationParamsCodec: const StandardMessageCodec(),
+            gestureRecognizers: const {
+              Factory<OneSequenceGestureRecognizer>(PanGestureRecognizer.new),
+            },
+            layoutDirection: TextDirection.ltr,
+          );
+        },
+      );
+    }
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      throw UnsupportedError('Native Neshan maps support Android and iOS.');
+    }
+    return AndroidView(
+      viewType: 'com.example.example/map_kit_view',
+      creationParams: _creationParams(),
+      creationParamsCodec: const StandardMessageCodec(),
+      gestureRecognizers: const {
+        Factory<OneSequenceGestureRecognizer>(PanGestureRecognizer.new),
+      },
+      layoutDirection: TextDirection.ltr,
+    );
+  }
+
+  Future<Map<String, dynamic>> _prepareIosParams() async {
+    final params = _creationParams();
+    params['markers'] = await NeshanMarkerCodec.encode(widget.markers!);
+    return params;
+  }
+
+  Map<String, dynamic> _creationParams() {
     final center = widget.initialCenter ?? const LatLng(35.6892, 51.3890);
     widget.markers ??= [];
     widget.circles ??= [];
@@ -137,17 +178,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
       'circles':
           widget.circles!.map((model) => model.toNeshanCircle()).toList(),
     };
-    return Platform.isIOS
-        ? const MapKitView()
-        : AndroidView(
-            viewType: 'com.example.example/map_kit_view',
-            creationParams: widget.creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            gestureRecognizers: const {
-              Factory<OneSequenceGestureRecognizer>(PanGestureRecognizer.new),
-            },
-            layoutDirection: TextDirection.ltr,
-          );
+    return widget.creationParams;
   }
 
   @override
