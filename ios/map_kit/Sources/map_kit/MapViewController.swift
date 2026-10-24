@@ -57,11 +57,7 @@ final class MapKitNativeView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
             markers = try MapPayload.objects(creation["markers"] ?? []).map(MapMarkerSpec.init)
             circles = try MapPayload.objects(creation["circles"] ?? []).map(MapCircleSpec.init)
             lines = try MapPayload.objects(creation["polyLines"] ?? []).map(MapLineSpec.init)
-            let key = Bundle.main.object(forInfoDictionaryKey: "MLNApiKey") as? String ?? ""
-            guard !key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-                  !key.contains("$("), key != "YOUR_API_KEY" else {
-                throw MapPayloadError(message: "Set MLNApiKey in the host application's Info.plist")
-            }
+            try NeshanConfiguration.configure()
             let nativeMap = MLNMapView(frame: container.bounds, styleURL: Self.styleURL(dark))
             map = nativeMap
             nativeMap.autoresizingMask = [.flexibleWidth, .flexibleHeight]

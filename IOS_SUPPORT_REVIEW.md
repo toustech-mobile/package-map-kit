@@ -22,7 +22,7 @@ The implementation follows the current
 | Area | Implementation |
 | --- | --- |
 | Renderer | Official Neshan MapLibre 6.28.0, imported as `MapLibre`; no Apple MapKit demo |
-| Authentication | Host `MLNApiKey` in Info.plist; no legacy license file |
+| Authentication | Package-owned key in `NeshanConfiguration.swift`, applied through `MLNSettings.apiKey` before map creation |
 | Creation | Initial center, zoom, theme, markers, circles and polylines forwarded through `UiKitView` |
 | Controller | Marker/circle/polyline add, remove and clear; supplied user position and accuracy; camera read/move, bounds, theme |
 | Events | Map tap/long press, marker/circle/polyline taps using the existing shared event channel |
@@ -75,9 +75,14 @@ Swift source tree is `ios/map_kit/Sources/map_kit`; duplicate `ios/Classes`
 sources and the old template plugin class were removed. Do not add a separate
 MapLibre or legacy Neshan SDK alongside the plugin.
 
-The example reads the key from ignored `example/ios/Flutter/Neshan.xcconfig`.
-Copy its `.example` file and authorize `com.golrang.mapKitExample` in Neshan's
-panel. See [README.md](README.md) for host setup.
+This private package embeds the existing key in
+`ios/map_kit/Sources/map_kit/NeshanConfiguration.swift`. It uses the SDK's
+programmatic `MLNSettings.apiKey` setter, verified in the downloaded
+`MLNSettings.h`, before creating any native map. Both package integrations
+compile this source automatically. The example's old key file, includes and
+Info.plist key entry were removed. No consuming-app key setup is required;
+authorize each consuming bundle ID in Neshan's panel. Publishing is disabled
+with `publish_to: none`. See [README.md](README.md).
 
 ## Checks completed on Windows
 
@@ -94,13 +99,15 @@ panel. See [README.md](README.md) for host setup.
 - Native XCTest cases were added for the registered plugin, unattached/disposed
   errors, numeric and overlay validation, geodesic circles and segment distance.
   They have not run here.
+- A native test also checks that the package configuration sets the SDK key;
+  its assertions avoid printing credentials. This still requires Xcode to run.
 - The SDK archive checksum, root layout, slices and referenced headers were
   inspected. The CocoaPods helper and SwiftPM dependency resolution still need
   to execute on macOS.
 
 ## Required macOS and iOS validation
 
-1. Configure an iOS-authorized key in the example. Build with CocoaPods and
+1. Authorize the example bundle ID for the package key. Build with CocoaPods and
    with Flutter's SwiftPM integration in separate clean build configurations;
    confirm there is one Neshan MapLibre framework and no upstream duplicate.
 2. Run `RunnerTests` using Xcode. Check both an Apple Silicon simulator and an

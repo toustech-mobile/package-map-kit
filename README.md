@@ -79,19 +79,15 @@ Requirements:
 - A Neshan API key authorized for your iOS application's bundle identifier.
 - Network access to download the SDK and load Neshan styles/tiles.
 
-Add the key to the **host application's** `ios/Runner/Info.plist`:
+This is a private package (`publish_to: none`). Its iOS API key lives in
+`ios/map_kit/Sources/map_kit/NeshanConfiguration.swift`, which is compiled by
+both CocoaPods and SwiftPM. The plugin sets `MLNSettings.apiKey` before creating
+the native map. Consuming apps and the example do not need an API key in their
+Info.plist or an extra Xcode configuration file.
 
-```xml
-<key>MLNApiKey</key>
-<string>YOUR_API_KEY</string>
-```
-
-Prefer an ignored Xcode configuration file and a build-setting reference for
-real projects. The example already uses `$(NESHAN_API_KEY)`. Copy
-`example/ios/Flutter/Neshan.xcconfig.example` to
-`example/ios/Flutter/Neshan.xcconfig` and set your key there. Debug, Profile and
-Release configurations include this ignored file. The example's iOS bundle
-identifier is `com.golrang.mapKitExample` (different from its Android ID).
+Update the key in that package configuration when rotating it. The configured
+key must authorize each consuming application's bundle identifier. The example's
+iOS identifier is `com.golrang.mapKitExample` (different from its Android ID).
 
 **Swift Package Manager:** the plugin manifest downloads the official Neshan
 archive automatically using a pinned SHA-256 checksum. Do not separately add

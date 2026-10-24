@@ -3,8 +3,9 @@
 * Replace the iOS Apple Maps demo with Neshan's official MapLibre Native
   6.28.0 SDK. Forward initial settings and implement the shared overlay,
   user-position, camera, bounds, theme, and event protocol.
-* **Breaking iOS setup:** minimum iOS is now 13. Configure `MLNApiKey` in the
-  host Info.plist; remove legacy NeshanMobileSDK/Carto and license-file setup.
+* **Breaking iOS setup:** minimum iOS is now 13. The private package supplies
+  its iOS key through `NeshanConfiguration.swift` and `MLNSettings.apiKey`;
+  no host Info.plist key is required. Remove legacy NeshanMobileSDK/Carto and license-file setup.
   SwiftPM and CocoaPods use the checksum-pinned official Neshan archive.
 * Rasterize host SVG marker assets for iOS and retain native image/pin fallbacks.
   Remove unused duplicate Swift sources and add Flutter iOS channel regression

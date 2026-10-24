@@ -1,4 +1,5 @@
 import Flutter
+import MapLibre
 import UIKit
 import XCTest
 
@@ -9,6 +10,13 @@ import XCTest
 // See https://developer.apple.com/documentation/xctest for more information about using XCTest.
 
 class RunnerTests: XCTestCase {
+
+  func testPackageKeyConfiguresSDK() throws {
+    try NeshanConfiguration.configure()
+    // Boolean assertions keep the configured key out of failure output.
+    XCTAssertTrue(MLNSettings.apiKey?.isEmpty == false)
+    XCTAssertTrue(MLNSettings.apiKey == NeshanConfiguration.apiKey)
+  }
 
   func testGetPlatformVersion() {
     let plugin = SwiftMapKitPlugin()

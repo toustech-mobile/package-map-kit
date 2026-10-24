@@ -6,7 +6,9 @@ The historical iOS findings below are superseded by the implementation in
 `ios/map_kit/Sources/map_kit` and [IOS_SUPPORT_REVIEW.md](IOS_SUPPORT_REVIEW.md).
 Neshan now distributes a MapLibre-based iOS SDK; the current official guide
 supersedes the old Carto/NTMapView starters. The plugin pins version 6.28.0,
-uses host `MLNApiKey` authentication, and supports SwiftPM and CocoaPods.
+uses a package-owned key through `MLNSettings.apiKey`, and supports SwiftPM and
+CocoaPods. The private key configuration is `NeshanConfiguration.swift`; no
+example/host key entry is needed. Publishing is disabled with `publish_to: none`.
 The shared widget forwards creation settings and receives native events on
 iOS; Swift handles controller commands, overlays, bounds and theme reloads.
 The prototype button and duplicate `ios/Classes` tree were removed.
