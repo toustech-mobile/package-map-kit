@@ -1,0 +1,5 @@
+// Apply this script from the consuming Android application module. APK packaging
+// belongs to the app; setting this in map_kit's library module is not inherited.
+project.pluginManager.withPlugin("com.android.application") {
+    project.extensions.getByName("android").packaging.jniLibs.useLegacyPackaging = true
+}

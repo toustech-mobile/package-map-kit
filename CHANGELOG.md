@@ -1,5 +1,10 @@
 ## Unreleased
 
+* Add `android/native-libs-packaging.gradle` for consuming application modules
+  to enable native-library compression in APKs. Apply it in both example Gradle
+  configurations and document the required one-line host setup and extraction
+  tradeoff. Library packaging settings alone do not propagate to host apps.
+
 * Supply the Android Neshan key from the private package's
   `android/src/main/res/values/neshan_configuration.xml` through the library
   manifest. Consuming apps and the example no longer need manifest entries,

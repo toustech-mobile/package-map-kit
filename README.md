@@ -43,6 +43,43 @@ missing/blank key reports `NESHAN_API_KEY_MISSING` and rejects queued controller
 operations with the same configuration error. Await controller operations to
 handle failures.
 
+### Compress native libraries in Android APKs
+
+The package includes `android/native-libs-packaging.gradle` to enable Android's
+supported native-library compression. Apply it once in the consuming app's
+`android/app/build.gradle`, after the `plugins` block:
+
+```groovy
+apply from: project(":map_kit").file("native-libs-packaging.gradle")
+```
+
+For `android/app/build.gradle.kts`:
+
+```kotlin
+apply(from = project(":map_kit").file("native-libs-packaging.gradle"))
+```
+
+The example applies this script in both Gradle configurations. It sets
+`android.packaging.jniLibs.useLegacyPackaging = true` on the **application**
+module. A library's packaging settings do not propagate to consuming apps, so
+updating the Flutter package alone does not enable compression. The host must
+apply the script and perform a full release rebuild. Keep this setting in
+Gradle rather than adding `android:extractNativeLibs` to a manifest.
+
+This compresses all native `.so` files in the app's APK, including Flutter and
+MapLibre. It preserves the library contents and supported architectures; it does
+not remove legacy SDK dependencies. Android extracts the libraries during
+installation, so the download gets smaller but installed disk usage does not
+necessarily decrease. The `Legacy` name describes APK packaging, not the old
+Neshan SDK. This setting concerns APKs; App Bundle delivery has separate
+packaging behavior.
+
+Build a fresh release APK and test installation, updating an existing install,
+and native features such as the map on supported devices. Compression does not
+fix an SDK's native-code or 16 KB page-size incompatibilities. See Android's
+[native packaging API](https://developer.android.com/reference/tools/gradle-api/8.11/com/android/build/api/dsl/JniLibsPackaging)
+and [shared-library packaging guide](https://developer.android.com/guide/practices/page-sizes).
+
 ## iOS Neshan setup
 
 The iOS provider uses Neshan's official MapLibre Native **6.28.0** binary,

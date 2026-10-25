@@ -5,6 +5,8 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+apply(from = project(":map_kit").file("native-libs-packaging.gradle"))
+
 android {
     namespace = "com.golrang.map_kit_example"
     compileSdk = 36
