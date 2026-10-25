@@ -1,5 +1,9 @@
 ## Unreleased
 
+* Preserve Android Neshan marker and content-image aspect ratios instead of
+  stretching them into squares. Match tour-pin drawable dimensions to their
+  viewports so circular heads remain circular.
+
 * Add `android/native-libs-packaging.gradle` for consuming application modules
   to enable native-library compression in APKs. Apply it in both example Gradle
   configurations and document the required one-line host setup and extraction

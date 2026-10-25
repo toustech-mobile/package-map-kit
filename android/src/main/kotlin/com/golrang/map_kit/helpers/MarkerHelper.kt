@@ -22,7 +22,9 @@ internal object MarkerHelper {
         val pixels = (size * context.resources.displayMetrics.density).toInt().coerceAtLeast(1)
         val drawable = optionalDrawable(context, data["icon"] as? String ?: "")
             ?: requireNotNull(getDrawable(context, R.drawable.end_point))
-        val bitmap = drawable.toBitmap(pixels, pixels, Bitmap.Config.ARGB_8888)
+        val (width, height) = MarkerImageLayout.fit(
+            drawable.intrinsicWidth, drawable.intrinsicHeight, pixels)
+        val bitmap = drawable.toBitmap(width, height, Bitmap.Config.ARGB_8888)
             .copy(Bitmap.Config.ARGB_8888, true)
         val content = data["markerContent"] as? String
         if (!content.isNullOrEmpty()) drawContent(context, bitmap, content)
@@ -38,9 +40,11 @@ internal object MarkerHelper {
         val drawable = optionalDrawable(context, content)
         if (drawable != null) {
             val size = (minOf(bitmap.width, bitmap.height) * 0.6f).toInt().coerceAtLeast(1)
-            val icon = drawable.toBitmap(size, size)
-            canvas.drawBitmap(icon, (bitmap.width - size) / 2f,
-                (bitmap.height - size) / 2f - 4 * context.resources.displayMetrics.density, null)
+            val (width, height) = MarkerImageLayout.fit(
+                drawable.intrinsicWidth, drawable.intrinsicHeight, size)
+            val icon = drawable.toBitmap(width, height)
+            canvas.drawBitmap(icon, (bitmap.width - width) / 2f,
+                (bitmap.height - height) / 2f - 4 * context.resources.displayMetrics.density, null)
         } else {
             val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = Color.rgb(37, 37, 39)
