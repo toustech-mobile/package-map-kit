@@ -15,6 +15,22 @@ abstract class NeshanMethods {
   static const MethodChannel _channel =
       MethodChannel('com.example.example/method_channel');
 
+  /// Check merged package metadata before AndroidView creation, where an exception would
+  /// otherwise escape Flutter's asynchronous platform-view initialization.
+  static Future<void> validateAndroidConfiguration() async {
+    try {
+      await _channel.invokeMethod<void>('validateConfiguration');
+    } on MissingPluginException {
+      throw PlatformException(
+        code: 'NESHAN_ANDROID_PLUGIN_MISMATCH',
+        message: 'The installed Android plugin cannot validate Neshan setup. '
+            'Stop the app and perform a full Android rebuild with the current '
+            'map_kit dependency. Hot reload and hot restart do not update '
+            'native plugin code.',
+      );
+    }
+  }
+
   static Future<T?> _invoke<T>(String method, [dynamic arguments]) async {
     final isIOS = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
     // Controller calls can arrive before the widget's renderer check finishes.

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared Android credential for the private map_kit package. -->
+    <string name="map_kit_neshan_api_key" translatable="false">mobile.3f93ce5520af4fb8af2d905df9e70170</string>
+</resources>

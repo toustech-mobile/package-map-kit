@@ -1,5 +1,22 @@
 ## Unreleased
 
+* Preserve Android Neshan marker and content-image aspect ratios instead of
+  stretching them into squares. Match tour-pin drawable dimensions to their
+  viewports so circular heads remain circular.
+
+* Add `android/native-libs-packaging.gradle` for consuming application modules
+  to enable native-library compression in APKs. Apply it in both example Gradle
+  configurations and document the required one-line host setup and extraction
+  tradeoff. Library packaging settings alone do not propagate to host apps.
+
+* Supply the Android Neshan key from the private package's
+  `android/src/main/res/values/neshan_configuration.xml` through the library
+  manifest. Consuming apps and the example no longer need manifest entries,
+  Gradle placeholders, local properties, or environment variables for this key.
+* Validate Android Neshan merged metadata before platform-view creation. Missing
+  API keys now report `NESHAN_API_KEY_MISSING` to the widget and queued commands
+  instead of an asynchronous creation exception followed by attachment errors.
+
 * Center iOS marker numbers and content images inside the circular head of
   portrait pin artwork, preserving the SVG content position during rasterization.
 
@@ -40,9 +57,8 @@
 
 * Migrate Android maps from the legacy Neshan/Carto SDK to
   `org.neshan.maplibre:android-sdk-opengl:13.4.1` from Maven Central.
-* **Breaking Android setup:** minimum Android API is now 23. Configure
-  `org.maplibre.android.API_KEY` in the host manifest; `neshan.license` is no
-  longer used. See README.md for the example's environment/local-property setup.
+* **Breaking Android setup:** minimum Android API is now 23. The package manifest
+  supplies `org.maplibre.android.API_KEY`; `neshan.license` is no longer used.
 * Preserve Flutter map/controller APIs while replacing native markers, filled
   circles, outlined polylines, user location, camera commands, and light/dark styles.
 * Delegate Neshan bounds fitting to MapLibre; handle async style readiness and

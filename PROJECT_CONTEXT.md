@@ -1,5 +1,14 @@
 # Map Kit — project analysis and reusable prompt context
 
+## Android package configuration update — 2026-10-25
+
+The private package now supplies the Android key from
+`android/src/main/res/values/neshan_configuration.xml` via library manifest
+metadata. Android merges this into each host; consuming apps need no key setup.
+The example no longer supplies metadata or a Gradle placeholder. Keep the key's
+Android application-ID restrictions current for every consuming app. Missing
+merged keys fail the widget and queued commands before platform-view creation.
+
 ## iOS implementation update — 2026-10-24
 
 The historical iOS findings below are superseded by the implementation in
@@ -48,10 +57,9 @@ Providers:
 - neshan on Android: org.neshan.maplibre:android-sdk-opengl:13.4.1.
   This is the NEW MapLibre renderer; do not reintroduce org.neshan.mapsdk,
   com.carto, old mobile/services/common-sdk artifacts, or neshan.license.
-  Requires Android API 23+, JVM 17, and host manifest metadata
-  org.maplibre.android.API_KEY. Example key configuration:
-  neshan.apiKey in local.properties,
-  or environment variable NESHAN_API_KEY. Never embed a real key in source.
+  Requires Android API 23+ and JVM 17. The private package owns the Android key
+  in android/src/main/res/values/neshan_configuration.xml. Its library manifest
+  merges org.maplibre.android.API_KEY into consuming apps; no host key setup.
 - neshan on iOS: still an Apple MKMapView demo, without shared map controls.
 - web: declared but unfinished registration/platform gating.
 
@@ -86,8 +94,7 @@ Keep scope focused, test changed provider paths, and report actual validation
 separately from unverified runtime behavior.
 ```
 
-The example property name above is simply `neshan.apiKey`; it is a configuration
-name, not a secret. No real API key or legacy license contents are included here.
+No real API key or legacy license contents are included in this context document.
 
 ## 2. Purpose and repository structure
 
@@ -146,11 +153,13 @@ The published AAR was inspected: its minimum Android SDK is 23 and minimum compi
 SDK is 34. Its POM declares Kotlin stdlib 2.2.10. The example uses Kotlin 2.2.20,
 which also satisfies the installed Flutter 3.47.6 toolchain's enforced minimum.
 
-Host application requirement: put `org.maplibre.android.API_KEY` metadata inside
-`<application>`. The example manifest takes `${neshanApiKey}`; both Gradle DSL
-variants resolve `neshan.apiKey` from ignored local.properties first, then
-`NESHAN_API_KEY` from the environment. An empty key is rejected when the native
-view is created. Do not reuse the old raw-license setup or copy keys into prompts.
+The private package's library manifest supplies `org.maplibre.android.API_KEY`
+inside `<application>`, referencing `map_kit_neshan_api_key` in
+`android/src/main/res/values/neshan_configuration.xml`. Consuming apps inherit it
+through Android manifest merging and need no key configuration. Remove previous
+host metadata/placeholders when upgrading. An empty merged key fails validation
+before the native view is created. Do not reuse the old raw-license setup or copy
+keys into prompts.
 
 Build configuration:
 

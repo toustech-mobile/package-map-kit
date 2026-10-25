@@ -56,7 +56,7 @@ class NeshanMapWidget extends StatefulWidget {
 class _NeshanMapWidgetState extends State<NeshanMapWidget>
     implements NeshanCallbackInterface {
   StreamSubscription<dynamic>? _subscription;
-  Future<Map<String, dynamic>>? _iosCreationParams;
+  Future<Map<String, dynamic>>? _nativeCreationParams;
   late final NeshanCommandQueue _commands;
 
   @override
@@ -67,10 +67,10 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
     widget.markers ??= [];
     widget.circles ??= [];
     widget.polyLines ??= [];
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-      _iosCreationParams = _prepareIosParams();
-    } else {
-      _subscription = NeshanCallback.setNeshanCallback(this);
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android)) {
+      _nativeCreationParams = _prepareNativeParams();
     }
 
     final controller = widget.uiMapController;
@@ -129,14 +129,19 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
 
   @override
   Widget build(BuildContext context) {
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-      return FutureBuilder<Map<String, dynamic>>(
-        future: _iosCreationParams,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) return ErrorWidget(snapshot.error!);
-          if (!snapshot.hasData) return const SizedBox.expand();
-          return UiKitView(
-            viewType: NeshanIosRenderer.viewType,
+    if (kIsWeb ||
+        (defaultTargetPlatform != TargetPlatform.android &&
+            defaultTargetPlatform != TargetPlatform.iOS)) {
+      throw UnsupportedError('Native Neshan maps support Android and iOS.');
+    }
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _nativeCreationParams,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) return ErrorWidget(snapshot.error!);
+        if (!snapshot.hasData) return const SizedBox.expand();
+        if (defaultTargetPlatform == TargetPlatform.android) {
+          return AndroidView(
+            viewType: 'com.example.example/map_kit_view',
             onPlatformViewCreated: (_) => _commands.attach(),
             creationParams: snapshot.data,
             creationParamsCodec: const StandardMessageCodec(),
@@ -145,30 +150,34 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
             },
             layoutDirection: TextDirection.ltr,
           );
-        },
-      );
-    }
-    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
-      throw UnsupportedError('Native Neshan maps support Android and iOS.');
-    }
-    return AndroidView(
-      viewType: 'com.example.example/map_kit_view',
-      onPlatformViewCreated: (_) => _commands.attach(),
-      creationParams: _creationParams(),
-      creationParamsCodec: const StandardMessageCodec(),
-      gestureRecognizers: const {
-        Factory<OneSequenceGestureRecognizer>(PanGestureRecognizer.new),
+        }
+        return UiKitView(
+          viewType: NeshanIosRenderer.viewType,
+          onPlatformViewCreated: (_) => _commands.attach(),
+          creationParams: snapshot.data,
+          creationParamsCodec: const StandardMessageCodec(),
+          gestureRecognizers: const {
+            Factory<OneSequenceGestureRecognizer>(PanGestureRecognizer.new),
+          },
+          layoutDirection: TextDirection.ltr,
+        );
       },
-      layoutDirection: TextDirection.ltr,
     );
   }
 
-  Future<Map<String, dynamic>> _prepareIosParams() async {
+  Future<Map<String, dynamic>> _prepareNativeParams() async {
     try {
       final params = _creationParams();
-      await NeshanIosRenderer.ensureAvailable();
+      final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
+      if (isIOS) {
+        await NeshanIosRenderer.ensureAvailable();
+      } else {
+        await NeshanMethods.validateAndroidConfiguration();
+      }
       if (mounted) _subscription = NeshanCallback.setNeshanCallback(this);
-      params['markers'] = await NeshanMarkerCodec.encode(widget.markers!);
+      if (isIOS) {
+        params['markers'] = await NeshanMarkerCodec.encode(widget.markers!);
+      }
       return params;
     } catch (error, stack) {
       _commands.failAttachment(error, stack);
