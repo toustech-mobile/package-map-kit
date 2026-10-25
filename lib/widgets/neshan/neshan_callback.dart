@@ -1,30 +1,38 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 
 abstract class NeshanCallback {
-  static const EventChannel _eventChannel = EventChannel('com.yourapp/event_channel');
+  static const EventChannel _eventChannel =
+      EventChannel('com.yourapp/event_channel');
 
-  static Future<void> setNeshanCallback(NeshanCallbackInterface callbacks) async {
-    _eventChannel.receiveBroadcastStream().listen((streamData) {
+  static StreamSubscription<dynamic> setNeshanCallback(
+      NeshanCallbackInterface callbacks) {
+    return _eventChannel.receiveBroadcastStream().listen((streamData) {
       switch (streamData["event"]) {
         case 'onMapTap':
-          callbacks.onMapTap(LatLng((streamData['data'] as Map)['latitude'], (streamData['data'] as Map)['longitude']));
+          callbacks.onMapTap(LatLng((streamData['data'] as Map)['latitude'],
+              (streamData['data'] as Map)['longitude']));
           break;
 
         case 'onMapLongPress':
-          callbacks.onMapLongPress(
-              LatLng((streamData['data'] as Map)['latitude'], (streamData['data'] as Map)['longitude']));
+          callbacks.onMapLongPress(LatLng(
+              (streamData['data'] as Map)['latitude'],
+              (streamData['data'] as Map)['longitude']));
           break;
 
         case 'onMarkerTap':
-          callbacks.onMarkerTap((streamData['data']['data'] as String),
-              LatLng((streamData['data'] as Map)['latitude'], (streamData['data'] as Map)['longitude']));
+          callbacks.onMarkerTap(
+              (streamData['data']['data'] as String),
+              LatLng((streamData['data'] as Map)['latitude'],
+                  (streamData['data'] as Map)['longitude']));
           break;
 
         case 'onCircleTap':
           final mapData = streamData['data'] as Map;
-          final lat = mapData['latitude'] as double?;
-          final lng = mapData['longitude'] as double?;
+          final lat = (mapData['latitude'] as num?)?.toDouble();
+          final lng = (mapData['longitude'] as num?)?.toDouble();
 
           callbacks.onCircleTap(
             mapData['data'] as String,
@@ -34,8 +42,8 @@ abstract class NeshanCallback {
 
         case 'onPolylineTap':
           final mapData = streamData['data'] as Map;
-          final lat = mapData['latitude'] as double?;
-          final lng = mapData['longitude'] as double?;
+          final lat = (mapData['latitude'] as num?)?.toDouble();
+          final lng = (mapData['longitude'] as num?)?.toDouble();
 
           callbacks.onPolylineTap(
             mapData['data'] as String,

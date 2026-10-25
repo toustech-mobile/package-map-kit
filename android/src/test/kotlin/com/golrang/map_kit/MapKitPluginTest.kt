@@ -15,6 +15,14 @@ import org.mockito.Mockito
 
 internal class MapKitPluginTest {
   @Test
+  fun mapCommandWithoutAttachedViewReturnsAnError() {
+    val plugin = MapKitPlugin()
+    val result = Mockito.mock(MethodChannel.Result::class.java)
+    plugin.onMethodCall(MethodCall("addMarkers", emptyList<Any>()), result)
+    Mockito.verify(result).error("MAP_NOT_ATTACHED", "No Neshan map is attached", null)
+  }
+
+  @Test
   fun onMethodCall_getPlatformVersion_returnsExpectedValue() {
     val plugin = MapKitPlugin()
 

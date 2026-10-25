@@ -1,81 +1,34 @@
+@file:Suppress("DEPRECATION")
+
 package com.golrang.map_kit.helpers
 
-import android.content.Context
-import com.carto.graphics.Color
-import com.carto.styles.LineStyle
-import com.carto.styles.LineStyleBuilder
+import android.graphics.Color
 import com.golrang.map_kit.models.MyCircle
-import org.neshan.common.model.LatLng
-import org.neshan.mapsdk.model.Circle
+import org.maplibre.android.annotations.PolygonOptions
+import org.maplibre.android.annotations.PolylineOptions
+import org.maplibre.android.maps.MapLibreMap
 
+internal object CircleHelper {
+    fun add(map: MapLibreMap, data: Map<*, *>): MyCircle {
+        val center = data.coordinate()
+        val radius = data.number("radius")
+        val width = data.number("borderStroke", 2.0)
+        require(width >= 0) { "borderStroke must be non-negative" }
+        val points = MapGeometry.circlePoints(center, radius)
+        val fill = Color.parseColor(data["color"] as? String ?: "#800000FF")
+        val stroke = Color.parseColor(data["borderColor"] as? String ?: "#FF0000FF")
+        // Polygon opacity is separate from its fill color in the annotation API.
+        val polygon = map.addPolygon(PolygonOptions().addAll(points)
+            .fillColor(fill or (0xFF shl 24)).alpha(Color.alpha(fill) / 255f)
+            .strokeColor(Color.TRANSPARENT))
+        val border = if (width > 0) map.addPolyline(PolylineOptions().addAll(points)
+            .color(stroke or (0xFF shl 24)).alpha(Color.alpha(stroke) / 255f)
+            .width(width.toFloat())) else null
+        return MyCircle(center, radius, polygon, border, data["data"]?.toString() ?: "{}")
+    }
 
-class CircleHelper {
-
-    companion object {
-        fun toNeshanModel(circles: List<*>, context: Context): List<MyCircle> {
-            return circles.mapNotNull { circle ->
-                if (circle is Map<*, *>) {
-                    val latitude = circle["latitude"] as? Double
-                    val longitude = circle["longitude"] as? Double
-                    val radius = circle["radius"] as? Double
-                    val borderStroke = circle["borderStroke"] as? Double
-                    val color = circle["color"] as? String
-                    val borderColor = circle["borderColor"] as? String
-                    val data = circle["data"]
-                    val snippetTitle = circle["snippetTitle"] as? String
-                    val snippetDescription = circle["snippetDescription"] as? String
-
-                    if (latitude != null && longitude != null) {
-                        createCircle(
-                            LatLng(latitude, longitude),
-                            radius!!,
-                            borderStroke!!,
-                            color!!,
-                            borderColor!!,
-                            data
-                        )
-                    } else {
-                        null
-                    }
-                } else {
-                    null
-                }
-            }
-        }
-
-        private fun createCircle(
-            point: LatLng,
-            radius: Double,
-            borderStroke: Double,
-            color: String,
-            borderColor: String,
-            data: Any?
-        ): MyCircle {
-            return MyCircle(
-                point.latitude, point.longitude, radius, "", "", Circle(
-                    point,
-                    radius,
-                    convertToCartoColor(android.graphics.Color.parseColor(color)),
-                    getLineStyle(borderColor, borderStroke)
-                ), data
-            )
-        }
-
-        private fun getLineStyle(
-            color: String, strokeWidth: Double
-        ): LineStyle {
-            val lineStyleBuilder = LineStyleBuilder()
-            lineStyleBuilder.color = convertToCartoColor(android.graphics.Color.parseColor(color))
-            lineStyleBuilder.width = strokeWidth.toFloat()
-            return lineStyleBuilder.buildStyle()
-        }
-
-        private fun convertToCartoColor(androidColor: Int): Color {
-            val alpha: Short = android.graphics.Color.alpha(androidColor).toShort()
-            val red: Short = android.graphics.Color.red(androidColor).toShort()
-            val green: Short = android.graphics.Color.green(androidColor).toShort()
-            val blue: Short = android.graphics.Color.blue(androidColor).toShort()
-            return Color(red, green, blue, alpha)
-        }
+    fun remove(map: MapLibreMap, circle: MyCircle) {
+        map.removePolygon(circle.polygon)
+        circle.border?.let(map::removePolyline)
     }
 }

@@ -1,27 +1,37 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:map_kit/models/vector_map_style.dart';
 import 'package:map_kit_example/main.dart';
 
 void main() {
-  testWidgets('Verify Platform version', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Flutter themes are bundled as package assets', (tester) async {
+    for (final dark in [false, true]) {
+      final uri = VectorMapStyle.googleLike.uriFor(dark);
+      final document = jsonDecode(await rootBundle.loadString(
+        uri.substring('asset://'.length),
+      )) as Map<String, dynamic>;
+      expect(document['layers'], isNotEmpty);
+      expect(document['name'], contains(dark ? 'Dark' : 'Light'));
+    }
+  });
 
-    // Verify that platform version is retrieved.
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) => widget is Text &&
-                           widget.data!.startsWith('Running on:'),
-      ),
-      findsOneWidget,
-    );
+  testWidgets('map demo exposes its provider and control panel',
+      (tester) async {
+    await tester.pumpWidget(const MyApp());
+    expect(find.text('Map Kit'), findsOneWidget);
+    expect(find.text('NESHAN'), findsOneWidget);
+    expect(find.text('Controls'), findsOneWidget);
+
+    await tester.tap(find.text('Controls'));
+    await tester.pumpAndSettle();
+    expect(find.text('Map Controllers'), findsOneWidget);
+    expect(find.text('+ Markers'), findsOneWidget);
+    expect(find.text('+ Circles'), findsOneWidget);
+    expect(find.text('+ Polyline'), findsOneWidget);
+    expect(find.text('Fit Bounds'), findsOneWidget);
+    expect(find.text('Get Camera Info'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

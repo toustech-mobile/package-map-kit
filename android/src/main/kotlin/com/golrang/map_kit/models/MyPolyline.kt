@@ -1,8 +1,9 @@
 package com.golrang.map_kit.models
 
-import org.neshan.mapsdk.model.Polyline
+import org.maplibre.android.annotations.Polyline
 
-data class MyPolyline(
-    var polyline: Polyline,
-    var data: Any?
+internal data class MyPolyline(
+    val polyline: Polyline,
+    val outline: Polyline,
+    val data: String,
 )

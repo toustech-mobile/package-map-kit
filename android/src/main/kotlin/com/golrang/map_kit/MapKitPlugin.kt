@@ -1,592 +1,124 @@
 package com.golrang.map_kit
 
+import android.app.Activity
+import android.app.Application
+import android.content.ComponentCallbacks2
 import android.content.Context
-import android.location.Location
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.FrameLayout
-import androidx.annotation.NonNull
-import com.golrang.map_kit.MapKitPlugin.Companion.eventChannel
-import com.golrang.map_kit.MapKitPlugin.Companion.mapKitView
-import com.golrang.map_kit.helpers.CircleHelper
-import com.golrang.map_kit.helpers.MarkerHelper
-import com.golrang.map_kit.helpers.PolyLineHelper
-import com.golrang.map_kit.models.MyCircle
-import com.golrang.map_kit.models.MyPolyline
+import android.content.res.Configuration
+import android.os.Bundle
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
 import io.flutter.plugin.platform.PlatformViewFactory
-import org.neshan.common.model.LatLng
-import org.neshan.mapsdk.MapView
-import org.neshan.mapsdk.model.Marker
-import org.neshan.mapsdk.model.Polyline
-import org.neshan.mapsdk.style.NeshanMapStyle
 
-class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
+/** Keeps the existing Flutter wire protocol while using Neshan's MapLibre SDK. */
+class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
+    EventChannel.StreamHandler, ActivityAware, Application.ActivityLifecycleCallbacks,
+    ComponentCallbacks2 {
+    private lateinit var methodChannel: MethodChannel
+    private lateinit var eventChannel: EventChannel
+    private lateinit var application: Application
+    private var activity: Activity? = null
+    private var eventSink: EventChannel.EventSink? = null
+    private val views = linkedSetOf<MapKitView>()
+    private var restoredState: Bundle? = null
 
-
-    companion object {
-        lateinit var methodChannel: MethodChannel
-        var eventChannel: EventChannel.EventSink? = null
-        var mapKitView: MapKitView? = null
-    }
-
-    lateinit var binding: FlutterPlugin.FlutterPluginBinding
-
-    override fun onAttachedToEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-
-        this.binding = binding
-
-
+    override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        application = binding.applicationContext as Application
+        application.registerActivityLifecycleCallbacks(this)
+        application.registerComponentCallbacks(this)
         methodChannel = MethodChannel(binding.binaryMessenger, "com.example.example/method_channel")
-
-
         methodChannel.setMethodCallHandler(this)
-
-        val eventChannel = EventChannel(binding.binaryMessenger, "com.yourapp/event_channel")
+        eventChannel = EventChannel(binding.binaryMessenger, "com.yourapp/event_channel")
         eventChannel.setStreamHandler(this)
-
         binding.platformViewRegistry.registerViewFactory(
-            "com.example.example/map_kit_view", MapKitViewFactory()
-        )
-    }
-
-    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        mapKitView?.dispose()
-        mapKitView = null
-
-        eventChannel = null
-    }
-
-    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-        eventChannel = events
-//        sendNativeEvent("Hello from Native!")
-    }
-
-    override fun onCancel(arguments: Any?) {
-        eventChannel = null
-    }
-
-    fun sendNativeEvent(message: String) {
-        Handler(Looper.getMainLooper()).post {
-            eventChannel?.success(message)
-        }
+            "com.example.example/map_kit_view",
+            object : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+                override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
+                    val view = MapKitView(context, viewId, args as? Map<*, *>,
+                        restoredState?.getBundle("map_kit_view_$viewId"),
+                        { event -> eventSink?.success(event) },
+                        { disposed -> views.remove(disposed) })
+                    views.add(view)
+                    if (activity != null) {
+                        view.onStart()
+                        view.onResume()
+                    }
+                    return view
+                }
+            })
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        when (call.method) {
-            "addMarkers" -> {
-                handleAddMarkers(call, result)
-            }
+        if (call.method == "getPlatformVersion") {
+            result.success("Android " + android.os.Build.VERSION.RELEASE)
+            return
+        }
+        // The legacy Dart channel is global. Keep its last-created-view routing.
+        val view = views.lastOrNull()
+        if (view == null) result.error("MAP_NOT_ATTACHED", "No Neshan map is attached", null)
+        else view.handleMethodCall(call, result)
+    }
 
-            "removeMarkers" -> {
-                handleRemoveMarkers(call, result)
-            }
+    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) { eventSink = events }
+    override fun onCancel(arguments: Any?) { eventSink = null }
 
-            "removeAllMarkers" -> {
-                handleRemoveAllMarkers(result)
-            }
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        methodChannel.setMethodCallHandler(null)
+        eventChannel.setStreamHandler(null)
+        eventSink = null
+        views.toList().forEach { it.dispose() }
+        application.unregisterActivityLifecycleCallbacks(this)
+        application.unregisterComponentCallbacks(this)
+        activity = null
+    }
 
-            "addCircles" -> {
-                handleAddCircles(call, result)
-            }
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        activity = binding.activity
+        views.forEach { it.onStart(); it.onResume() }
+    }
 
-            "removeCircles" -> {
-                handleRemoveCircles(call, result)
-            }
+    override fun onDetachedFromActivity() {
+        views.forEach { it.onPause(); it.onStop() }
+        activity = null
+    }
 
-            "removeAllCircles" -> {
-                handleRemoveAllCircles(result)
-            }
+    override fun onDetachedFromActivityForConfigChanges() = onDetachedFromActivity()
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) =
+        onAttachedToActivity(binding)
 
-            "addPolyLines" -> {
-                handleAddPolyLines(call, result)
-            }
-
-            "removePolyLines" -> {
-                handleRemovePolyLines(call, result)
-            }
-
-            "removeAllPolyLines" -> {
-                handleRemoveAllPolyLines(result)
-            }
-
-            "setUserMarker" -> {
-                handleSetUserMarker(call, result)
-            }
-
-            "moveCamera" -> {
-                handleMoveCamera(call, result)
-            }
-
-
-            "setMapStyle" -> {
-                handleSetStyle(call, result)
-            }
-
-            "getCamera" -> {
-                handleGetCamera(result)
-            }
-
-
-            else -> {
-                result.notImplemented()
-            }
+    override fun onActivityCreated(activity: Activity, state: Bundle?) {
+        if (activity === this.activity) restoredState = state
+    }
+    override fun onActivityStarted(activity: Activity) {
+        if (activity === this.activity) views.forEach { it.onStart() }
+    }
+    override fun onActivityResumed(activity: Activity) {
+        if (activity === this.activity) views.forEach { it.onResume() }
+    }
+    override fun onActivityPaused(activity: Activity) {
+        if (activity === this.activity) views.forEach { it.onPause() }
+    }
+    override fun onActivityStopped(activity: Activity) {
+        if (activity === this.activity) views.forEach { it.onStop() }
+    }
+    override fun onActivitySaveInstanceState(activity: Activity, state: Bundle) {
+        if (activity === this.activity) views.forEach { it.saveState(state) }
+    }
+    override fun onActivityDestroyed(activity: Activity) {
+        if (activity === this.activity) {
+            views.toList().forEach { it.dispose() }
+            this.activity = null
         }
     }
-
-    private fun handleGetCamera(result: MethodChannel.Result) {
-        // Fetch the data from the view and send it across the MethodChannel
-        result.success(mapKitView?.getCamera())
-    }
-
-    private fun handleAddMarkers(call: MethodCall, result: MethodChannel.Result) {
-        //Log.d("Native Add Markers", "")
-        mapKitView?.addMarkers(call.arguments as List<*>)
-
-        result.success("Marker added successfully")
-    }
-
-    private fun handleRemoveMarkers(call: MethodCall, result: MethodChannel.Result) {
-        //Log.d("Native Remove Markers", "")
-        mapKitView?.removeMarkers(call.arguments as List<*>)
-
-        result.success("Marker removed successfully")
-    }
-
-    private fun handleRemoveAllMarkers(result: MethodChannel.Result) {
-        //Log.d("Native Remove Markers", "")
-        mapKitView?.removeAllMarkers()
-
-        result.success("All Marker removed successfully")
-    }
-
-    private fun handleAddCircles(call: MethodCall, result: MethodChannel.Result) {
-        //Log.d("Native Add Circles", "")
-        mapKitView?.addCircles(call.arguments as List<*>)
-
-        result.success("Circles added successfully")
-    }
-
-    private fun handleRemoveCircles(call: MethodCall, result: MethodChannel.Result) {
-        //Log.d("Native Remove Circles", "")
-        mapKitView?.removeCircles(call.arguments as List<*>)
-
-        result.success("Circles removed successfully")
-    }
-
-    private fun handleRemoveAllCircles(result: MethodChannel.Result) {
-        //Log.d("Native Remove Circles", "")
-        mapKitView?.removeAllCircles()
-
-        result.success("All Circles removed successfully")
-    }
-
-    private fun handleAddPolyLines(call: MethodCall, result: MethodChannel.Result) {
-        //Log.d("Native Add PolyLines", "")
-        mapKitView?.addPolyLines(call.arguments as List<*>)
-
-        result.success("PolyLines added successfully")
-    }
-
-    private fun handleSetUserMarker(call: MethodCall, result: MethodChannel.Result) {
-        //Log.d("Native SetUserMarker", "")
-
-        @Suppress("UNCHECKED_CAST")
-        val args = call.arguments as Map<String, *>
-        mapKitView?.setUserMarker(args)
-        result.success("SetUserMarker set successfully")
-    }
-
-    private fun handleMoveCamera(call: MethodCall, result: MethodChannel.Result) {
-        //Log.d("Native MoveCamera", "")
-
-        @Suppress("UNCHECKED_CAST")
-        val args = call.arguments as Map<String, *>
-        mapKitView?.moveCamera(args)
-        result.success("MoveCamera successfully")
-    }
-
-    private fun handleSetStyle(call: MethodCall, result: MethodChannel.Result) {
-        //Log.d("Native Add Markers", "")
-        @Suppress("UNCHECKED_CAST")
-        val args = call.arguments as Map<String, *>
-        mapKitView?.setMapStyle(args)
-
-        result.success("Marker added successfully")
-    }
-
-    private fun handleRemovePolyLines(call: MethodCall, result: MethodChannel.Result) {
-        //Log.d("Native Remove PolyLines", "")
-        mapKitView?.removePolyLines(call.arguments as List<*>)
-
-        result.success("PolyLines removed successfully")
-    }
-
-    private fun handleRemoveAllPolyLines(result: MethodChannel.Result) {
-        //Log.d("Native RemoveAllPolyLines", "")
-        mapKitView?.removeAllPolyLines()
-
-        result.success("All PolyLines removed successfully")
-    }
-
-}
-
-class MapKitViewFactory : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
-    override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
-        @Suppress("UNCHECKED_CAST")
-        val params = args as? Map<String, Any>
-
-        val view = MapKitView(context, params)
-
-        MapKitPlugin.mapKitView = view
-
-        return view
-    }
-}
-
-class MapKitView(private val context: Context, params: Map<String, Any>?) : PlatformView {
-    private lateinit var mapView: MapView
-    private var defaultZoom: Float = 12.0f
-    private var markers: MutableList<Marker> = mutableListOf()
-    private var circles: MutableList<MyCircle> = mutableListOf()
-    private var polyLines: MutableList<MyPolyline> = mutableListOf()
-    private var userMarker: Marker? = null
-
-    private val layout: FrameLayout =
-        LayoutInflater.from(context).inflate(R.layout.my_activity, null) as FrameLayout
-
-    init {
-        initLayoutReferences()
-
-        setInitialCenter(params)
-        setDefaultZoom(params)
-        if (params != null) {
-            setMapStyle(params)
-        }
-        addMarkers(params!!["markers"] as List<*>)
-        addCircles(params["circles"] as List<*>)
-        addPolyLines(params["polyLines"] as List<*>)
-
-    }
-
-    fun getCamera(): Map<String, Double> {
-        return mapOf(
-            "zoom" to mapView.zoom.toDouble(),
-            "latitude" to mapView.cameraTargetPosition.latitude,
-            "longitude" to mapView.cameraTargetPosition.longitude
-        )
-    }
-
-    private fun setInitialCenter(params: Map<String, Any>?) {
-        val initialCenter = params?.get("initialCenter") as Map<*, *>
-        //Log.d("Native InitialCenter", initialCenter.toString())
-
-        mapView.moveCamera(
-            LatLng(
-                initialCenter["latitude"] as Double, initialCenter["longitude"] as Double
-            ), 0f
-        )
-
-        mapView.setZoom(defaultZoom, 0f)
-    }
-
-    private fun setDefaultZoom(params: Map<String, Any>?) {
-        var zoom = params?.get("zoom") as? Double
-        if (zoom == null) {
-            zoom = mapView.zoom.toDouble()
-        }
-
-        //Log.d("setDefaultZoom", zoom.toString())
-
-        defaultZoom = zoom.toFloat()
-        mapView.setZoom(defaultZoom, 0f)
-    }
-
-
-    fun setMapStyle(params: Map<String, *>) {
-        val isDarkMode: Boolean = params["isDarkMode"] as Boolean
-        //Log.d("Native isDarkMode", isDarkMode.toString())
-
-        if (isDarkMode) {
-            mapView.mapStyle = NeshanMapStyle.NESHAN_NIGHT
-        } else {
-            mapView.mapStyle = NeshanMapStyle.STANDARD_DAY
-        }
-    }
-
-
-    fun addMarkers(rawData: List<*>) {
-        val markers = MarkerHelper.toNeshanModel(context, rawData)
-        //Log.d("Native Markers", markers.toString())
-
-        this.markers.addAll(markers)
-        mapView.addMarkers(markers)
-        ensureUserMarkerOnTop()
-
-    }
-
-    fun removeAllMarkers() {
-        mapView.clearMarkers()
-        mapView.addMarker(userMarker)
-    }
-
-    fun removeMarkers(rawData: List<*>) {
-        rawData.forEach {
-            val arguments = it as? Map<*, *>
-            val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
-            val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
-
-            val marker = this.markers.find {
-                it.latLng.latitude == latitude && it.latLng.longitude == longitude
-            }
-            if (marker != null) {
-                this.markers.remove(marker)
-                mapView.removeMarker(marker)
-            }
-        }
-        mapView.setZoom(mapView.zoom, 0f)
-    }
-
-    fun addCircles(rawCircles: List<*>) {
-        val circles = CircleHelper.toNeshanModel(rawCircles, context)
-        this.circles.addAll(circles)
-        circles.forEach {
-            mapView.addCircle(it.circle)
-        }
-        ensureUserMarkerOnTop()
-    }
-
-    fun removeCircles(rawData: List<*>) {
-        rawData.forEach {
-            val arguments = it as? Map<*, *>
-            val latitude = (arguments?.get("latitude") as? Double) ?: 0.0
-            val longitude = (arguments?.get("longitude") as? Double) ?: 0.0
-
-            val circle = this.circles.find {
-                it.latitude == latitude && it.longitude == longitude
-            }
-
-            if (circle != null) {
-                this.circles.remove(circle)
-                mapView.removeCircle(circle.circle)
-            }
-        }
-        mapView.setZoom(mapView.zoom, 0f)
-    }
-
-    fun removeAllCircles() {
-        circles.forEach {
-            mapView.removeCircle(it.circle)
-        }
-        circles.clear()
-        mapView.setZoom(mapView.zoom, 0f)
-    }
-
-    fun addPolyLines(rawPolyLines: List<*>) {
-        val parsedData = PolyLineHelper.toNeshanModel(rawPolyLines, context)
-
-        // Add our wrappers to the list
-        this.polyLines.addAll(parsedData)
-
-        // Add the raw native lines to the map
-        polyLines.forEach {
-            mapView.addPolyline(it.polyline)
-        }
-    }
-
-    fun removePolyLines(rawData: List<*>) {
-        val parsedData = PolyLineHelper.toNeshanModel(rawData, context)
-
-        parsedData.forEach { parsedPolyline ->
-            val polylineToRemove = polyLines.find {
-                it.polyline.points.firstOrNull()?.latitude == parsedPolyline.polyline.points.firstOrNull()?.latitude &&
-                        it.polyline.points.firstOrNull()?.longitude == parsedPolyline.polyline.points.firstOrNull()?.longitude
-            }
-
-            if (polylineToRemove != null) {
-                mapView.removePolyline(polylineToRemove.polyline)
-                polyLines.remove(polylineToRemove)
-            }
-        }
-
-        mapView.setZoom(mapView.zoom, 0f)
-    }
-
-    fun removeAllPolyLines() {
-        polyLines.forEach {
-            mapView.removePolyline(it.polyline)
-        }
-        polyLines.clear()
-
-        mapView.setZoom(mapView.zoom, 0f)
-    }
-
-    fun setUserMarker(rawPolyLines: Map<String, *>) {
-        val latitude = rawPolyLines["latitude"] as Double
-        val longitude = rawPolyLines["longitude"] as Double
-        val accuracy = rawPolyLines["accuracy"] as Double
-
-        val location = Location("my_native_provider")
-        location.latitude = latitude
-        location.longitude = longitude
-        location.altitude = 1200.0
-        location.accuracy = accuracy.toFloat()
-        location.time = System.currentTimeMillis()
-        location.speed = 0.0f
-
-        if (userMarker != null) {
-            mapView.removeMarker(userMarker)
-        }
-
-        userMarker = MarkerHelper.createMarker(
-            LatLng(latitude, longitude),
-            "",
-            "current_location.svg",
-            24,
-            "",
-            "",
-            "",
-            0.0,
-            context,
-            placementPriority = Int.MAX_VALUE,
-            hideIfOverlapped = true,
-
-            causesOverlap = true
-        )
-        mapView.addMarker(
-            userMarker
-        )
-        mapView.showAccuracyCircle(location)
-
-    }
-
-    private fun ensureUserMarkerOnTop() {
-        val marker = userMarker ?: return
-        mapView.removeMarker(marker)
-        mapView.addMarker(marker)
-    }
-
-    fun moveCamera(rawPolyLines: Map<String, *>) {
-        val latitude = rawPolyLines["latitude"] as Double
-        val longitude = rawPolyLines["longitude"] as Double
-        val zoom = rawPolyLines["zoom"] as? Double
-
-        if (zoom != null) {
-            mapView.setZoom(zoom.toFloat(), 0f)
-        }
-        mapView.moveCamera(LatLng(latitude, longitude), .5f)
-    }
-
-
-    private fun initLayoutReferences() {
-        initViews()
-
-        mapView.setOnMapLongClickListener { latLng ->
-            sendOnMapLongClickCallbackToFlutter(latLng)
-        }
-
-        mapView.setOnMapClickListener { latLng ->
-            Log.d("onMapClick", latLng.longitude.toString() + "  " + latLng.longitude.toString())
-            sendOnMapClickCallbackToFlutter(latLng)
-        }
-
-        mapView.setOnPolylineClickListener { polyline ->
-            val matchedMyPolyline = polyLines.find { it.polyline == polyline }
-            if (matchedMyPolyline != null) {
-
-                val flutterData = matchedMyPolyline.data?.toString() ?: "{}"
-
-                sendOnPolylineClickCallbackToFlutter(flutterData, null)
-            }
-
-        }
-
-        mapView.setOnCircleClickListener { circle ->
-
-            val matchedMyCircle = circles.find { it.circle == circle }
-
-            if (matchedMyCircle != null) {
-                val exactCenter = LatLng(matchedMyCircle.latitude, matchedMyCircle.longitude)
-
-                val flutterData = matchedMyCircle.data?.toString() ?: "{}"
-
-                sendOnCircleClickCallbackToFlutter(flutterData, exactCenter)
-            }
-        }
-
-        mapView.setOnMarkerClickListener { marker: Marker ->
-            if (!marker.title.isNullOrEmpty() || !marker.description.isNullOrEmpty()) {
-                marker.showInfoWindow()
-            }
-            sendOnMarkerClickCallbackToFlutter(marker.getMetadata("data"), marker.latLng)
-
-            mapView.setZoom(mapView.zoom, 0f)
-        }
-    }
-
-    private fun initViews() {
-        mapView = layout.findViewById(R.id.map)
-    }
-
-    private fun sendOnMapClickCallbackToFlutter(point: LatLng) {
-        val pointMap = mapOf(
-            "latitude" to point.latitude, "longitude" to point.longitude
-        )
-        sendEventToFlutter("onMapTap", pointMap)
-    }
-
-
-    private fun sendOnMapLongClickCallbackToFlutter(point: LatLng) {
-        val pointMap = mapOf(
-            "latitude" to point.latitude, "longitude" to point.longitude
-        )
-        sendEventToFlutter("onMapLongPress", pointMap)
-    }
-
-    private fun sendOnMarkerClickCallbackToFlutter(data: String, point: LatLng) {
-        sendEventToFlutter(
-            "onMarkerTap",
-            mapOf("data" to data, "latitude" to point.latitude, "longitude" to point.longitude)
-        )
-    }
-
-    private fun sendOnCircleClickCallbackToFlutter(data: String, point: LatLng?) {
-        sendEventToFlutter(
-            "onCircleTap",
-            mapOf("data" to data, "latitude" to point?.latitude, "longitude" to point?.longitude)
-        )
-    }
-
-    private fun sendOnPolylineClickCallbackToFlutter(data: String, point: LatLng?) {
-        sendEventToFlutter(
-            "onPolylineTap",
-            mapOf("data" to data, "latitude" to point?.latitude, "longitude" to point?.longitude)
-        )
-    }
-
-    private fun sendEventToFlutter(event: String, data: Map<String, *>) {
-        Handler(Looper.getMainLooper()).post {
-            eventChannel?.success(
-                mapOf(
-                    "event" to event, "data" to data
-                )
-            )
-        }
-    }
-
-    override fun getView(): View {
-        return layout
-    }
-
-    override fun dispose() {
-        // Clean-up resources if needed
+    override fun onConfigurationChanged(configuration: Configuration) = Unit
+    override fun onLowMemory() { views.forEach { it.onLowMemory() } }
+    override fun onTrimMemory(level: Int) {
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) onLowMemory()
     }
 }

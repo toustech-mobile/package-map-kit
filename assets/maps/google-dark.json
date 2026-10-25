@@ -1,0 +1,259 @@
+{
+  "version": 8,
+  "name": "Map Kit Google-inspired Dark v1",
+  "sources": {
+    "basemap": {
+      "type": "vector",
+      "url": "https://tiles.openfreemap.org/planet",
+      "attribution": "© OpenStreetMap contributors, OpenMapTiles, OpenFreeMap"
+    }
+  },
+  "layers": [
+    {
+      "id": "land",
+      "type": "background",
+      "paint": {
+        "background-color": "#202124"
+      }
+    },
+    {
+      "id": "landcover",
+      "type": "fill",
+      "source": "basemap",
+      "source-layer": "landcover",
+      "paint": {
+        "fill-color": "#263C2E"
+      }
+    },
+    {
+      "id": "residential",
+      "type": "fill",
+      "source": "basemap",
+      "source-layer": "landuse",
+      "filter": [
+        "==",
+        "class",
+        "residential"
+      ],
+      "paint": {
+        "fill-color": "#202124"
+      }
+    },
+    {
+      "id": "parks",
+      "type": "fill",
+      "source": "basemap",
+      "source-layer": "park",
+      "paint": {
+        "fill-color": "#263C2E"
+      }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "basemap",
+      "source-layer": "water",
+      "paint": {
+        "fill-color": "#193C53"
+      }
+    },
+    {
+      "id": "waterways",
+      "type": "line",
+      "source": "basemap",
+      "source-layer": "waterway",
+      "paint": {
+        "line-color": "#193C53",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "buildings",
+      "type": "fill",
+      "source": "basemap",
+      "source-layer": "building",
+      "minzoom": 13,
+      "paint": {
+        "fill-color": "#303134",
+        "fill-outline-color": "#3C4043"
+      }
+    },
+    {
+      "id": "road-casing",
+      "type": "line",
+      "source": "basemap",
+      "source-layer": "transportation",
+      "filter": [
+        "in",
+        "class",
+        "motorway",
+        "trunk",
+        "primary",
+        "secondary",
+        "tertiary",
+        "minor",
+        "service"
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#3C4043",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          1,
+          12,
+          2,
+          16,
+          8,
+          18,
+          16
+        ]
+      }
+    },
+    {
+      "id": "roads",
+      "type": "line",
+      "source": "basemap",
+      "source-layer": "transportation",
+      "filter": [
+        "in",
+        "class",
+        "motorway",
+        "trunk",
+        "primary",
+        "secondary",
+        "tertiary",
+        "minor",
+        "service"
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#454A50",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          0.5,
+          12,
+          1,
+          16,
+          6,
+          18,
+          14
+        ]
+      }
+    },
+    {
+      "id": "highways",
+      "type": "line",
+      "source": "basemap",
+      "source-layer": "transportation",
+      "filter": [
+        "in",
+        "class",
+        "motorway",
+        "trunk",
+        "primary"
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#8A7950",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          6,
+          0.8,
+          12,
+          2,
+          16,
+          7,
+          18,
+          15
+        ]
+      }
+    },
+    {
+      "id": "boundaries",
+      "type": "line",
+      "source": "basemap",
+      "source-layer": "boundary",
+      "paint": {
+        "line-color": "#5F6368",
+        "line-width": 0.8,
+        "line-dasharray": [
+          3,
+          2
+        ]
+      }
+    },
+    {
+      "id": "road-labels",
+      "type": "symbol",
+      "source": "basemap",
+      "source-layer": "transportation_name",
+      "minzoom": 12,
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": "{name}",
+        "text-size": 11
+      },
+      "paint": {
+        "text-color": "#BDC1C6",
+        "text-halo-color": "#202124",
+        "text-halo-width": 1.5
+      }
+    },
+    {
+      "id": "place-labels",
+      "type": "symbol",
+      "source": "basemap",
+      "source-layer": "place",
+      "layout": {
+        "text-field": "{name}",
+        "text-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          3,
+          11,
+          12,
+          15
+        ]
+      },
+      "paint": {
+        "text-color": "#E8EAED",
+        "text-halo-color": "#202124",
+        "text-halo-width": 1.5
+      }
+    }
+  ]
+}

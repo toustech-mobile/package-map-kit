@@ -5,12 +5,20 @@ import 'package:map_kit/enums/map_provider.dart';
 import 'package:map_kit/models/circle_model.dart';
 import 'package:map_kit/models/marker_model.dart';
 import 'package:map_kit/models/poly_line_model.dart';
+import 'package:map_kit/models/vector_map_style.dart';
 import 'package:map_kit/widgets/flutter/flutter_map_widget.dart';
 import 'package:map_kit/widgets/neshan/neshan_map_widget.dart';
 
 class UiMap extends StatefulWidget {
   final MapProvider mapProvider;
   final UiMapController? controller;
+
+  /// Stable host application identity sent to raster tile providers.
+  final String userAgentPackageName;
+
+  /// Theme for MapProvider.flutter only. Map.ir and Neshan ignore this input.
+  /// Set null to use the original Flutter raster tiles.
+  final VectorMapStyle? vectorStyle;
   final void Function(LatLng point)? onTap;
   final void Function(LatLng point)? onLongPress;
   final void Function(dynamic data, LatLng point)? onMarkerTap;
@@ -28,6 +36,8 @@ class UiMap extends StatefulWidget {
       {super.key,
       required this.mapProvider,
       this.controller,
+      this.userAgentPackageName = 'com.golrang.map_kit',
+      this.vectorStyle = VectorMapStyle.googleLike,
       this.onTap,
       this.onLongPress,
       this.onMarkerTap,
@@ -63,6 +73,8 @@ class _UiMapState extends State<UiMap> {
     switch (widget.mapProvider) {
       case MapProvider.flutter:
         return FlutterMapWidget(
+          vectorStyle: widget.vectorStyle,
+          userAgentPackageName: widget.userAgentPackageName,
           uiMapController: widget.controller,
           initialCenter: widget.initialCenter,
           zoom: widget.zoom,
@@ -79,6 +91,7 @@ class _UiMapState extends State<UiMap> {
         );
       case MapProvider.mapIr:
         return FlutterMapWidget(
+          userAgentPackageName: widget.userAgentPackageName,
           uiMapController: widget.controller,
           initialCenter: widget.initialCenter,
           zoom: widget.zoom,

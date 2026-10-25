@@ -1,13 +1,13 @@
 package com.golrang.map_kit.models
 
-import org.neshan.mapsdk.model.Circle
+import org.maplibre.android.annotations.Polygon
+import org.maplibre.android.annotations.Polyline
+import org.maplibre.android.geometry.LatLng
 
-data class MyCircle(
-    var latitude: Double,
-    var longitude: Double,
-    var radius: Double,
-    var snippetTitle: String?,
-    var snippetDescription: String?,
-    var circle: Circle,
-    var data: Any?
+internal data class MyCircle(
+    val center: LatLng,
+    val radius: Double,
+    val polygon: Polygon,
+    val border: Polyline?,
+    val data: String,
 )
