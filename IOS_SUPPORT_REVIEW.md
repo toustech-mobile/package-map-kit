@@ -1,6 +1,6 @@
 # iOS Neshan implementation and validation
 
-Updated 2026-10-24. Implemented on Windows; iOS compilation and device
+Updated 2026-10-25. Implemented on Windows; iOS compilation and device
 validation remain outstanding.
 
 ## SDK choice and correction to the original review
@@ -22,6 +22,7 @@ The implementation follows the current
 | Area | Implementation |
 | --- | --- |
 | Renderer | Official Neshan MapLibre 6.28.0, imported as `MapLibre`; no Apple MapKit demo |
+| Native identity | `getRendererInfo` handshake verifies Neshan/protocol/view before opening `com.golrang.map_kit/neshan_map_view`; incompatible builds fail clearly |
 | Authentication | Package-owned key in `NeshanConfiguration.swift`, applied through `MLNSettings.apiKey` before map creation |
 | Creation | Initial center, zoom, theme, markers, circles and polylines forwarded through `UiKitView` |
 | Controller | Marker/circle/polyline add, remove and clear; supplied user position and accuracy; camera read/move, bounds, theme |
@@ -41,6 +42,24 @@ sets should be profiled on device.
 
 `setUserLocation` draws supplied data without acquiring GPS or requesting
 permission. The example's explicit location-service action has a purpose string.
+
+The user reported seeing Apple branding in another consuming application.
+The supplied runtime logs also show `MissingPluginException` for `addMarkers`,
+`removeAllMarkers`, and `setUserMarker` on the shared method channel. This
+establishes that their Neshan command handlers are absent in the running engine;
+the current registered plugin would handle them even before view creation,
+returning `MAP_NOT_ATTACHED` until a view exists. The exact installed native
+binary and host engine/widget code are not available here, so the underlying
+registration/build cause remains unverified. Current package sources contain
+no `MKMapView` implementation. A dedicated view ID and identity check
+now distinguish old/mixed native code from this renderer; the original view ID
+is kept only as a native alias to Neshan. A full consuming-app rebuild is
+required for this change. See the README troubleshooting steps.
+
+Controller methods perform the same identity check independently, including
+calls arriving before widget initialization completes. A missing native command
+handler is translated into `NESHAN_IOS_PLUGIN_MISMATCH` rather than a raw
+`MissingPluginException`. Tests cover the three methods from the supplied logs.
 
 ## Packaging and SDK evidence
 
@@ -90,7 +109,12 @@ with `publish_to: none`. See [README.md](README.md).
 - Three new iOS Flutter regression tests pass: SVG/display-scale conversion
   and missing-asset fallback; all initial creation payloads; shared commands,
   all callback kinds, cancellation and remount without duplicate events.
-- Final full package suite: **16 passed**. Example widget suite: **2 passed**.
+- Initial implementation full package suite: **16 passed**. Example widget suite: **2 passed**.
+- Renderer-registration follow-up (2026-10-25): **22 package tests passed**,
+  including provider switching, old/incompatible renderer identities, legacy
+  wrapper creation, early controller calls, and missing command handlers.
+- Follow-up full analysis found no errors, with 3 pre-existing warnings and
+  14 informational diagnostics after removing the legacy initialization print.
 - Final Flutter analysis: no errors, 3 existing warnings and 15 informational
   diagnostics; the analyzer exits nonzero because of the existing warnings.
 - `git diff --check` passed.

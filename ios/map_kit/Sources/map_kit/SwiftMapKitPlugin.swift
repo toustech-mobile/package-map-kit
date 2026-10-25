@@ -2,6 +2,11 @@ import Flutter
 import UIKit
 
 public final class SwiftMapKitPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
+    static let viewType = "com.golrang.map_kit/neshan_map_view"
+    static let rendererInfo: [String: Any] = [
+        "renderer": "neshan-maplibre", "sdkVersion": "6.28.0",
+        "protocolVersion": 1, "viewType": viewType
+    ]
     private var eventSink: FlutterEventSink?
     private var eventChannel: FlutterEventChannel?
     private var methodChannels: [FlutterMethodChannel] = []
@@ -10,7 +15,10 @@ public final class SwiftMapKitPlugin: NSObject, FlutterPlugin, FlutterStreamHand
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let instance = SwiftMapKitPlugin()
-        registrar.register(MapViewFactory(plugin: instance), withId: "map_kit_view")
+        let factory = MapViewFactory(plugin: instance)
+        registrar.register(factory, withId: viewType)
+        // Older Dart callers also receive Neshan when linked to this plugin.
+        registrar.register(factory, withId: "map_kit_view")
         for name in ["com.example.example/method_channel", "map_kit"] {
             let channel = FlutterMethodChannel(name: name, binaryMessenger: registrar.messenger())
             registrar.addMethodCallDelegate(instance, channel: channel)
@@ -23,6 +31,7 @@ public final class SwiftMapKitPlugin: NSObject, FlutterPlugin, FlutterStreamHand
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
+        case "getRendererInfo": result(Self.rendererInfo)
         case "getPlatformVersion": result("iOS " + UIDevice.current.systemVersion)
         case "createMapView": result(nil) // Compatibility with the former MapKit.initialize API.
         default:

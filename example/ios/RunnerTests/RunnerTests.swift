@@ -11,6 +11,18 @@ import XCTest
 
 class RunnerTests: XCTestCase {
 
+  func testRendererIdentityWithoutAnAttachedMap() {
+    let done = expectation(description: "renderer identity is available before creating a view")
+    SwiftMapKitPlugin().handle(FlutterMethodCall(methodName: "getRendererInfo", arguments: nil)) { result in
+      let info = result as? [String: Any]
+      XCTAssertEqual(info?["renderer"] as? String, "neshan-maplibre")
+      XCTAssertEqual(info?["protocolVersion"] as? Int, 1)
+      XCTAssertEqual(info?["viewType"] as? String, "com.golrang.map_kit/neshan_map_view")
+      done.fulfill()
+    }
+    waitForExpectations(timeout: 1)
+  }
+
   func testPackageKeyConfiguresSDK() throws {
     try NeshanConfiguration.configure()
     // Boolean assertions keep the configured key out of failure output.

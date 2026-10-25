@@ -13,6 +13,7 @@ import 'package:map_kit/models/user_marker.dart';
 import 'package:map_kit/widgets/neshan/neshan_callback.dart';
 import 'package:map_kit/widgets/neshan/neshan_methods.dart';
 import 'package:map_kit/widgets/neshan/neshan_marker_codec.dart';
+import 'package:map_kit/widgets/neshan/neshan_ios_renderer.dart';
 
 class NeshanMapWidget extends StatefulWidget {
   late Map<String, dynamic> creationParams;
@@ -63,9 +64,10 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
     widget.markers ??= [];
     widget.circles ??= [];
     widget.polyLines ??= [];
-    _subscription = NeshanCallback.setNeshanCallback(this);
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
       _iosCreationParams = _prepareIosParams();
+    } else {
+      _subscription = NeshanCallback.setNeshanCallback(this);
     }
 
     final controller = widget.uiMapController;
@@ -128,7 +130,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
           if (snapshot.hasError) return ErrorWidget(snapshot.error!);
           if (!snapshot.hasData) return const SizedBox.expand();
           return UiKitView(
-            viewType: 'map_kit_view',
+            viewType: NeshanIosRenderer.viewType,
             creationParams: snapshot.data,
             creationParamsCodec: const StandardMessageCodec(),
             gestureRecognizers: const {
@@ -155,6 +157,8 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
 
   Future<Map<String, dynamic>> _prepareIosParams() async {
     final params = _creationParams();
+    await NeshanIosRenderer.ensureAvailable();
+    if (mounted) _subscription = NeshanCallback.setNeshanCallback(this);
     params['markers'] = await NeshanMarkerCodec.encode(widget.markers!);
     return params;
   }

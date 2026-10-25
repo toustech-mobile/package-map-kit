@@ -133,6 +133,46 @@ The Swift implementation and packaging still require an Xcode build and real
 iOS validation. See [IOS_SUPPORT_REVIEW.md](IOS_SUPPORT_REVIEW.md) for the exact
 checks completed here and the remaining device checklist.
 
+### Apple Maps appears after selecting Neshan
+
+The current native plugin creates only `MLNMapView`; it has no Apple Maps
+renderer or fallback. An Apple logo means the consuming app is displaying
+another native implementation or another map widget, even if its Dart package
+revision is current.
+
+The iOS view now uses `com.golrang.map_kit/neshan_map_view`. Before creating it,
+the Dart widget checks the compiled plugin's `getRendererInfo` response for
+`neshan-maplibre` and the matching view/protocol. Older or incompatible native
+builds produce `NESHAN_IOS_PLUGIN_MISMATCH` instead of opening the former
+`map_kit_view` Apple Maps demo. The native plugin retains the old identifier
+as an alias to Neshan for older Dart callers.
+
+`MissingPluginException` on `com.example.example/method_channel` means its
+native handlers are absent in the running Flutter engine. The current plugin
+registers that channel before map creation. Controller calls now verify native
+identity too, so even calls made early report the registration mismatch clearly.
+
+After updating this package, **stop the consuming app completely** and rebuild
+it on the Mac. Hot reload and hot restart do not replace compiled Swift code.
+Run these commands from the consuming application's directory:
+
+```sh
+flutter clean
+flutter pub get
+```
+
+For CocoaPods builds, also run `pod install` from that app's `ios` directory;
+then run `flutter run -d YOUR_IOS_DEVICE_ID` from the app directory. SwiftPM
+builds resolve packages through Xcode/Flutter and do not need `pod install`.
+
+If Apple Maps still appears with the rebuilt plugin, inspect the consuming
+app's provider-switch widget. It should actually build
+`UiMap(mapProvider: MapProvider.neshan, ...)`, rather than an app-owned Apple
+Maps widget or a copied `UiKitView` pointing at `map_kit_view`.
+If the command channel remains missing, check that the app calls
+`GeneratedPluginRegistrant.register(with: ...)` for the Flutter engine that
+displays the map, including any custom or additional engines.
+
 ## Usage
 
 Import the shared widget and controller directly.

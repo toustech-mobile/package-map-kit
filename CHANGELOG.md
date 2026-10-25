@@ -1,5 +1,12 @@
 ## Unreleased
 
+* Give the iOS Neshan renderer a namespaced platform-view identifier and verify
+  its compiled native identity before opening it. Mixed/old native builds now
+  report `NESHAN_IOS_PLUGIN_MISMATCH` instead of silently opening the former
+  Apple Maps view. Keep the original native identifier as a Neshan alias.
+* Cover provider switching, incompatible native renderer identities, and the
+  legacy `MapKitView` entry point in Flutter regression tests.
+
 * Replace the iOS Apple Maps demo with Neshan's official MapLibre Native
   6.28.0 SDK. Forward initial settings and implement the shared overlay,
   user-position, camera, bounds, theme, and event protocol.

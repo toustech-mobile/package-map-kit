@@ -1,16 +1,14 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:map_kit/widgets/neshan/neshan_ios_renderer.dart';
 
 class MapKit {
   static const MethodChannel _channel = MethodChannel('map_kit');
   static const MethodChannel _viewChannel = MethodChannel('map_kit_view');
 
   static Future<void> initialize() async {
-    try {
-      await _channel.invokeMethod('createMapView');
-    } on PlatformException catch (e) {
-      print('Failed to initialize map view: ${e.message}');
-    }
+    await NeshanIosRenderer.ensureAvailable();
+    await _channel.invokeMethod('createMapView');
   }
 
   @Deprecated('The prototype button was removed. Use UiMap callbacks.')
@@ -35,18 +33,29 @@ class MapKitView extends StatefulWidget {
 }
 
 class _MapKitViewState extends State<MapKitView> {
+  late final Future<void> _initialization;
+
   @override
   void initState() {
     super.initState();
-    MapKit.initialize();
+    _initialization = MapKit.initialize();
   }
 
   @override
   Widget build(BuildContext context) {
-    return UiKitView(
-      viewType: 'map_kit_view',
-      creationParams: widget.creationParams,
-      creationParamsCodec: const StandardMessageCodec(),
+    return FutureBuilder<void>(
+      future: _initialization,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) return ErrorWidget(snapshot.error!);
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const SizedBox.expand();
+        }
+        return UiKitView(
+          viewType: NeshanIosRenderer.viewType,
+          creationParams: widget.creationParams,
+          creationParamsCodec: const StandardMessageCodec(),
+        );
+      },
     );
   }
 }
