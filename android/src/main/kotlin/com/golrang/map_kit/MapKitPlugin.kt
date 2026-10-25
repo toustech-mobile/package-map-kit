@@ -55,6 +55,15 @@ class MapKitPlugin : FlutterPlugin, MethodChannel.MethodCallHandler,
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        if (call.method == "validateConfiguration") {
+            try {
+                NeshanConfiguration.validate(application)
+                result.success(null)
+            } catch (error: IllegalArgumentException) {
+                result.error(NeshanConfiguration.ERROR_CODE, error.message, null)
+            }
+            return
+        }
         if (call.method == "getPlatformVersion") {
             result.success("Android " + android.os.Build.VERSION.RELEASE)
             return

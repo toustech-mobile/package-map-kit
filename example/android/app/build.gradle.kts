@@ -5,11 +5,6 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-val neshanProperties = java.util.Properties().apply {
-    val propertiesFile = rootProject.file("local.properties")
-    if (propertiesFile.exists()) propertiesFile.inputStream().use { load(it) }
-}
-
 android {
     namespace = "com.golrang.map_kit_example"
     compileSdk = 36
@@ -30,8 +25,6 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = maxOf(23, flutter.minSdkVersion)
-        manifestPlaceholders["neshanApiKey"] = neshanProperties.getProperty("neshan.apiKey")
-            ?: System.getenv("NESHAN_API_KEY") ?: ""
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

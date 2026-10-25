@@ -3,7 +3,6 @@
 package com.golrang.map_kit
 
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -62,12 +61,7 @@ internal class MapKitView(
         val center = (creation["initialCenter"] as? Map<*, *>)?.coordinate()
             ?: LatLng(35.6892, 51.3890)
         val zoom = creation.number("zoom", 13.0)
-        val metadata = context.packageManager.getApplicationInfo(
-            context.packageName, PackageManager.GET_META_DATA).metaData
-        require(!metadata?.getString("org.maplibre.android.API_KEY").isNullOrBlank()) {
-            "Set org.maplibre.android.API_KEY in the host AndroidManifest.xml. " +
-                "The legacy neshan.license is not used by MapLibre."
-        }
+        NeshanConfiguration.validate(context)
         MapLibre.getInstance(context)
         layout = LayoutInflater.from(context).inflate(R.layout.my_activity, null) as FrameLayout
         mapView = layout.findViewById(R.id.map)

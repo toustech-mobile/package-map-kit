@@ -13,57 +13,35 @@ Requirements:
 
 - Android API 23 or later.
 - Java/JVM 17. The example uses Kotlin 2.2.20, AGP 8.11.1, and Gradle 8.14.
-- A Neshan API key configured in the consuming Android application's manifest.
 - Maven Central and Google Maven repositories; no Neshan-specific Maven repository.
+- A package API key authorized for each consuming app's Android application ID.
 
-### Configure the example
+### Package-owned Android configuration
 
-Provide the key in the ignored `example/android/local.properties` file:
+This is a private package (`publish_to: none`). Its Android API key lives in
+`android/src/main/res/values/neshan_configuration.xml`, in the
+`map_kit_neshan_api_key` string. The library manifest supplies
+`org.maplibre.android.API_KEY` using that resource; Android's manifest merger
+includes it in consuming apps automatically. The SDK dependency and Internet
+permission are supplied by the package as well.
 
-```properties
-neshan.apiKey=YOUR_NESHAN_API_KEY
-```
+Consuming apps and the example need no API-key manifest entry, Gradle
+placeholder, local property, or environment variable. Remove the previous
+host `org.maplibre.android.API_KEY` entry and `neshanApiKey` placeholder setup
+when upgrading. Set the host's `minSdk` to 23 or later and use the package as usual.
+Do not add legacy `mobile-sdk`, `services-sdk`, `common-sdk`, or `neshan.license`.
 
-Alternatively, set `NESHAN_API_KEY` in the environment before building:
+Update the package resource when rotating the Android key. Its Android bundle
+restrictions must authorize every consuming application's application ID
+(the example uses `com.golrang.map_kit_example`). Network connectivity is needed
+to load Neshan styles and tiles.
 
-```powershell
-$env:NESHAN_API_KEY = 'YOUR_NESHAN_API_KEY'
-Set-Location example
-flutter pub get
-flutter run
-```
-
-Both example Gradle variants resolve the local property first, then the
-environment variable, into the manifest placeholder `neshanApiKey`. The manifest
-contains:
-
-```xml
-<meta-data
-    android:name="org.maplibre.android.API_KEY"
-    android:value="${neshanApiKey}" />
-```
-
-### Configure another host application
-
-Set `minSdk = 23` or higher in the app module. Supply the same metadata inside
-your host's `<application>`, using your own resource or manifest placeholder.
-For example, in Kotlin DSL:
-
-```kotlin
-android {
-    defaultConfig {
-        minSdk = 23
-        manifestPlaceholders["neshanApiKey"] =
-            System.getenv("NESHAN_API_KEY") ?: ""
-    }
-}
-```
-
-The plugin supplies the SDK dependency and Internet permission. Do not add the
-old `mobile-sdk`, `services-sdk`, or `common-sdk` artifacts alongside it. The key must allow your application ID in its Android bundle restrictions
-(the example is `com.golrang.map_kit_example`); HTTP 484 indicates a scope mismatch. An
-empty/missing API key is rejected when creating the native view. A real key and
-network connectivity are needed to load Neshan styles and tiles.
+Stop the consuming app and perform a full Android rebuild after updating the
+package or key; hot reload/restart cannot replace native code or resources.
+The widget validates the merged metadata before opening the Android view. A
+missing/blank key reports `NESHAN_API_KEY_MISSING` and rejects queued controller
+operations with the same configuration error. Await controller operations to
+handle failures.
 
 ## iOS Neshan setup
 
