@@ -3,6 +3,9 @@
         android:label="map_kit_example"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data
+            android:name="org.maplibre.android.API_KEY"
+            android:value="${neshanApiKey}" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
