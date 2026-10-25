@@ -1,5 +1,13 @@
 ## Unreleased
 
+* Queue native controller calls until the platform view is attached and execute
+  them in order. Bound attachment waits and reject queued/in-flight calls when
+  their map is disposed, fixing early `MAP_NOT_ATTACHED` errors on iOS.
+* Authenticate Neshan HTTPS tile requests using the package key and actual iOS
+  bundle. The SDK's `nsh://` resource loader bypasses `MLNSettings.apiKey` and
+  reads the host Info.plist; a network delegate preserves package-owned setup.
+  Log HTTP failure status/resource paths without exposing credentials.
+
 * Give the iOS Neshan renderer a namespaced platform-view identifier and verify
   its compiled native identity before opening it. Mixed/old native builds now
   report `NESHAN_IOS_PLUGIN_MISMATCH` instead of silently opening the former

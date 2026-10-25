@@ -14,6 +14,7 @@ import 'package:map_kit/widgets/neshan/neshan_callback.dart';
 import 'package:map_kit/widgets/neshan/neshan_methods.dart';
 import 'package:map_kit/widgets/neshan/neshan_marker_codec.dart';
 import 'package:map_kit/widgets/neshan/neshan_ios_renderer.dart';
+import 'package:map_kit/widgets/neshan/neshan_command_queue.dart';
 
 class NeshanMapWidget extends StatefulWidget {
   late Map<String, dynamic> creationParams;
@@ -56,10 +57,12 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
     implements NeshanCallbackInterface {
   StreamSubscription<dynamic>? _subscription;
   Future<Map<String, dynamic>>? _iosCreationParams;
+  late final NeshanCommandQueue _commands;
 
   @override
   void initState() {
     super.initState();
+    _commands = NeshanCommandQueue();
     widget.initialCenter ??= const LatLng(35.6892, 51.3890);
     widget.markers ??= [];
     widget.circles ??= [];
@@ -72,53 +75,56 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
 
     final controller = widget.uiMapController;
     if (controller == null) return;
-    controller.addMarkers = (markers) async {
-      await NeshanMethods.addMarkers(markers);
-      if (mounted) widget.markers!.addAll(markers);
-    };
-    controller.removeMarkers = (markers) async {
-      await NeshanMethods.removeMarkers(markers);
-      if (mounted) widget.markers!.removeWhere(markers.contains);
-    };
-    controller.removeAllMarkers = () async {
-      await NeshanMethods.removeAllMarkers();
-      if (mounted) widget.markers!.clear();
-    };
-    controller.addCircles = (circles) async {
-      await NeshanMethods.addCircles(circles);
-      if (mounted) widget.circles!.addAll(circles);
-    };
-    controller.removeCircles = (circles) async {
-      await NeshanMethods.removeCircles(circles);
-      if (mounted) widget.circles!.removeWhere(circles.contains);
-    };
-    controller.removeAllCircles = () async {
-      await NeshanMethods.removeAllCircles();
-      if (mounted) widget.circles!.clear();
-    };
-    controller.addPolyline = (lines) async {
-      await NeshanMethods.addPolylines(lines);
-      if (mounted) widget.polyLines!.addAll(lines);
-    };
-    controller.removePolyLines = (lines) async {
-      await NeshanMethods.removePolyLines(lines);
-      if (mounted) widget.polyLines!.removeWhere(lines.contains);
-    };
-    controller.removeAllPolyLines = () async {
-      await NeshanMethods.removeAllPolyLines();
-      if (mounted) widget.polyLines!.clear();
-    };
-    controller.cameraCallback = NeshanMethods.getCamera;
-    controller.setUserLocation = (user) async {
-      await NeshanMethods.setUserMarker(user);
-      if (mounted) widget.userMarker = user;
-    };
-    controller.moveCamera = NeshanMethods.moveCamera;
-    controller.fitBounds = NeshanMethods.fitBounds;
-    controller.setDarkMode = (dark) async {
-      await NeshanMethods.setDarkMode(dark);
-      if (mounted) widget.isDarkMode = dark;
-    };
+    controller.addMarkers = (markers) => _commands.run(() async {
+          await NeshanMethods.addMarkers(markers);
+          if (mounted) widget.markers!.addAll(markers);
+        });
+    controller.removeMarkers = (markers) => _commands.run(() async {
+          await NeshanMethods.removeMarkers(markers);
+          if (mounted) widget.markers!.removeWhere(markers.contains);
+        });
+    controller.removeAllMarkers = () => _commands.run(() async {
+          await NeshanMethods.removeAllMarkers();
+          if (mounted) widget.markers!.clear();
+        });
+    controller.addCircles = (circles) => _commands.run(() async {
+          await NeshanMethods.addCircles(circles);
+          if (mounted) widget.circles!.addAll(circles);
+        });
+    controller.removeCircles = (circles) => _commands.run(() async {
+          await NeshanMethods.removeCircles(circles);
+          if (mounted) widget.circles!.removeWhere(circles.contains);
+        });
+    controller.removeAllCircles = () => _commands.run(() async {
+          await NeshanMethods.removeAllCircles();
+          if (mounted) widget.circles!.clear();
+        });
+    controller.addPolyline = (lines) => _commands.run(() async {
+          await NeshanMethods.addPolylines(lines);
+          if (mounted) widget.polyLines!.addAll(lines);
+        });
+    controller.removePolyLines = (lines) => _commands.run(() async {
+          await NeshanMethods.removePolyLines(lines);
+          if (mounted) widget.polyLines!.removeWhere(lines.contains);
+        });
+    controller.removeAllPolyLines = () => _commands.run(() async {
+          await NeshanMethods.removeAllPolyLines();
+          if (mounted) widget.polyLines!.clear();
+        });
+    controller.cameraCallback = () => _commands.run(NeshanMethods.getCamera);
+    controller.setUserLocation = (user) => _commands.run(() async {
+          await NeshanMethods.setUserMarker(user);
+          if (mounted) widget.userMarker = user;
+        });
+    controller.moveCamera = (camera) => _commands.run(() async {
+          await NeshanMethods.moveCamera(camera);
+        });
+    controller.fitBounds =
+        (bounds) => _commands.run(() => NeshanMethods.fitBounds(bounds));
+    controller.setDarkMode = (dark) => _commands.run(() async {
+          await NeshanMethods.setDarkMode(dark);
+          if (mounted) widget.isDarkMode = dark;
+        });
   }
 
   @override
@@ -131,6 +137,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
           if (!snapshot.hasData) return const SizedBox.expand();
           return UiKitView(
             viewType: NeshanIosRenderer.viewType,
+            onPlatformViewCreated: (_) => _commands.attach(),
             creationParams: snapshot.data,
             creationParamsCodec: const StandardMessageCodec(),
             gestureRecognizers: const {
@@ -146,6 +153,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
     }
     return AndroidView(
       viewType: 'com.example.example/map_kit_view',
+      onPlatformViewCreated: (_) => _commands.attach(),
       creationParams: _creationParams(),
       creationParamsCodec: const StandardMessageCodec(),
       gestureRecognizers: const {
@@ -156,11 +164,16 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
   }
 
   Future<Map<String, dynamic>> _prepareIosParams() async {
-    final params = _creationParams();
-    await NeshanIosRenderer.ensureAvailable();
-    if (mounted) _subscription = NeshanCallback.setNeshanCallback(this);
-    params['markers'] = await NeshanMarkerCodec.encode(widget.markers!);
-    return params;
+    try {
+      final params = _creationParams();
+      await NeshanIosRenderer.ensureAvailable();
+      if (mounted) _subscription = NeshanCallback.setNeshanCallback(this);
+      params['markers'] = await NeshanMarkerCodec.encode(widget.markers!);
+      return params;
+    } catch (error, stack) {
+      _commands.failAttachment(error, stack);
+      rethrow;
+    }
   }
 
   Map<String, dynamic> _creationParams() {
@@ -187,6 +200,7 @@ class _NeshanMapWidgetState extends State<NeshanMapWidget>
 
   @override
   void dispose() {
+    _commands.dispose();
     _subscription?.cancel();
     super.dispose();
   }

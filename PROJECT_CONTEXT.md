@@ -9,6 +9,10 @@ supersedes the old Carto/NTMapView starters. The plugin pins version 6.28.0,
 uses a package-owned key through `MLNSettings.apiKey`, and supports SwiftPM and
 CocoaPods. The private key configuration is `NeshanConfiguration.swift`; no
 example/host key entry is needed. Publishing is disabled with `publish_to: none`.
+The SDK's `nsh://` tile loader reads `Bundle.main` directly, so setting
+`MLNSettings.apiKey` alone is insufficient: `NeshanNetworkDelegate` adds the
+package key and iOS bundle header to Neshan HTTPS requests. Controller calls
+also wait for native attachment and run serially through `NeshanCommandQueue`.
 The shared widget forwards creation settings and receives native events on
 iOS; Swift handles controller commands, overlays, bounds and theme reloads.
 The prototype button and duplicate `ios/Classes` tree were removed.

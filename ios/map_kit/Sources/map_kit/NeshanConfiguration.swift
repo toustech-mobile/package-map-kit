@@ -12,5 +12,9 @@ enum NeshanConfiguration {
         }
         // The SDK requires the key before the first style request / map creation.
         MLNSettings.apiKey = apiKey
+        // Neshan's resourceURL() reads MLNApiKey from Bundle.main directly for
+        // its private tile scheme, bypassing MLNSettings.apiKey. Authenticate
+        // requests as well so this private package needs no host plist entry.
+        NeshanNetworkDelegate.shared.install()
     }
 }

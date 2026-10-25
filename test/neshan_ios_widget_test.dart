@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -277,6 +278,40 @@ void main() {
         NeshanMethods.removeAllMarkers(),
         throwsA(isA<PlatformException>().having(
             (error) => error.code, 'code', 'NESHAN_IOS_PLUGIN_MISMATCH')));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+  testWidgets('iOS controller calls wait for the native view-created callback',
+      (tester) async {
+    final platformCreated = Completer<void>();
+    messenger.setMockMethodCallHandler(SystemChannels.platform_views,
+        (call) async {
+      views.add(call);
+      if (call.method == 'create') await platformCreated.future;
+      return null;
+    });
+    final controller = UiMapController();
+    await tester.pumpWidget(MaterialApp(
+      home: UiMap(mapProvider: MapProvider.neshan, controller: controller),
+    ));
+    await tester.pump();
+    final clearing = controller.removeAllMarkers();
+    final adding = controller.addMarkers([
+      MarkerModel(latitude: 35, longitude: 51, icon: '', data: 'office'),
+    ]);
+    final user = controller.setUserLocation!(
+        UserMarkerModel(latitude: 35, longitude: 51, accuracy: 10));
+    await tester.pump();
+    expect(calls, isEmpty);
+    platformCreated.complete();
+    await tester.pumpAndSettle();
+    await clearing;
+    await adding;
+    await user;
+    expect(calls.map((call) => call.method),
+        ['removeAllMarkers', 'addMarkers', 'setUserMarker']);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   test('renderer identity must match both the native provider and protocol',

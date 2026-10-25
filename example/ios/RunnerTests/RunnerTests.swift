@@ -28,6 +28,30 @@ class RunnerTests: XCTestCase {
     // Boolean assertions keep the configured key out of failure output.
     XCTAssertTrue(MLNSettings.apiKey?.isEmpty == false)
     XCTAssertTrue(MLNSettings.apiKey == NeshanConfiguration.apiKey)
+    XCTAssertTrue(MLNNetworkConfiguration.sharedManager.delegate === NeshanNetworkDelegate.shared)
+    XCTAssertTrue(NeshanNetworkDelegate.shared.responds(to: NSSelectorFromString("willSendRequest:")))
+    XCTAssertTrue(NeshanNetworkDelegate.shared.responds(to: NSSelectorFromString("didReceiveResponse:")))
+  }
+
+  func testNeshanRequestsUsePackageCredentialsWithoutHostPlist() {
+    let request = NSMutableURLRequest(url: URL(string: "https://api.neshan.org/tile?x=1&key=old-host-key")!)
+    request.setValue("existing-etag", forHTTPHeaderField: "If-None-Match")
+    let authenticated = NeshanNetworkDelegate.authenticate(request, key: "package-key", bundleID: "com.example.ios")
+    let items = URLComponents(url: authenticated.url!, resolvingAgainstBaseURL: false)!.queryItems!
+    XCTAssertEqual(items.filter { $0.name == "key" }.count, 1)
+    XCTAssertTrue(items.contains { $0.name == "key" && $0.value == "package-key" })
+    XCTAssertTrue(items.contains { $0.name == "x" && $0.value == "1" })
+    XCTAssertEqual(authenticated.value(forHTTPHeaderField: "bundle"), "com.example.ios")
+    XCTAssertEqual(authenticated.value(forHTTPHeaderField: "If-None-Match"), "existing-etag")
+  }
+
+  func testPackageKeyIsNotSentToOtherHostsOrInsecureURLs() {
+    for url in ["https://example.org/tile", "https://neshan.org.example.org/tile", "http://api.neshan.org/tile"] {
+      let request = NSMutableURLRequest(url: URL(string: url)!)
+      let authenticated = NeshanNetworkDelegate.authenticate(request, key: "package-key", bundleID: "com.example.ios")
+      XCTAssertEqual(authenticated.url?.absoluteString, url)
+      XCTAssertNil(authenticated.value(forHTTPHeaderField: "bundle"))
+    }
   }
 
   func testGetPlatformVersion() {

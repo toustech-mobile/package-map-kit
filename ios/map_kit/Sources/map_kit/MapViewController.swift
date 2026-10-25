@@ -190,7 +190,12 @@ final class MapKitNativeView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
     }
 
     func mapViewDidFailLoadingMap(_ mapView: MLNMapView, withError error: Error) {
-        if !ready { failStyle("Could not load Neshan style; check MLNApiKey, bundle restrictions and network") }
+        let nativeError = error as NSError
+        NSLog("[map_kit] Neshan map loading failed: domain=%@; code=%ld; iOS bundle=%@",
+              nativeError.domain, nativeError.code, Bundle.main.bundleIdentifier ?? "unknown")
+        if !ready {
+            failStyle("Could not load Neshan style (\(nativeError.domain), \(nativeError.code)); check package key permissions for this iOS bundle and network")
+        }
     }
 
     private func becomeReady() {

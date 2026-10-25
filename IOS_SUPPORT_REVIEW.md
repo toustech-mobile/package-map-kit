@@ -23,14 +23,14 @@ The implementation follows the current
 | --- | --- |
 | Renderer | Official Neshan MapLibre 6.28.0, imported as `MapLibre`; no Apple MapKit demo |
 | Native identity | `getRendererInfo` handshake verifies Neshan/protocol/view before opening `com.golrang.map_kit/neshan_map_view`; incompatible builds fail clearly |
-| Authentication | Package-owned key in `NeshanConfiguration.swift`, applied through `MLNSettings.apiKey` before map creation |
+| Authentication | Package-owned key through `MLNSettings.apiKey` and a Neshan-only HTTPS network delegate supplying `key` plus the actual iOS `bundle` header |
 | Creation | Initial center, zoom, theme, markers, circles and polylines forwarded through `UiKitView` |
 | Controller | Marker/circle/polyline add, remove and clear; supplied user position and accuracy; camera read/move, bounds, theme |
 | Events | Map tap/long press, marker/circle/polyline taps using the existing shared event channel |
 | Markers | Host SVGs rasterized to PNG at display scale; native asset image/pin fallback; SVG or text content and marker callouts |
 | Shapes | Closed 96-segment geodesic circles, separate borders, outlined polylines and projected hit testing |
 | Theme | Neshan light/dark URLs; camera retained and annotations restored after loading |
-| Readiness | Commands queue while style/layout initializes; 45-second timeout, failure and disposal completion paths |
+| Readiness | Ordered Dart command queue waits up to 30 seconds for native attachment; native style/layout wait has a 45-second timeout; disposal rejects pending/in-flight calls |
 | Lifecycle | Weak native-view registry; dispose queued replies and renderer on view/engine release; cancel Dart event subscriptions |
 
 Existing compatibility limits remain: commands target the newest live native
@@ -62,6 +62,42 @@ handler is translated into `NESHAN_IOS_PLUGIN_MISMATCH` rather than a raw
 `MissingPluginException`. Tests cover the three methods from the supplied logs.
 
 ## Packaging and SDK evidence
+
+### Attachment and tile authentication correction — 2026-10-25
+
+The user's updated device run opened Neshan but reported `MAP_NOT_ATTACHED`
+from a controller call and showed no tiles. Two concrete issues were found:
+
+1. The widget bound controller callbacks before asynchronous iOS preparation
+   and native view creation completed. All widget-bound controller operations
+   now wait for `onPlatformViewCreated`, run in invocation order, propagate
+   initialization failures, and fail on timeout/disposal. Native style readiness
+   remains a separate queue. Direct low-level `NeshanMethods` calls still
+   require an attached view.
+2. Inspection of the official arm64 binary's `mbgl::resourceURL` implementation
+   showed that its `nsh://` loader reads `MLNApiKey` from `Bundle.main` and
+   appends `key` to HTTPS tile URLs. The general SDK header supports
+   `MLNSettings.apiKey`, but the Neshan-specific loader bypasses that property.
+   The earlier assumption that this setter alone authenticated private tiles
+   was incorrect. The package now also uses the SDK's request delegate to add
+   the package key and actual iOS bundle header only to Neshan HTTPS requests.
+   It retains and forwards existing delegate hooks and logs safe HTTP error
+   metadata. This hook is part of the inspected SDK but is marked experimental
+   in its header; recheck its selectors when upgrading the SDK.
+
+The user's actual bundle identifier is `com.golrang.sfapp`. A direct request to
+Neshan's protected basemap tile endpoint, with the package key as `key` and
+that identifier in the `bundle` header, returned **HTTP 200** (68,504 bytes).
+The same request using the known Android example bundle also returned 200.
+No credential value or response body was logged. This verifies service access
+for those supplied request parameters; it does not replace an authenticated
+rendering test on the iPhone or validate device connectivity.
+
+Native tests cover request authentication, preserving existing query/header
+values, host/TLS restrictions and delegate selectors. They require Xcode and
+have not executed here. Flutter regressions cover delayed platform creation,
+command order, disposal, late replies, failed commands and attachment timeout.
+The full Flutter package suite after these fixes passed **28 tests**.
 
 The official archive was downloaded from:
 
@@ -95,9 +131,9 @@ sources and the old template plugin class were removed. Do not add a separate
 MapLibre or legacy Neshan SDK alongside the plugin.
 
 This private package embeds the existing key in
-`ios/map_kit/Sources/map_kit/NeshanConfiguration.swift`. It uses the SDK's
-programmatic `MLNSettings.apiKey` setter, verified in the downloaded
-`MLNSettings.h`, before creating any native map. Both package integrations
+`ios/map_kit/Sources/map_kit/NeshanConfiguration.swift`. It configures the SDK
+setter plus `NeshanNetworkDelegate` before creating any native map, as described
+above. Both package integrations
 compile this source automatically. The example's old key file, includes and
 Info.plist key entry were removed. No consuming-app key setup is required;
 authorize each consuming bundle ID in Neshan's panel. Publishing is disabled

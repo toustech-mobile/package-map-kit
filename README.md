@@ -81,8 +81,12 @@ Requirements:
 
 This is a private package (`publish_to: none`). Its iOS API key lives in
 `ios/map_kit/Sources/map_kit/NeshanConfiguration.swift`, which is compiled by
-both CocoaPods and SwiftPM. The plugin sets `MLNSettings.apiKey` before creating
-the native map. Consuming apps and the example do not need an API key in their
+both CocoaPods and SwiftPM. Before creating the map, the plugin sets
+`MLNSettings.apiKey` and installs a network delegate that supplies the `key`
+query parameter and actual iOS `bundle` header on Neshan HTTPS requests.
+This is necessary because this SDK's `nsh://` tile loader reads the host
+Info.plist directly instead of using only `MLNSettings.apiKey`.
+Consuming apps and the example do not need an API key in their
 Info.plist or an extra Xcode configuration file.
 
 Update the key in that package configuration when rotating it. The configured
@@ -113,11 +117,19 @@ flutter run -d YOUR_IOS_DEVICE_ID
 
 The shared `UiMap` and `UiMapController` APIs work on both native providers.
 iOS receives the initial camera, theme and overlays and uses the same method
-and event protocol as Android. Commands accepted during style loading wait
-for readiness, and style changes restore overlays. A style load that fails or
+and event protocol as Android. Controller calls queue in order until the native
+view-created callback arrives, then the native renderer waits for style
+readiness. Disposal rejects old pending calls instead of routing them to a
+replacement map. Attachment has a 30-second timeout (`MAP_ATTACH_TIMEOUT`).
+Style changes restore overlays. A style load that fails or
 times out returns `STYLE_LOAD_FAILED`; use `setDarkMode` to retry after
 correcting network/key configuration. Missing keys or invalid creation inputs
 return `MAP_INITIALIZATION_FAILED` on controller calls.
+
+The SDK network delegate adds credentials only to Neshan HTTPS hosts and
+preserves an existing delegate's hooks. HTTP failures log their status, host,
+path and bundle ID, with no key, query string or response body. If tiles stay
+blank, look for `[map_kit] Neshan resource failed` in the iOS console.
 
 On iOS, marker SVGs are read from the same host `assets/icons/` directory used
 by Flutter maps and converted to PNGs at the display scale. Missing files fall
