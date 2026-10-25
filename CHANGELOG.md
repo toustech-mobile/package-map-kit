@@ -1,5 +1,8 @@
 ## Unreleased
 
+* Center iOS marker numbers and content images inside the circular head of
+  portrait pin artwork, preserving the SVG content position during rasterization.
+
 * Queue native controller calls until the platform view is attached and execute
   them in order. Bound attachment waits and reject queued/in-flight calls when
   their map is disposed, fixing early `MAP_NOT_ATTACHED` errors on iOS.

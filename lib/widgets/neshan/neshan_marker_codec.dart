@@ -23,17 +23,21 @@ abstract final class NeshanMarkerCodec {
       final ratio = views.isEmpty ? 2.0 : views.first.devicePixelRatio;
       final pixels = (size * ratio).round().clamp(1, 2048);
       final icon = await _rasterize(marker.icon, pixels);
-      if (icon != null) spec['iconBytes'] = icon;
+      if (icon != null) {
+        spec['iconBytes'] = icon.bytes;
+        spec['contentCenterY'] = icon.contentCenterY;
+      }
       final content = marker.markerContent;
       if (content != null && content.length > 2) {
         final image = await _rasterize(content, pixels);
-        if (image != null) spec['markerContentBytes'] = image;
+        if (image != null) spec['markerContentBytes'] = image.bytes;
       }
       return spec;
     }));
   }
 
-  static Future<Uint8List?> _rasterize(String name, int pixels) async {
+  static Future<({Uint8List bytes, double contentCenterY})?> _rasterize(
+      String name, int pixels) async {
     if (name.isEmpty) return null;
     PictureInfo? source;
     ui.Picture? picture;
@@ -55,7 +59,16 @@ abstract final class NeshanMarkerCodec {
       picture = recorder.endRecording();
       image = await picture.toImage(pixels, pixels);
       final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      return bytes?.buffer.asUint8List();
+      if (bytes == null) return null;
+      // Portrait pins have a circular head above their stem. Preserve its
+      // center before aspect-fit rasterization turns the image into a square.
+      final contentCenterY = source.size.height > source.size.width
+          ? source.size.width / (2 * source.size.height)
+          : 0.5;
+      return (
+        bytes: bytes.buffer.asUint8List(),
+        contentCenterY: contentCenterY,
+      );
     } catch (_) {
       // A host can supply an iOS asset-catalog image instead of a Flutter SVG.
       return null;

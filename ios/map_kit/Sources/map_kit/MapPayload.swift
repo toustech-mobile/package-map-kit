@@ -89,6 +89,7 @@ struct MapMarkerSpec {
     let image: UIImage?
     let content: String
     let contentImage: UIImage?
+    let contentCenterY: Double
     let title: String?
     let subtitle: String?
     let data: String
@@ -99,6 +100,10 @@ struct MapMarkerSpec {
         guard size > 0, size <= 512 else { throw MapPayloadError(message: "iconSize must be between 0 and 512") }
         icon = object["icon"] as? String ?? ""
         content = object["markerContent"] as? String ?? ""
+        contentCenterY = try MapPayload.number(object, "contentCenterY", default: 0.5)
+        guard (0...1).contains(contentCenterY) else {
+            throw MapPayloadError(message: "contentCenterY must be between 0 and 1")
+        }
         image = (object["iconBytes"] as? FlutterStandardTypedData).flatMap { UIImage(data: $0.data) }
         contentImage = (object["markerContentBytes"] as? FlutterStandardTypedData).flatMap { UIImage(data: $0.data) }
         title = object["snippetTitle"] as? String

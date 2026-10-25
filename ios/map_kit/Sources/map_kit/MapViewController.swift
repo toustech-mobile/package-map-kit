@@ -315,16 +315,20 @@ final class MapKitNativeView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
             image.image = marker.image ?? UIImage(named: marker.icon.replacingOccurrences(of: ".svg", with: ""))
                 ?? UIImage(systemName: "mappin.circle.fill")?.withTintColor(.systemRed, renderingMode: .alwaysOriginal)
             view.addSubview(image)
+            let contentCenter = CGPoint(x: size / 2, y: size * CGFloat(marker.contentCenterY))
             if let contentImage = marker.contentImage ?? UIImage(named: marker.content.replacingOccurrences(of: ".svg", with: "")) {
                 let content = UIImageView(frame: view.bounds.insetBy(dx: size / 4, dy: size / 4))
+                content.center = contentCenter
                 content.contentMode = .scaleAspectFit
                 content.image = contentImage
                 view.addSubview(content)
             } else if !marker.content.isEmpty {
                 let label = UILabel(frame: view.bounds.insetBy(dx: 2, dy: 2))
+                label.center = contentCenter
                 label.text = marker.content
                 label.textAlignment = .center
-                label.font = .systemFont(ofSize: size * 0.4, weight: .medium)
+                label.font = .monospacedDigitSystemFont(ofSize: size * 0.4, weight: .medium)
+                label.baselineAdjustment = .alignCenters
                 label.adjustsFontSizeToFitWidth = true
                 view.addSubview(label)
             }
