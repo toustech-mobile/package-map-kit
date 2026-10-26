@@ -1,5 +1,9 @@
 ## Unreleased
 
+* Migrate Android Kotlin configuration to stop explicitly applying KGP, allowing
+  host apps to use AGP's built-in Kotlin support. Raise the minimum supported
+  Flutter version to 3.44 and Dart to 3.12.
+
 * Preserve Android Neshan marker and content-image aspect ratios instead of
   stretching them into squares. Match tour-pin drawable dimensions to their
   viewports so circular heads remain circular.
