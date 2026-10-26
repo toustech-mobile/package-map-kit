@@ -12,6 +12,12 @@ the new renderer.
 Requirements:
 
 - Android API 23 or later.
+- Flutter 3.44 / Dart 3.12 or later. The plugin no longer explicitly applies
+  the Kotlin Gradle Plugin (KGP), following Flutter's
+  [built-in Kotlin migration](https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-plugin-authors).
+  Flutter supplies Kotlin support when the host still uses legacy KGP. Enabling
+  built-in Kotlin in a host requires Flutter 3.47+, AGP 9+, and migration of the
+  host app and all its Android plugins.
 - Java/JVM 17. The example uses Kotlin 2.2.20, AGP 8.11.1, and Gradle 8.14.
 - Maven Central and Google Maven repositories; no Neshan-specific Maven repository.
 - A package API key authorized for each consuming app's Android application ID.
